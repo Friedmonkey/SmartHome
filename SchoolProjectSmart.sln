@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Common", "SmartHome.Common\SmartHome.Common.csproj", "{F353620A-F0EF-4C10-B85A-4A4C7A8CE6AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.UI", "SmartHome.UI\SmartHome.UI.csproj", "{26EA56E1-3A1C-4E4E-9DE9-2ABC06D1E766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Backend", "SmartHome.Backend\SmartHome.Backend.csproj", "{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F353620A-F0EF-4C10-B85A-4A4C7A8CE6AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F353620A-F0EF-4C10-B85A-4A4C7A8CE6AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F353620A-F0EF-4C10-B85A-4A4C7A8CE6AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F353620A-F0EF-4C10-B85A-4A4C7A8CE6AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26EA56E1-3A1C-4E4E-9DE9-2ABC06D1E766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26EA56E1-3A1C-4E4E-9DE9-2ABC06D1E766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26EA56E1-3A1C-4E4E-9DE9-2ABC06D1E766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26EA56E1-3A1C-4E4E-9DE9-2ABC06D1E766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
