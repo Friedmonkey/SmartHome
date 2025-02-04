@@ -1,5 +1,6 @@
 ﻿@page "/weather"
-@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory;
+@inject FrontendConfig config;
 
 <PageTitle>Weather</PageTitle>
 
@@ -41,7 +42,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("https://localhost:7216/weatherforecast");
+        var http = HttpClientFactory.CreateClient(config.HttpClientName);
+        forecasts = await http.GetFromJsonAsync<WeatherForecast[]>("/weatherforecast");
     }
 
     public class WeatherForecast

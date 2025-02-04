@@ -24,7 +24,7 @@ namespace SmartHome.UI
             builder.Services.AddSingleton<JwtAuthenticationStateProvider>();
             builder.Services.AddSingleton<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthenticationStateProvider>());
 
-            var appUri = new Uri(builder.HostEnvironment.BaseAddress);
+            var appUri = new Uri(config.ApiBaseUrl);// builder.HostEnvironment.BaseAddress);
             builder.Services.AddScoped(provider => new JwtTokenMessageHandler(appUri, provider.GetRequiredService<JwtAuthenticationStateProvider>()));
             
             

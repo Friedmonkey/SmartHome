@@ -10,9 +10,9 @@ public record FrontendConfig
         {
             HttpClientName = "MyApp.ServerAPI",
 #if DEBUG
-            ApiBaseUrl = "",
+            ApiBaseUrl = "https://localhost:7216",
 #else
-            ApiBaseUrl = "",
+            ApiBaseUrl = "https://smart-api.friedmonkey.nl",
 #endif
         };
     }
