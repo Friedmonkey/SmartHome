@@ -1,34 +1,43 @@
+using FastEndpoints.Security;
+using FastEndpoints.Swagger;
+using Microsoft.EntityFrameworkCore;
 
-namespace SmartHome.Backend
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContextFactory<SmartHomeDbContext>(options =>
 {
-    public class Program
+    options.UseSqlServer(builder.Configuration["SmartHomeDb"]);
+});
+
+builder.Services.AddAuthentication("Bearer");
+
+builder.Services
+    .AddAuthenticationJwtBearer(x =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
+        x.SigningKey = builder.Configuration["JwtSigningKey"];
+    })
+    .AddAuthorization()
+    .AddFastEndpoints()
+    .SwaggerDocument();
 
 
-            app.MapControllers();
+builder.Services.AddHttpContextAccessor();
 
-            app.Run();
-        }
-    }
-}
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseDefaultExceptionHandler(useGenericReason: true);
+app.UseFastEndpoints(fe => 
+{
+    fe.Security.RoleClaimType = "Role";
+});
+
+app.UseSwaggerGen();
+
+app.Run();
+
+public partial class Program { }
