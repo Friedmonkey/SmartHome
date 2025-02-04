@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using SmartHome.UI.Api;
 using SmartHome.UI.Auth;
-using System.Net.Http;
 
 namespace SmartHome.UI
 {
