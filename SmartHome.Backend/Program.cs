@@ -1,3 +1,5 @@
+using FastEndpoints;
+using FastEndpoints.Swagger;
 using SmartHome.Backend.Auth;
 
 namespace SmartHome.Backend;
@@ -14,6 +16,8 @@ public class Program
         builder.Services.AddSingleton(config);
 
         builder.Services.SetupJWTAuthServices(config);
+
+        builder.Services.AddFastEndpoints().SwaggerDocument();
 
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -37,6 +41,8 @@ public class Program
 
         app.UseAuthorization();
 
+        app.UseFastEndpoints();
+        app.UseSwaggerGen();
 
         app.MapControllers();
 

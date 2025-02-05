@@ -52,7 +52,6 @@ public static class AuthSetupExtention
         })
         .AddEntityFrameworkStores<AuthContext>()
         .AddDefaultTokenProviders();
-
     }
     public static void SetupJWTAuthApp(this WebApplication app, BackendConfig config)
     {
