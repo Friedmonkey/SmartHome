@@ -4,50 +4,49 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SmartHome.UI.Api;
 using SmartHome.UI.Auth;
 
-namespace SmartHome.UI
+namespace SmartHome.UI;
+
+public class Program
 {
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static async Task Main(string[] args)
-        {
-            var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.RootComponents.Add<App>("#app");
-            builder.RootComponents.Add<HeadOutlet>("head::after");
+        var builder = WebAssemblyHostBuilder.CreateDefault(args);
+        builder.RootComponents.Add<App>("#app");
+        builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-            var config = FrontendConfig.GetDefaultConfig();
+        //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+        var config = FrontendConfig.GetDefaultConfig();
 
-            builder.Services.AddSingleton(config);
+        builder.Services.AddSingleton(config);
 
-            builder.Services.AddSingleton<JwtAuthenticationStateProvider>();
-            builder.Services.AddSingleton<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthenticationStateProvider>());
+        builder.Services.AddSingleton<JwtAuthenticationStateProvider>();
+        builder.Services.AddSingleton<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthenticationStateProvider>());
 
-            var appUri = new Uri(config.ApiBaseUrl);// builder.HostEnvironment.BaseAddress);
-            builder.Services.AddScoped(provider => new JwtTokenMessageHandler(appUri, provider.GetRequiredService<JwtAuthenticationStateProvider>()));
-            
-            
-            builder.Services.AddHttpClient(config.HttpClientName, client => client.BaseAddress = appUri)
-                .AddHttpMessageHandler<JwtTokenMessageHandler>();
-            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(config.HttpClientName));
+        var appUri = new Uri(config.ApiBaseUrl);// builder.HostEnvironment.BaseAddress);
+        builder.Services.AddScoped(provider => new JwtTokenMessageHandler(appUri, provider.GetRequiredService<JwtAuthenticationStateProvider>()));
+        
+        
+        builder.Services.AddHttpClient(config.HttpClientName, client => client.BaseAddress = appUri)
+            .AddHttpMessageHandler<JwtTokenMessageHandler>();
+        builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(config.HttpClientName));
 
-            builder.Services.AddSingleton<ApiService>();
+        builder.Services.AddSingleton<ApiService>();
 
-            var application = builder.Build();
-            //await RefreshJwtToken(application);
+        var application = builder.Build();
+        //await RefreshJwtToken(application);
 
-            await application.RunAsync();
-        }
-        //private static async Task RefreshJwtToken(WebAssemblyHost application)
-        //{
-        //    using var boostrapScope = application.Services.CreateScope();
-        //    var api = boostrapScope.ServiceProvider.GetRequiredService<ApiService>();
-
-        //    var refreshTokenResponse = await api.RefreshToken();
-        //    if (refreshTokenResponse.IsSuccess)
-        //    {
-        //        var loginStateService = boostrapScope.ServiceProvider.GetRequiredService<JwtAuthenticationStateProvider>();
-        //        loginStateService.Login(refreshTokenResponse.Token);
-        //    }
-        //}
+        await application.RunAsync();
     }
+    //private static async Task RefreshJwtToken(WebAssemblyHost application)
+    //{
+    //    using var boostrapScope = application.Services.CreateScope();
+    //    var api = boostrapScope.ServiceProvider.GetRequiredService<ApiService>();
+
+    //    var refreshTokenResponse = await api.RefreshToken();
+    //    if (refreshTokenResponse.IsSuccess)
+    //    {
+    //        var loginStateService = boostrapScope.ServiceProvider.GetRequiredService<JwtAuthenticationStateProvider>();
+    //        loginStateService.Login(refreshTokenResponse.Token);
+    //    }
+    //}
 }

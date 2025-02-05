@@ -50,8 +50,8 @@ public static class AuthSetupExtention
             options.Password.RequireUppercase = true;
             options.SignIn.RequireConfirmedEmail = true;
         })
-.AddEntityFrameworkStores<AuthContext>()
-.AddDefaultTokenProviders();
+        .AddEntityFrameworkStores<AuthContext>()
+        .AddDefaultTokenProviders();
 
     }
     public static void SetupJWTAuthApp(this WebApplication app, BackendConfig config)
