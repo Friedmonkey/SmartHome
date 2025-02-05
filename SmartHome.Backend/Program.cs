@@ -1,3 +1,5 @@
+public partial class Program { }
+
 using SmartHome.Backend.Auth;
 
 namespace SmartHome.Backend;
