@@ -1,6 +1,4 @@
-﻿using FastEndpoints;
-using Microsoft.AspNetCore.Identity;
-using SmartHome.Backend.Auth;
+﻿using SmartHome.Backend.Auth;
 using SmartHome.Backend.FastEndpoints.Base;
 using SmartHome.Common;
 using SmartHome.Common.Models.Auth;
