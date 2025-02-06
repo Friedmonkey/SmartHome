@@ -9,6 +9,7 @@ using SmartHome.Common.Models.Auth;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
 
 namespace SmartHome.Backend.Controllers;
 

@@ -22,24 +22,18 @@ namespace SmartHome.Database.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SmartHome.Database.Entities.User", b =>
+            modelBuilder.Entity("SmartHome.Database.Entities.Account", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTimeOffset?>("DeletedOn")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnOrder(103);
-
-                    b.Property<DateTimeOffset>("ModifiedOn")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnOrder(102);
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -47,14 +41,24 @@ namespace SmartHome.Database.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnOrder(1);
 
+                    b.Property<string>("PasswordHashed")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("SecurityStamp")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(3);
+
                     b.HasKey("Id")
-                        .HasName("PK_User");
+                        .HasName("PK_Account");
 
-                    b.HasIndex("Name", "DeletedOn")
+                    b.HasIndex("Email")
                         .IsUnique()
-                        .HasDatabaseName("UX_Customer_Name");
+                        .HasDatabaseName("UX_Email");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("Account", (string)null);
                 });
 #pragma warning restore 612, 618
         }

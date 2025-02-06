@@ -1,4 +1,4 @@
-﻿namespace SmartHome.Shared.Commands.User;
+﻿namespace SmartHome.Common.Commands.Account;
 
 public class UpdateCommand(Guid Id, string Name)
     : IUpdateCommand
@@ -20,6 +20,4 @@ public class UpdateCommandValidator
 }
 
 public class UpdateResponse(
-)
-{
-}
+){}

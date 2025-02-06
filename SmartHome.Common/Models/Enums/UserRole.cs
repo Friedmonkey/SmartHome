@@ -1,4 +1,4 @@
-﻿namespace SmartHome.Shared.Models.Enums;
+﻿namespace SmartHome.Common.Models.Enums;
 
 public enum UserRole
 {

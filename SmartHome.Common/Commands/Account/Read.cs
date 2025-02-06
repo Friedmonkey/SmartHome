@@ -1,4 +1,6 @@
-﻿namespace SmartHome.Shared.Commands.User;
+﻿using SmartHome.Common.Commands.Base;
+
+namespace SmartHome.Common.Commands.Account;
 
 public class ReadResponse(
     Guid Id,

@@ -1,5 +1,3 @@
-public partial class Program { }
-
 using SmartHome.Backend.Auth;
 
 namespace SmartHome.Backend;
@@ -18,10 +16,13 @@ public class Program
         builder.Services.SetupJWTAuthServices(config);
 
         builder.Services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
         builder.Services.AddOpenApi();
 
         builder.Services.SetupCors(config);
+        builder.Services.AddSqlServer<SmartHomeDbContext>(builder.Configuration["SmartHomeDb"]);
+
+        builder.Services.AddFastEndpoints();
 
         var app = builder.Build();
         app.UseCors(config.FrontendCorsKey);
@@ -34,11 +35,11 @@ public class Program
             app.MapOpenApi();
         }
 
-
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
 
+        app.UseFastEndpoints();
 
         app.MapControllers();
 

@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using SmartHome.Shared.Models.Enums;
+using SmartHome.Common.Models.Enums;
 
 namespace SmartHome.Backend.Features;
 

@@ -1,6 +1,5 @@
 ﻿namespace SmartHome.Database.Entities;
-
-public class User
+public class Role
     : Entity
 {
     public string? Name { get; set; }

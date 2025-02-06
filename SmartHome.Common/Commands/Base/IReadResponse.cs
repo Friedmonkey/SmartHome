@@ -1,4 +1,4 @@
-﻿namespace SmartHome.Shared.Commands.Base;
+﻿namespace SmartHome.Common.Commands.Base;
 
 public interface IReadResponse
 {

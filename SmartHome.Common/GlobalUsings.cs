@@ -1,3 +1,3 @@
 ﻿global using FluentValidation;
-global using SmartHome.Shared.Commands.Base;
-global using SmartHome.Shared.Commands.Base.Validators;
+global using SmartHome.Common.Commands.Base;
+global using SmartHome.Common.Commands.Base.Validators;

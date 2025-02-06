@@ -1,20 +1,14 @@
-﻿using SmartHome.Database.Entities;
-using SmartHome.Database.Interceptors;
-namespace SmartHome.Database;
+﻿namespace SmartHome.Database;
 
 public class SmartHomeDbContext
     : DbContext
 {
-    private readonly bool _migrationMode;
 
-    public SmartHomeDbContext(DbContextOptions<SmartHomeDbContext> options, bool migrationMode = false)
+    public SmartHomeDbContext(DbContextOptions<SmartHomeDbContext> options)
         : base(options)
-    {
-        _migrationMode = migrationMode;
-    }
+    {}
 
-    public DbSet<User>? Users { get; set; }
-
+    public DbSet<Account>? Accounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,17 +21,6 @@ public class SmartHomeDbContext
         foreach (var fk in cascadeFKs)
         {
             fk.DeleteBehavior = DeleteBehavior.NoAction;
-        }
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-
-        if (!_migrationMode)
-        {
-            optionsBuilder.AddInterceptors(new AuditInterceptor());
-            optionsBuilder.AddInterceptors(new SoftDeleteInterceptor());
         }
     }
 }

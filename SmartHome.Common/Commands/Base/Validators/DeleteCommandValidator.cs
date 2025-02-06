@@ -1,4 +1,4 @@
-﻿namespace SmartHome.Shared.Commands.Base.Validators;
+﻿namespace SmartHome.Common.Commands.Base.Validators;
 
 public abstract class DeleteCommandValidator<T>
     : AbstractValidator<T>

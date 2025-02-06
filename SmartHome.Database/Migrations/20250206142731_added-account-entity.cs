@@ -6,30 +6,30 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SmartHome.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class adduserentity : Migration
+    public partial class addedaccountentity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "Account",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    ModifiedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    DeletedOn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PasswordHashed = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Id);
+                    table.PrimaryKey("PK_Account", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "UX_Customer_Name",
-                table: "User",
-                columns: new[] { "Name", "DeletedOn" },
+                name: "UX_Email",
+                table: "Account",
+                column: "Email",
                 unique: true);
         }
 
@@ -37,7 +37,7 @@ namespace SmartHome.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "User");
+                name: "Account");
         }
     }
 }

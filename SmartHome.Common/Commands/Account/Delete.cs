@@ -1,5 +1,7 @@
-﻿
-namespace SmartHome.Shared.Commands.User;
+﻿using SmartHome.Common.Commands.Base;
+using SmartHome.Common.Commands.Base.Validators;
+
+namespace SmartHome.Common.Commands.Account;
 
 public class DeleteCommand(Guid Id)
     : IDeleteCommand

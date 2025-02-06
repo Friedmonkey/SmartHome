@@ -1,11 +1,11 @@
-﻿using SmartHome.Shared.Commands.User;
-using SmartHome.Backend.Features;
-using SmartHome.Shared.Models.Enums;
+﻿using SmartHome.Backend.Features;
+using SmartHome.Common.Models.Enums;
+using SmartHome.Common.Commands.Account;
 
 namespace SmartHome.Backend.Features.User;
 
 public class Delete(SmartHomeDbContext _SmartHomeDbContext)
-    : DeleteEndpointBase<DeleteCommand, Entity.User, DeleteCommandValidator>(_SmartHomeDbContext)
+    : DeleteEndpointBase<DeleteCommand, Entity.Account, DeleteCommandValidator>(_SmartHomeDbContext)
 {
     protected override UserRole[] RoleNames => [UserRole.Admin];
 
