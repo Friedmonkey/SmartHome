@@ -32,7 +32,7 @@ public class Program
             .AddHttpMessageHandler<JwtTokenMessageHandler>();
         builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(config.HttpClientName));
 
-        builder.Services.AddSingleton<ApiService>();
+        builder.Services.AddScoped<ApiService>();
 
         var application = builder.Build();
         //await RefreshJwtToken(application);

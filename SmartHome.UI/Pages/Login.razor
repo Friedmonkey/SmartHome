@@ -1,37 +1,25 @@
-﻿@using Newtonsoft.Json
-@using SmartHome.Common
-@using SmartHome.Common.Models
-@using SmartHome.Common.Models.Auth
-@inject IHttpClientFactory HttpClientFactory;
-@inject FrontendConfig config;
+﻿@page "/login"
+@inject ApiService api;
 
 <h3>Login</h3>
 
+<MudTextField @bind-Value="Email">Email</MudTextField>
+<MudTextField @bind-Value="Password">Password</MudTextField>
 <MudButton OnClick="OnClick">Login</MudButton>
 
 @code {
+    public string Email = "";
+    public string Password = "";
     public async Task OnClick()
     {
-        var http = HttpClientFactory.CreateClient(config.HttpClientName);
-        //var json = JsonConvert.SerializeObject();
-        //var stringContent = new StringContent(json);
-        //var login = await http.PostAsJsonAsync<LoginRequest>(SharedConfig.LoginUrl, new LoginRequest("email", "password"));
-        //if (login.Content.ReadAsStream().read)
-        var response = await http.PostAsJsonAsync(SharedConfig.LoginUrl, new LoginRequest("email", "password"));
+        var loginRequest = new LoginRequest(this.Email, this.Password);
 
-        if (response.IsSuccessStatusCode) // Check if the request was successful
+        var loginResponse = await api.Post<LoginResponse>(SharedConfig.LoginUrl, loginRequest);
+
+        if (loginResponse.WasSuccess())
         {
-            var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            if (loginResponse != null)
-            {
-                // Use loginResponse object
-                Console.WriteLine(loginResponse.JWT);
-            }
-        }
-        else
-        {
-            // Handle error (e.g., log response status)
-            Console.WriteLine($"Error: {response.StatusCode}");
+            // Use loginResponse object
+            Console.WriteLine(loginResponse!.JWT);
         }
     }
 }

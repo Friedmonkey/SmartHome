@@ -1,9 +1,7 @@
 ﻿@page "/weather"
 @using SmartHome.Common
 @using SmartHome.Common.Models
-@inject IHttpClientFactory HttpClientFactory;
-@inject FrontendConfig config;
-
+@inject ApiService api;
 <PageTitle>Weather forecast</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Weather forecast</MudText>
@@ -17,10 +15,10 @@ else
 {
     <MudTable Items="forecasts" Hover="true" SortLabel="Sort By" Elevation="0">
         <HeaderContent>
-            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<WeatherResponse, object>(x=>x.Date)">Date</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<WeatherResponse, object>(x=>x.TemperatureC)">Temp. (C)</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<WeatherResponse, object>(x=>x.TemperatureF)">Temp. (F)</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<WeatherResponse, object>(x=>x.Summary!)">Summary</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<WeatherForecast, object>(x=>x.Date)">Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<WeatherForecast, object>(x=>x.TemperatureC)">Temp. (C)</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<WeatherForecast, object>(x=>x.TemperatureF)">Temp. (F)</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<WeatherForecast, object>(x=>x.Summary!)">Summary</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Date">@context.Date</MudTd>
@@ -35,22 +33,14 @@ else
 }
 
 @code {
-    private WeatherResponse[]? forecasts;
+    private WeatherForecast[]? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
-        var http = HttpClientFactory.CreateClient(config.HttpClientName);
-        forecasts = await http.GetFromJsonAsync<WeatherResponse[]>(SharedConfig.WeatherUrl);
+        var response = await api.Get<WeatherResponse>(SharedConfig.WeatherUrl);
+        if (response.WasSuccess())
+        {
+            forecasts = response!.Forcasts;
+        }
     }
-
-    // public class WeatherForecast
-    // {
-    //     public DateOnly Date { get; set; }
-
-    //     public int TemperatureC { get; set; }
-
-    //     public string? Summary { get; set; }
-
-    //     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    // }
 }
