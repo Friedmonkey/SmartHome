@@ -17,7 +17,7 @@ public class ApiService
     private readonly FrontendConfig _config;
 
     private const string JWT_STORAGE_KEY = "jwt_token";
-    private const string REFRESH_STORAGE_KEY = "refresh_token";
+    //private const string REFRESH_STORAGE_KEY = "refresh_token";
 
     public ApiService(IHttpClientFactory httpClientFactory, IJSRuntime jsRuntime, ISnackbar snackbarService, FrontendConfig config)
     {
@@ -107,16 +107,16 @@ public class ApiService
 
     private async Task RefreshToken()
     {
-        var refreshToken = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", REFRESH_STORAGE_KEY);
-        if (string.IsNullOrEmpty(refreshToken)) return;
+        //var refreshToken = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", REFRESH_STORAGE_KEY);
+        //if (string.IsNullOrEmpty(refreshToken)) return;
 
-        var refreshRequest = new RefreshRequest(refreshToken);
-        var response = await SendInternal<RefreshResponse>(false, HttpMethod.Post, SharedConfig.RefreshUrl, refreshRequest);
+        var refreshRequest = new RefreshRequest();
+        var response = await SendInternal<TokenResponse>(false, HttpMethod.Post, SharedConfig.AuthUrls.RefreshUrl, refreshRequest);
 
-        if (response?.Success == true)
+        if (response.WasSuccess())
         {
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response.JWT);
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, response.RefreshToken);
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response!.JWT);
+            //await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, response.RefreshToken);
         }
     }
 

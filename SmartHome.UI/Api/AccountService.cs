@@ -1,5 +1,5 @@
-﻿using System.Net.Http.Json;
-using Microsoft.JSInterop;
+﻿using MudBlazor;
+using SmartHome.Common;
 using SmartHome.Common.Models;
 using SmartHome.Common.Models.Auth;
 
@@ -7,41 +7,33 @@ namespace SmartHome.UI.Api;
 
 public class AccountService
 {
-    private readonly ApiService _apiService;
-    private readonly IJSRuntime _jsRuntime;
+    private readonly ISnackbar _snackBar;
+    private readonly FrontendConfig _config;
+    private readonly ApiService _api;
 
-    private const string JWT_STORAGE_KEY = "jwt_token";
-    private const string REFRESH_STORAGE_KEY = "refresh_token";
-
-    public AccountService(ApiService apiService, IJSRuntime jsRuntime)
+    public AccountService(ApiService api, ISnackbar snackbar, FrontendConfig config)
     {
-        _apiService = apiService;
-        _jsRuntime = jsRuntime;
+        this._api = api;
+        this._snackBar = snackbar;
+        this._config = config;
     }
 
-    public async Task<bool> Login(string email, string password)
+    public async Task Login(LoginRequest request)
     {
-        var response = await _apiService.Post<LoginResponse>("/auth/login", new { email, password });
-
-        if (response.WasSuccess())
+        var response = await _api.Post<TokenResponse>(SharedConfig.AuthUrls.LoginUrl, request);
+        if (response.EnsureSuccess(_snackBar))
         {
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response!.JWT);
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, response.RefreshToken);
-            return true;
+            _snackBar.Add(response.JWT);
         }
-
-        return false;
     }
-
-    public async Task Logout()
+    public async Task Register(RegisterRequest request)
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", JWT_STORAGE_KEY);
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", REFRESH_STORAGE_KEY);
+        var response = await _api.Post<RegisterResponse>(SharedConfig.AuthUrls.RegisterUrl, request);
+        response.Show(_snackBar, "Account created!");
     }
-
-    public async Task<bool> IsLoggedIn()
+    public async Task ForgotPassword(ForgotPasswordRequest request)
     {
-        var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", JWT_STORAGE_KEY);
-        return !string.IsNullOrEmpty(token);
+        var response = await _api.Post<GenericSuccessResponse>(SharedConfig.Urls.Account.ForgotPasswordUrl, request);
+        response.Show(_snackBar, "An email has been sent to you with instructions to reset your password");
     }
 }

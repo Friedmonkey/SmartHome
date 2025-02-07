@@ -12,7 +12,7 @@ public class Weather: Ep.NoReq.Res<WeatherResponse>
     };
     public override void Configure()
     {
-        Get(SharedConfig.WeatherUrl);
+        Get(SharedConfig.Urls.WeatherUrl);
         AllowAnonymous();
     }
 

@@ -1,10 +1,8 @@
 ﻿namespace SmartHome.Common.Models;
 
-public record Response<T>(bool Success = true) where T : Response<T>
+public record Response<T>(bool _RequestSuccess = true, string _RequestMessage = "") where T : Response<T>
 {
-    public static T Failed => CreateFailedInstance();
-
-    private static T CreateFailedInstance()
+    public static T Failed(string error)
     {
         // Find the constructor with the most parameters
         var ctor = typeof(T).GetConstructors().OrderByDescending(c => c.GetParameters().Length).FirstOrDefault();
@@ -17,7 +15,7 @@ public record Response<T>(bool Success = true) where T : Response<T>
 
         // Invoke constructor with default values and set Success = false
         var instance = (T)ctor.Invoke(parameters);
-        return instance with { Success = false };
+        return instance with { _RequestSuccess = false, _RequestMessage = error };
     }
 }
 
@@ -25,6 +23,6 @@ public static class ResponseExtentions
 {
     public static bool WasSuccess<T>(this Response<T>? response) where T : Response<T>
     {   //handles null too
-        return response?.Success == true;
+        return response?._RequestSuccess == true;
     }
 }

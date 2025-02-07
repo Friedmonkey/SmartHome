@@ -9,7 +9,7 @@ public class RegisterEndpoint : AuthEndpointBase<RegisterRequest, RegisterRespon
 {
     public override void Configure()
     {
-        Post(SharedConfig.RegisterUrl);
+        Post(SharedConfig.AuthUrls.RegisterUrl);
         AllowAnonymous();
     }
 
@@ -17,8 +17,8 @@ public class RegisterEndpoint : AuthEndpointBase<RegisterRequest, RegisterRespon
     {
         var user = new User()
         {
-            Email = request.EmailAddress,
-            UserName = request.DisplayName,
+            Email = request.Email,
+            UserName = request.Username,
             EmailConfirmed = true,
         };
 
@@ -27,54 +27,61 @@ public class RegisterEndpoint : AuthEndpointBase<RegisterRequest, RegisterRespon
     }
 }
 
-public class LoginEndpoint : AuthEndpointBase<LoginRequest, LoginResponse>
+public class LoginEndpoint : AuthEndpointBase<LoginRequest, TokenResponse>
 {
     public override void Configure()
     {
-        Post(SharedConfig.LoginUrl);
+        Post(SharedConfig.AuthUrls.LoginUrl);
         AllowAnonymous();
     }
 
     public override async Task HandleAsync(LoginRequest request, CancellationToken ct)
     {
         var user = await UserManager.FindByEmailAsync(request.Email);
-        if (user != null)
-        {
-            var signIn = await SignInManager.CheckPasswordSignInAsync(user, request.Password, false);
-            if (signIn.Succeeded)
-            {
-                string jwt = CreateJWT(user);
-                AppendRefreshTokenCookie(user, HttpContext.Response.Cookies);
-
-                await SendAsync(new LoginResponse(JWT:jwt));
-                return;
-            }
+        if (user is null)
+        { 
+            await SendAsync(TokenResponse.Failed($"User with email {request.Email} not found!"));
+            return;
         }
-        await SendAsync(LoginResponse.Failed);
+        var signIn = await SignInManager.CheckPasswordSignInAsync(user, request.Password, false);
+        if (!signIn.Succeeded)
+        {
+            await SendAsync(TokenResponse.Failed($"Email or Password is not correct."));
+            return;
+        }
+
+        string jwt = CreateJWT(user);
+        AppendRefreshTokenCookie(user, HttpContext.Response.Cookies);
+
+        await SendAsync(new TokenResponse(JWT:jwt));
     }
 }
 
-public class RefreshEndpoint : AuthEndpointBase<RefreshRequest, RefreshResponse>
+public class RefreshEndpoint : AuthEndpointBase<RefreshRequest, TokenResponse>
 {
     public override void Configure()
     {
-        Post(SharedConfig.RefreshUrl);
+        Post(SharedConfig.AuthUrls.RefreshUrl);
         AllowAnonymous();
     }
 
     public override async Task HandleAsync(RefreshRequest request, CancellationToken ct)
     {
         var cookie = HttpContext.Request.Cookies[RefreshTokenCookieKey];
-        if (cookie != null)
-        {
-            var user = UserManager.Users.FirstOrDefault(user => user.SecurityStamp == cookie);
-            if (user != null)
-            {
-                var jwtToken = CreateJWT(user);
-                await SendAsync(new RefreshResponse(JWT:jwtToken));
-                return;
-            }
+        if (cookie is null)
+        { 
+            await SendAsync(TokenResponse.Failed("refresh cookie was empty"));
+            return;
         }
-        await SendAsync(RefreshResponse.Failed);
+
+        var user = UserManager.Users.FirstOrDefault(user => user.SecurityStamp == cookie);
+        if (user is null)
+        { 
+            await SendAsync(TokenResponse.Failed($"User cookie not found!"));
+            return;
+        }
+
+        var jwtToken = CreateJWT(user);
+        await SendAsync(new TokenResponse(JWT:jwtToken));
     }
 }

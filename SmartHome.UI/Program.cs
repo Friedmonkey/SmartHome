@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SmartHome.UI.Api;
 using SmartHome.UI.Auth;
 using MudBlazor.Services;
+using MudExtensions.Services;
 
 namespace SmartHome.UI;
 
@@ -16,6 +17,8 @@ public class Program
         builder.RootComponents.Add<HeadOutlet>("head::after");
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
         builder.Services.AddMudServices();
+        builder.Services.AddMudExtensions();
+
 
         var config = FrontendConfig.GetDefaultConfig();
 
@@ -33,6 +36,7 @@ public class Program
         builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(config.HttpClientName));
 
         builder.Services.AddScoped<ApiService>();
+        builder.Services.AddScoped<AccountService>();
 
         var application = builder.Build();
         //await RefreshJwtToken(application);
