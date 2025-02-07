@@ -4,7 +4,7 @@ using SmartHome.Common.Models;
 
 namespace SmartHome.Backend.FastEndpoints;
 
-public class Weather: Ep.NoReq.Res<IEnumerable<WeatherResponse>>
+public class Weather: Ep.NoReq.Res<WeatherResponse>
 {
     private static readonly string[] Summaries = new[]
     {
@@ -18,11 +18,12 @@ public class Weather: Ep.NoReq.Res<IEnumerable<WeatherResponse>>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        await SendAsync(Enumerable.Range(1, 5).Select(index => new WeatherResponse
-        (   Date: DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+        var forcasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        (Date: DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
             TemperatureC: Random.Shared.Next(-20, 55),
             Summary: Summaries[Random.Shared.Next(Summaries.Length)]
-        )).ToArray());
+        )).ToArray();
+        await SendAsync(new WeatherResponse(forcasts));
     }
 
 }

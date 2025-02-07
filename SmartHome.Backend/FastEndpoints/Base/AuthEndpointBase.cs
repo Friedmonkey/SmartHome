@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using SmartHome.Backend.Auth;
+using SmartHome.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -9,7 +10,7 @@ namespace SmartHome.Backend.FastEndpoints.Base;
 
 public abstract class AuthEndpointBase<TRequest, TResponse>: Endpoint<TRequest, TResponse>
     where TRequest: notnull
-    where TResponse: notnull
+    where TResponse: Response<TResponse>
 {
     //dependency injection
     public required UserManager<User> UserManager { get; set; }

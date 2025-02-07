@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.JSInterop;
+using SmartHome.Common.Models;
+using SmartHome.Common.Models.Auth;
 
 namespace SmartHome.UI.Api;
 
@@ -19,11 +21,11 @@ public class AccountService
 
     public async Task<bool> Login(string email, string password)
     {
-        var response = await _apiService.Post<TokenResponse>("/auth/login", new { email, password });
+        var response = await _apiService.Post<LoginResponse>("/auth/login", new { email, password });
 
-        if (response != null)
+        if (response.WasSuccess())
         {
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response.Jwt);
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response!.JWT);
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, response.RefreshToken);
             return true;
         }

@@ -1,72 +1,78 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.JSInterop;
+using MudBlazor;
+using SmartHome.Common;
+using SmartHome.Common.Models;
+using SmartHome.Common.Models.Auth;
 
 namespace SmartHome.UI.Api;
 
 public class ApiService
 {
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IJSRuntime _jsRuntime;
+    private readonly ISnackbar _snackbarService;
     private readonly FrontendConfig _config;
 
     private const string JWT_STORAGE_KEY = "jwt_token";
     private const string REFRESH_STORAGE_KEY = "refresh_token";
 
-    public ApiService(HttpClient httpClient, IJSRuntime jsRuntime, FrontendConfig config)
+    public ApiService(IHttpClientFactory httpClientFactory, IJSRuntime jsRuntime, ISnackbar snackbarService, FrontendConfig config)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _jsRuntime = jsRuntime;
+        _snackbarService = snackbarService;
         _config = config;
     }
-
-    public async Task<T?> Get<T>(string url)
+    private HttpClient GetHttpClient()
     {
-        await EnsureAuthenticated();
-        var request = new HttpRequestMessage(HttpMethod.Get, _config.ApiBaseUrl + url);
-        await AttachAuthorizationHeader(request);
-        var response = await _httpClient.SendAsync(request);
-
-        return await HandleResponse<T>(response);
+        return _httpClientFactory.CreateClient(_config.HttpClientName);
     }
-
-    public async Task<T?> Post<T>(string url, object data)
+    private string GetUrl(string url)
     {
+        return $"{_config.ApiBaseUrl}/{url}";
+    }
+    public async Task<T?> Get<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Get, url);
+    public async Task<T?> Post<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Post, url, data);
+    public async Task<T?> Put<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Put, url, data);
+    public async Task<T?> Delete<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Delete, url);
+    private async Task<T?> Send<T>(HttpMethod method, string url, object data = null)
+    { 
         await EnsureAuthenticated();
-        var request = new HttpRequestMessage(HttpMethod.Post, _config.ApiBaseUrl + url)
+        return await SendInternal<T>(true, method, url, data);
+    }
+    private async Task<T?> SendInternal<T>(bool authenticate, HttpMethod method, string url, object data = null)
+    {
+        try
         {
-            Content = JsonContent.Create(data)
-        };
-        await AttachAuthorizationHeader(request);
-        var response = await _httpClient.SendAsync(request);
+            var newUrl = GetUrl(url);
+            var request = new HttpRequestMessage(method, newUrl);
+            if (authenticate)
+            {
+                await AttachAuthorizationHeader(request);
+            }
+            if (data is not null)
+                request.Content = JsonContent.Create(data);
 
-        return await HandleResponse<T>(response);
-    }
-
-    public async Task<T?> Put<T>(string url, object data)
-    {
-        await EnsureAuthenticated();
-        var request = new HttpRequestMessage(HttpMethod.Put, _config.ApiBaseUrl + url)
+            var response = await HandleResponse<T>(await GetHttpClient().SendAsync(request));
+            return response;
+        }
+        catch (Exception ex)
         {
-            Content = JsonContent.Create(data)
-        };
-        await AttachAuthorizationHeader(request);
-        var response = await _httpClient.SendAsync(request);
-
-        return await HandleResponse<T>(response);
+#if DEBUG
+            if (ex.Message.StartsWith("TypeError: Failed to fetch"))
+            { 
+                _snackbarService.Add("BACKEND not enabled", Severity.Error);
+                _snackbarService.Add("TURN ON THE BACK-END, \n Solution Explorer -> SmartHome.Backend -> r-click -> debug -> start new instance", Severity.Error);
+                return default(T);
+            }
+#endif
+            throw new Exception("Api error: " + ex.Message);
+        }
     }
-
-    public async Task<T?> Delete<T>(string url)
-    {
-        await EnsureAuthenticated();
-        var request = new HttpRequestMessage(HttpMethod.Delete, _config.ApiBaseUrl + url);
-        await AttachAuthorizationHeader(request);
-        var response = await _httpClient.SendAsync(request);
-
-        return await HandleResponse<T>(response);
-    }
-
     private async Task AttachAuthorizationHeader(HttpRequestMessage request)
     {
         var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", JWT_STORAGE_KEY);
@@ -105,16 +111,13 @@ public class ApiService
         var refreshToken = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", REFRESH_STORAGE_KEY);
         if (string.IsNullOrEmpty(refreshToken)) return;
 
-        var response = await _httpClient.PostAsJsonAsync(_config.ApiBaseUrl + "/auth/refresh", new { refreshToken });
+        var refreshRequest = new RefreshRequest(refreshToken);
+        var response = await SendInternal<RefreshResponse>(false, HttpMethod.Post, SharedConfig.RefreshUrl, refreshRequest);
 
-        if (response.IsSuccessStatusCode)
+        if (response?.Success == true)
         {
-            var newTokens = await response.Content.ReadFromJsonAsync<TokenResponse>();
-            if (newTokens != null)
-            {
-                await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, newTokens.Jwt);
-                await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, newTokens.RefreshToken);
-            }
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response.JWT);
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, response.RefreshToken);
         }
     }
 
@@ -136,10 +139,4 @@ public class ApiService
 public class JwtPayload
 {
     public long Exp { get; set; }
-}
-
-public class TokenResponse
-{
-    public string Jwt { get; set; } = "";
-    public string RefreshToken { get; set; } = "";
 }

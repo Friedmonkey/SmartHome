@@ -23,7 +23,7 @@ public class RegisterEndpoint : AuthEndpointBase<RegisterRequest, RegisterRespon
         };
 
         var result = await UserManager.CreateAsync(user, request.Password);
-        await SendAsync(new(Succeeded: true));
+        await SendAsync(new RegisterResponse());
     }
 }
 
@@ -46,7 +46,7 @@ public class LoginEndpoint : AuthEndpointBase<LoginRequest, LoginResponse>
                 string jwt = CreateJWT(user);
                 AppendRefreshTokenCookie(user, HttpContext.Response.Cookies);
 
-                await SendAsync(new LoginResponse(true, jwt));
+                await SendAsync(new LoginResponse(JWT:jwt));
                 return;
             }
         }
@@ -54,7 +54,7 @@ public class LoginEndpoint : AuthEndpointBase<LoginRequest, LoginResponse>
     }
 }
 
-public class RefreshEndpoint : AuthEndpointBase<LoginRequest, LoginResponse>
+public class RefreshEndpoint : AuthEndpointBase<RefreshRequest, RefreshResponse>
 {
     public override void Configure()
     {
@@ -62,7 +62,7 @@ public class RefreshEndpoint : AuthEndpointBase<LoginRequest, LoginResponse>
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(LoginRequest request, CancellationToken ct)
+    public override async Task HandleAsync(RefreshRequest request, CancellationToken ct)
     {
         var cookie = HttpContext.Request.Cookies[RefreshTokenCookieKey];
         if (cookie != null)
@@ -71,10 +71,10 @@ public class RefreshEndpoint : AuthEndpointBase<LoginRequest, LoginResponse>
             if (user != null)
             {
                 var jwtToken = CreateJWT(user);
-                await SendAsync(new LoginResponse(true, jwtToken));
+                await SendAsync(new RefreshResponse(JWT:jwtToken));
                 return;
             }
         }
-        await SendAsync(LoginResponse.Failed);
+        await SendAsync(RefreshResponse.Failed);
     }
 }
