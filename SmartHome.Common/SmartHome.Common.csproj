@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\UltraEndpoints.Generator\UltraEndpoints.Generator.csproj" />
+  </ItemGroup>
+
 </Project>

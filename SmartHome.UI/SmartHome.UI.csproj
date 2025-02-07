@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
+    <ProjectReference Include="..\UltraEndpoints.Generator\UltraEndpoints.Generator.csproj" />
   </ItemGroup>
 
 </Project>

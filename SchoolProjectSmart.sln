@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.UI", "SmartHome.U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Backend", "SmartHome.Backend\SmartHome.Backend.csproj", "{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltraEndpoints.Generator", "UltraEndpoints.Generator\UltraEndpoints.Generator.csproj", "{7A38492D-B291-4246-8F60-50307CDF72D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourcegeneratorTester", "SourcegeneratorTester\SourcegeneratorTester.csproj", "{11F23CA3-7203-4431-AA46-59CE5D7033D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A57A7AEA-A04C-40C4-8513-8400F03EBBF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A38492D-B291-4246-8F60-50307CDF72D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A38492D-B291-4246-8F60-50307CDF72D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A38492D-B291-4246-8F60-50307CDF72D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A38492D-B291-4246-8F60-50307CDF72D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11F23CA3-7203-4431-AA46-59CE5D7033D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11F23CA3-7203-4431-AA46-59CE5D7033D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11F23CA3-7203-4431-AA46-59CE5D7033D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11F23CA3-7203-4431-AA46-59CE5D7033D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
