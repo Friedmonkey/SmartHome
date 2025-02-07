@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/SmartHome.Backend/database.db
+/SmartHome.Backend/database.db-shm
+/SmartHome.Backend/database.db-wal

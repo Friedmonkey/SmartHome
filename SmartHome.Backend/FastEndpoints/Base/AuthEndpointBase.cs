@@ -15,16 +15,8 @@ public abstract class AuthEndpointBase<TRequest, TResponse>: Endpoint<TRequest, 
     public required UserManager<User> UserManager { get; set; }
     public required SignInManager<User> SignInManager { get; set; }
     public required BackendConfig BackendConfig { get; set; }
-    //public IDbContextFactory<AuthContext> ContextFactory { get; set; }
 
-    //public override async Task<TResponse> ExecuteAsync(TRequest req, CancellationToken ct)
-    //{
-    //    using var context = ContextFactory.CreateDbContext();
-    //    var entity = Map.ToEntity(req);
-    //    context.Add(entity!);
-    //    await context.SaveChangesAsync(ct);
-    //    return Map.FromEntity(entity);
-    //}
+
     public const string RefreshTokenCookieKey = "refresh_token";
     public void AppendRefreshTokenCookie(User user, IResponseCookies cookies)
     {
