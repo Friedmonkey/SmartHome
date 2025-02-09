@@ -1,39 +1,35 @@
 ﻿using MudBlazor;
 using SmartHome.Common;
+using SmartHome.Common.Api;
 using SmartHome.Common.Models;
-using SmartHome.Common.Models.Auth;
-
+using static SmartHome.Common.Api.IAccountService;
 namespace SmartHome.UI.Api;
 
-public class AccountService
+public class AccountService : IAccountService
 {
-    private readonly ISnackbar _snackBar;
-    private readonly FrontendConfig _config;
     private readonly ApiService _api;
 
-    public AccountService(ApiService api, ISnackbar snackbar, FrontendConfig config)
+    public AccountService(ApiService api)
     {
         this._api = api;
-        this._snackBar = snackbar;
-        this._config = config;
     }
 
-    public async Task Login(LoginRequest request)
+    public async Task<TokenResponse> Login(LoginRequest request)
     {
         var response = await _api.Post<TokenResponse>(SharedConfig.AuthUrls.LoginUrl, request);
-        if (response.EnsureSuccess(_snackBar))
-        {
-            _snackBar.Add(response.JWT);
-        }
+        return response;
     }
-    public async Task Register(RegisterRequest request)
+    public async Task<EmptyResponse> Register(RegisterRequest request)
     {
-        var response = await _api.Post<RegisterResponse>(SharedConfig.AuthUrls.RegisterUrl, request);
-        response.Show(_snackBar, "Account created!");
+        return await _api.Post<EmptyResponse>(SharedConfig.AuthUrls.RegisterUrl, request);
     }
-    public async Task ForgotPassword(ForgotPasswordRequest request)
+    public async Task<EmptyResponse> ForgotPassword(ForgotPasswordRequest request)
     {
-        var response = await _api.Post<GenericSuccessResponse>(SharedConfig.Urls.Account.ForgotPasswordUrl, request);
-        response.Show(_snackBar, "An email has been sent to you with instructions to reset your password");
+        return await _api.Post<EmptyResponse>(SharedConfig.Urls.Account.ForgotPasswordUrl, request);
+    }
+
+    public async Task<TokenResponse> Refresh(EmptyRequest request)
+    {
+        return await _api.Post<TokenResponse>(SharedConfig.AuthUrls.RefreshUrl, request);
     }
 }

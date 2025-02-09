@@ -34,16 +34,16 @@ public class ApiService
     {
         return $"{_config.ApiBaseUrl}/{url}";
     }
-    public async Task<T?> Get<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Get, url);
-    public async Task<T?> Post<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Post, url, data);
-    public async Task<T?> Put<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Put, url, data);
-    public async Task<T?> Delete<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Delete, url);
-    private async Task<T?> Send<T>(HttpMethod method, string url, object data = null)
+    public async Task<T> Get<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Get, url);
+    public async Task<T> Post<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Post, url, data);
+    public async Task<T> Put<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Put, url, data);
+    public async Task<T> Delete<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Delete, url);
+    private async Task<T> Send<T>(HttpMethod method, string url, object data = null)
     { 
         await EnsureAuthenticated();
         return await SendInternal<T>(true, method, url, data);
     }
-    private async Task<T?> SendInternal<T>(bool authenticate, HttpMethod method, string url, object data = null)
+    private async Task<T> SendInternal<T>(bool authenticate, HttpMethod method, string url, object data = null)
     {
         try
         {
@@ -120,13 +120,13 @@ public class ApiService
         }
     }
 
-    private static async Task<T?> HandleResponse<T>(HttpResponseMessage response)
+    private static async Task<T> HandleResponse<T>(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)
         {
             throw new Exception($"API Error: {response.StatusCode}");
         }
-        return await response.Content.ReadFromJsonAsync<T>();
+        return await response.Content.ReadFromJsonAsync<T>() ?? throw new Exception("unable to parse Json");
     }
 
     private static string PadBase64(string base64)

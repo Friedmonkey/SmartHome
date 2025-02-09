@@ -24,14 +24,5 @@ public class ForgotPasswordEndpoint : AuthEndpointBase<ForgotPasswordRequest, Ge
 
         await SendAsync(GenericSuccessResponse.Success());
         return;
-        //var user = new User()
-        //{
-        //    Email = request.EmailAddress,
-        //    UserName = request.DisplayName,
-        //    EmailConfirmed = true,
-        //};
-
-        //var result = await UserManager.CreateAsync(user, request.Password);
-        //await SendAsync(new RegisterResponse());
     }
 }
