@@ -2,14 +2,6 @@
 
 public class SharedConfig
 {
-    private const string AuthBase = "auth/";
-    public static class AuthUrls
-    {
-        public const string RegisterUrl = AuthBase + "register";
-        public const string LoginUrl = AuthBase + "login";
-        public const string RefreshUrl = AuthBase + "refresh";
-    }
-
     private const string ApiBase = "api/";
     public static class Urls
     {
@@ -19,6 +11,10 @@ public class SharedConfig
         private const string AccountBase = ApiBase + "account/";
         public static class Account
         { 
+            public const string RegisterUrl = AccountBase + "register";
+            public const string LoginUrl = AccountBase + "login";
+            public const string RefreshUrl = AccountBase + "refresh";
+            public const string LogoutUrl = AccountBase + "logout";
             public const string ForgotPasswordUrl = AccountBase + "forgotPassword";
         }
     }

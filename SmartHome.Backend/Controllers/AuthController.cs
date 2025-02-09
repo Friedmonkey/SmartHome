@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
 using SmartHome.Backend.Auth;
 using SmartHome.Common;
-using SmartHome.Common.Models.Auth;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

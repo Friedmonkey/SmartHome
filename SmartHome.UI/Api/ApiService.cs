@@ -1,11 +1,14 @@
-﻿using System.Net.Http.Headers;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Blazored.SessionStorage;
 using Microsoft.JSInterop;
 using MudBlazor;
 using SmartHome.Common;
+using SmartHome.Common.Api;
 using SmartHome.Common.Models;
-using SmartHome.Common.Models.Auth;
+using static SmartHome.Common.Api.IAccountService;
 
 namespace SmartHome.UI.Api;
 
@@ -15,38 +18,85 @@ public class ApiService
     private readonly IJSRuntime _jsRuntime;
     private readonly ISnackbar _snackbarService;
     private readonly FrontendConfig _config;
+    private readonly ISessionStorageService _sessionStorageService;
 
-    private const string JWT_STORAGE_KEY = "jwt_token";
-    //private const string REFRESH_STORAGE_KEY = "refresh_token";
+    private const string JWT_KEY = "jwt_token";
+    private const string REFRESH_KEY = "refresh_token";
+    private JwtSecurityToken? cachedJwt = null;
 
-    public ApiService(IHttpClientFactory httpClientFactory, IJSRuntime jsRuntime, ISnackbar snackbarService, FrontendConfig config)
+    public ApiService(IHttpClientFactory httpClientFactory, IJSRuntime jsRuntime, ISnackbar snackbarService, FrontendConfig config, ISessionStorageService sessionStorageService)
     {
         _httpClientFactory = httpClientFactory;
         _jsRuntime = jsRuntime;
         _snackbarService = snackbarService;
         _config = config;
+        _sessionStorageService = sessionStorageService;
     }
-    private HttpClient GetHttpClient()
+
+    public async Task Logout()
     {
-        return _httpClientFactory.CreateClient(_config.HttpClientName);
+        var response = await Delete<EmptyResponse>(SharedConfig.Urls.Account.LogoutUrl);
+
+        await _sessionStorageService.RemoveItemAsync(JWT_KEY);
+        await _sessionStorageService.RemoveItemAsync(REFRESH_KEY);
+
+        cachedJwt = null;
     }
-    private string GetUrl(string url)
+    public async Task<TokenResponse> Login(LoginRequest request)
     {
-        return $"{_config.ApiBaseUrl}/{url}";
+        var response = await Post<TokenResponse>(SharedConfig.Urls.Account.LoginUrl, request, authenticated: false);
+
+        if (response.EnforceSuccess())
+        {
+            await _sessionStorageService.SetItemAsync(JWT_KEY, response.JWT);
+            await _sessionStorageService.SetItemAsync(JWT_KEY, response.Refresh);
+            cachedJwt = new JwtSecurityToken(response.JWT);
+        }
+        
+        return response;
     }
-    public async Task<T> Get<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Get, url);
-    public async Task<T> Post<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Post, url, data);
-    public async Task<T> Put<T>(string url, object data) where T : Response<T> => await Send<T>(HttpMethod.Put, url, data);
-    public async Task<T> Delete<T>(string url) where T : Response<T> => await Send<T>(HttpMethod.Delete, url);
-    private async Task<T> Send<T>(HttpMethod method, string url, object data = null)
-    { 
-        await EnsureAuthenticated();
-        return await SendInternal<T>(true, method, url, data);
+    public async Task<TokenResponse> Refresh()
+    {
+        var jwt = await _sessionStorageService.GetItemAsync<string>(JWT_KEY);
+        var refresh = await _sessionStorageService.GetItemAsync<string>(REFRESH_KEY);
+
+        var request = new TokenRequest(JWT: jwt, Refresh: refresh);
+        var response = await Post<TokenResponse>(SharedConfig.Urls.Account.RefreshUrl, request, authenticated:false);
+
+        if (response.EnforceSuccess())
+        {
+            await _sessionStorageService.SetItemAsync(JWT_KEY, response.JWT);
+            await _sessionStorageService.SetItemAsync(REFRESH_KEY, response.Refresh);
+
+            cachedJwt = new JwtSecurityToken(response.JWT);
+        }
+
+        return response;
     }
-    private async Task<T> SendInternal<T>(bool authenticate, HttpMethod method, string url, object data = null)
+    public async Task<T> Get<T>(string url, bool authenticated = true) where T : Response<T>
+    {
+        return await Send<T>(authenticated, HttpMethod.Get, url);
+    }
+    public async Task<T> Post<T>(string url, object data, bool authenticated = true) where T : Response<T>
+    {
+        return await Send<T>(authenticated, HttpMethod.Post, url, data);
+    }
+    public async Task<T> Put<T>(string url, object data, bool authenticated = true) where T : Response<T>
+    {
+        return await Send<T>(authenticated, HttpMethod.Put, url, data);
+    }
+    public async Task<T> Delete<T>(string url, bool authenticated = true) where T : Response<T>
+    {
+        return await Send<T>(authenticated, HttpMethod.Delete, url);
+    }
+    private async Task<T> Send<T>(bool authenticate, HttpMethod method, string url, object data = null)
     {
         try
         {
+            if (authenticate)
+            {
+                await EnsureAuthenticated();
+            }
             var newUrl = GetUrl(url);
             var request = new HttpRequestMessage(method, newUrl);
             if (authenticate)
@@ -63,7 +113,7 @@ public class ApiService
         {
 #if DEBUG
             if (ex.Message.StartsWith("TypeError: Failed to fetch"))
-            { 
+            {
                 _snackbarService.Add("BACKEND not enabled", Severity.Error);
                 _snackbarService.Add("TURN ON THE BACK-END, \n Solution Explorer -> SmartHome.Backend -> r-click -> debug -> start new instance", Severity.Error);
                 return default(T);
@@ -74,51 +124,48 @@ public class ApiService
     }
     private async Task AttachAuthorizationHeader(HttpRequestMessage request)
     {
-        var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", JWT_STORAGE_KEY);
-        if (!string.IsNullOrEmpty(token))
-        {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        }
+        var jwt = await GetJwt();
+        if (jwt is null)
+            throw new Exception("User is not authenticated");
+
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt.RawData);
     }
 
     private async Task EnsureAuthenticated()
     {
-        var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", JWT_STORAGE_KEY);
-        if (string.IsNullOrEmpty(token) || IsTokenExpired(token))
+        var jwt = await GetJwt();
+
+        if (jwt is null)
+            throw new Exception("User is not authenticated");
+
+        // Refresh if the token is expired
+        if (DateTime.UtcNow >= jwt.ValidTo)
         {
-            await RefreshToken();
+            await Refresh();
         }
     }
 
-    private bool IsTokenExpired(string token)
+
+    private HttpClient GetHttpClient()
     {
-        try
-        {
-            var payload = token.Split('.')[1]; // JWT payload
-            var jsonBytes = Convert.FromBase64String(PadBase64(payload));
-            var json = JsonSerializer.Deserialize<JwtPayload>(jsonBytes);
-            return json?.Exp < DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
-        catch
-        {
-            return true; // Assume expired if decoding fails
-        }
+        return _httpClientFactory.CreateClient(_config.HttpClientName);
     }
-
-    private async Task RefreshToken()
+    public async ValueTask<JwtSecurityToken?> GetJwt()
     {
-        //var refreshToken = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", REFRESH_STORAGE_KEY);
-        //if (string.IsNullOrEmpty(refreshToken)) return;
-
-        var refreshRequest = new RefreshRequest();
-        var response = await SendInternal<TokenResponse>(false, HttpMethod.Post, SharedConfig.AuthUrls.RefreshUrl, refreshRequest);
-
-        if (response.WasSuccess())
-        {
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response!.JWT);
-            //await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, response.RefreshToken);
+        if (cachedJwt is null)
+        { 
+            string jwt = await _sessionStorageService.GetItemAsync<string>(JWT_KEY);
+            if (!string.IsNullOrEmpty(jwt))
+                cachedJwt = new JwtSecurityToken(jwt);
         }
+
+        return cachedJwt;
     }
+    private string GetUrl(string url)
+    {
+        return $"{_config.ApiBaseUrl}/{url}";
+    }
+
 
     private static async Task<T> HandleResponse<T>(HttpResponseMessage response)
     {
@@ -126,13 +173,13 @@ public class ApiService
         {
             throw new Exception($"API Error: {response.StatusCode}");
         }
-        return await response.Content.ReadFromJsonAsync<T>() ?? throw new Exception("unable to parse Json");
+        return await response.Content.ReadFromJsonAsync<T>() ?? throw new Exception("Unable to parse Json");
     }
 
-    private static string PadBase64(string base64)
-    {
-        return base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=');
-    }
+    //private static string PadBase64(string base64)
+    //{
+    //    return base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=');
+    //}
 }
 
 public class JwtPayload

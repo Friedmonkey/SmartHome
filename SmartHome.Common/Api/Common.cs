@@ -8,4 +8,4 @@ public record EmptyResponse() : Response<EmptyResponse>
     public static EmptyResponse Success() => new EmptyResponse();
 };
 
-public record TokenResponse(string? JWT = null) : Response<TokenResponse>;
+public record TokenResponse(string JWT, string Refresh) : Response<TokenResponse>;

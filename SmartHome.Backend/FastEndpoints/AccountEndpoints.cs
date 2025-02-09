@@ -1,12 +1,58 @@
-﻿using SmartHome.Backend.Auth;
-using SmartHome.Backend.FastEndpoints.Base;
+﻿using SmartHome.Backend.FastEndpoints.Base;
 using SmartHome.Common;
-using SmartHome.Common.Models.Auth;
+using SmartHome.Common.Api;
+using static SmartHome.Common.Api.IAccountService;
 
 namespace SmartHome.Backend.FastEndpoints;
 
-public class ForgotPasswordEndpoint : AuthEndpointBase<ForgotPasswordRequest, GenericSuccessResponse>
+public class RegisterEndpoint : BasicEndpointBase<RegisterRequest, EmptyResponse>
 {
+    public required IAccountService AccountService { get; set; }
+    public override void Configure()
+    {
+        Post(SharedConfig.Urls.Account.RegisterUrl);
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(RegisterRequest request, CancellationToken ct)
+    {
+        await SendAsync(await AccountService.Register(request));
+    }
+}
+
+public class LoginEndpoint : BasicEndpointBase<LoginRequest, TokenResponse>
+{
+    public required IAccountService AccountService { get; set; }
+    public override void Configure()
+    {
+        Post(SharedConfig.Urls.Account.LoginUrl);
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(LoginRequest request, CancellationToken ct)
+    {
+        await SendAsync(await AccountService.Login(request));
+    }
+}
+
+public class RefreshEndpoint : BasicEndpointBase<TokenRequest, TokenResponse>
+{
+    public required IAccountService AccountService { get; set; }
+    public override void Configure()
+    {
+        Post(SharedConfig.Urls.Account.RefreshUrl);
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(TokenRequest request, CancellationToken ct)
+    {
+        await SendAsync(await AccountService.Refresh(request));
+    }
+}
+
+public class ForgotPasswordEndpoint : BasicEndpointBase<ForgotPasswordRequest, EmptyResponse>
+{
+    public required IAccountService AccountService { get; set; }
     public override void Configure()
     {
         Post(SharedConfig.Urls.Account.ForgotPasswordUrl);
@@ -15,14 +61,6 @@ public class ForgotPasswordEndpoint : AuthEndpointBase<ForgotPasswordRequest, Ge
 
     public override async Task HandleAsync(ForgotPasswordRequest request, CancellationToken ct)
     {
-        var user = UserManager.FindByEmailAsync(request.Email);
-        if (user is null)
-        {
-            await SendAsync(GenericSuccessResponse.Failed($"User with email {request.Email} not found!"));
-            return;
-        }
-
-        await SendAsync(GenericSuccessResponse.Success());
-        return;
+        await SendAsync(await AccountService.ForgotPassword(request));
     }
 }
