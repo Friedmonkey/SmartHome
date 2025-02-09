@@ -71,40 +71,11 @@ namespace UltraEndpoints.Generator
                 .Where(m => !m.IsImplicitlyDeclared)
                 .ToList();
 
-            var otherMethods = classSymbol.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(m => m.GetAttributes().All(a => a.AttributeClass?.Name.StartsWith("Ultra") == false))
-                .Where(m => !m.IsImplicitlyDeclared)
-                .ToList();
-
             // Use a StringBuilder to build the generated code.
             var builder = new StringBuilder();
             builder.AppendLine($"namespace {namespaceName}.Generated");
             builder.AppendLine("{");
 
-            // Generate the shared base class that copies over [UltraInject] properties.
-            builder.AppendLine($"    public abstract class {className}EndpointBase<T_Request, T_Response> : FastEndpoints.Endpoint<T_Request, T_Response>");
-            builder.AppendLine("    {");
-
-            //var members = classSymbol.GetMembers().OfType<MethodDeclarationSyntax>().ToList();
-            // Copy properties marked with [UltraInject].
-            foreach (var prop in classSymbol.GetMembers().OfType<IPropertySymbol>())
-            {
-                if (prop.GetAttributes().Any(a => a.AttributeClass?.Name == nameof(UltraInjectAttribute)))
-                {
-                    builder.AppendLine($"        public {prop.Type} {prop.Name} {{ get; set; }}");
-                }
-            }
-            foreach (var method in otherMethods)
-            {
-                var code = GetMethodCode(method);
-                builder.AppendLine(code);
-            }
-                    //string.Join("\n", methods.Where(m => !m.AttributeLists.Any(a => a.Attributes.Any(attr => attr.Name.ToString().StartsWith("Ultra"))))
-                    //              .Select(m => m.ToFullString()))
-
-            builder.AppendLine("    }"); // End of base class
-            builder.AppendLine();
 
             // Generate an endpoint class for each method with an Ultra attribute.
             foreach (var method in methods)
@@ -120,9 +91,39 @@ namespace UltraEndpoints.Generator
                 string methodName = method.Name;
                 string requestType = $"{methodName}Request";
                 string responseType = $"{methodName}Response";
+                
+                //how get full type??
+                //string requestParameters = string.Join(", ", method.Parameters.Select(p => $"{p.Type}???? {p.Name}"));
+                string requestParameters = string.Join(", ",
+                    method.Parameters.Select(p => 
+                        $"{p.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} {p.Name}"
+                    )
+                );
 
-                builder.AppendLine($"    public class {methodName}Endpoint : {className}EndpointBase<{requestType}, {responseType}>");
+                // Get return type (unwrap Task<T>)
+                INamedTypeSymbol returnType = (method.ReturnType as INamedTypeSymbol);
+                INamedTypeSymbol? actualReturnType = (returnType?.TypeArguments.FirstOrDefault() ?? returnType) as INamedTypeSymbol;
+
+                // Check if the return type inherits Response<T>
+                bool inheritsResponse = actualReturnType?.BaseType?.ConstructedFrom?.ToDisplayString() == "SmartHome.Common.Models.Response<T>";
+
+                builder.AppendLine();
+                //generate request and respionse
+                builder.AppendLine($"   public record {requestType}({requestParameters});");
+                if (inheritsResponse)
+                {   //it already inherits the response type so use that instead
+                    responseType = actualReturnType.ToDisplayString();
+                }
+                else
+                { 
+                    builder.AppendLine($"   public record {responseType}({actualReturnType} Output) : SmartHome.Common.Models.Response<{responseType}>;");
+                }
+                builder.AppendLine();
+
+                builder.AppendLine($"    public class {methodName}Endpoint : Endpoint<{requestType}, {responseType}>");
                 builder.AppendLine("    {");
+                builder.AppendLine();
+                builder.AppendLine($"       public required {className} _ultraEndpoint {{ get; set; }}");
                 builder.AppendLine("        public override void Configure()");
                 builder.AppendLine("        {");
                 // Remove the "Ultra" prefix and "Attribute" suffix to get the HTTP verb.
@@ -134,7 +135,7 @@ namespace UltraEndpoints.Generator
                 builder.AppendLine($"        public override async Task HandleAsync({requestType} request, CancellationToken ct)");
                 builder.AppendLine("        {");
                 string mappedParameters = string.Join(", ", method.Parameters.Select(p => $"request.{p.Name}"));
-                builder.AppendLine($"            var response = await base.{methodName}({mappedParameters});");
+                builder.AppendLine($"           var response = await _ultraEndpoint.{methodName}({mappedParameters});");
                 builder.AppendLine("            await SendAsync(response);");
                 builder.AppendLine("        }");
                 builder.AppendLine();
@@ -144,21 +145,6 @@ namespace UltraEndpoints.Generator
 
             builder.AppendLine("}"); // End of namespace
             return builder.ToString();
-        }
-        private static string GetMethodCode(IMethodSymbol methodSymbol)
-        {
-            // Get the syntax reference for the method
-            var syntaxReference = methodSymbol.DeclaringSyntaxReferences.FirstOrDefault();
-            if (syntaxReference == null)
-                return string.Empty;
-
-            // Get the syntax node (MethodDeclarationSyntax)
-            var methodSyntax = syntaxReference.GetSyntax() as MethodDeclarationSyntax;
-            if (methodSyntax == null)
-                return string.Empty;
-
-            // Convert syntax node back to string
-            return methodSyntax.ToFullString();
         }
 
     }

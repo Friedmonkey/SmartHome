@@ -1,6 +1,8 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using SmartHome.Backend.Auth;
+using SmartHome.Backend.UltraEndpoints;
+using SmartHome.Common.Models;
 
 namespace SmartHome.Backend;
 
@@ -12,10 +14,14 @@ public class Program
 
         var config = BackendConfig.GetDefaultConfig();
 
+
         // Add services to the container.
         builder.Services.AddSingleton(config);
 
         builder.Services.SetupJWTAuthServices(config);
+
+        builder.Services.AddScoped<IDatabase, MemoryDatabase>();
+        builder.Services.AddScoped<PersonUltraEndpoints>();
 
         builder.Services.AddFastEndpoints().SwaggerDocument();
 
