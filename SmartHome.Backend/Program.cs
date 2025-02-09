@@ -21,7 +21,7 @@ public class Program
         builder.Services.SetupJWTAuthServices(config);
 
         builder.Services.AddScoped<IDatabase, MemoryDatabase>();
-        builder.Services.AddScoped<PersonUltraEndpoints>();
+        //builder.Services.AddScoped<PersonUltraEndpoints>();
 
         builder.Services.AddFastEndpoints().SwaggerDocument();
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UltraEndpoints.Generator;
+//using UltraEndpoints.Generator;
 
 //namespace SmartHome.Common.UltraEndpoints;
 
