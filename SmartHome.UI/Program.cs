@@ -6,6 +6,7 @@ using SmartHome.UI.Auth;
 using MudBlazor.Services;
 using MudExtensions.Services;
 using SmartHome.Common.Models;
+using SmartHome.Common.Api;
 
 namespace SmartHome.UI;
 
@@ -37,7 +38,8 @@ public class Program
         //builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(config.HttpClientName));
 
         builder.Services.AddScoped<ApiService>();
-        builder.Services.AddScoped<InternalAccountService>();
+        builder.Services.AddScoped<IAccountService, InternalAccountService>();
+        builder.Services.AddScoped<IPersonTestingService, InternalPersonTestingService>();
 
         var application = builder.Build();
         //await RefreshJwtToken(application);

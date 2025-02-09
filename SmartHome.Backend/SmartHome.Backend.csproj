@@ -17,11 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Database\" />
+    <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
+    <Folder Include="Database\" />
   </ItemGroup>
 
 </Project>

@@ -17,5 +17,13 @@ public class SharedConfig
             public const string LogoutUrl = AccountBase + "logout";
             public const string ForgotPasswordUrl = AccountBase + "forgotPassword";
         }
+
+        private const string PersonBase = ApiBase + "person/";
+        public static class Person
+        {
+            public const string AddPersonUrl = PersonBase + "add";
+            public const string GetByAgeUrl = PersonBase + "getByAge";
+            public const string GetByNameUrl = PersonBase + "getByName";
+        }
     }
 }

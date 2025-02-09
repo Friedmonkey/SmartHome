@@ -22,7 +22,7 @@ public class AccountService : IAccountService
         _backendConfig = backendConfig;
     }
 
-    public async Task<EmptyResponse> Register(RegisterRequest request)
+    public async Task<SuccessResponse> Register(RegisterRequest request)
     {
         var user = new User()
         {
@@ -32,7 +32,7 @@ public class AccountService : IAccountService
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
-        return EmptyResponse.Success();
+        return SuccessResponse.Success();
     }
     public async Task<TokenResponse> Login(LoginRequest request)
     {
@@ -57,17 +57,17 @@ public class AccountService : IAccountService
 
         return new TokenResponse(JWT: CreateJWT(user), Refresh:user.SecurityStamp);
     }
-    public Task<EmptyResponse> Logout(EmptyRequest request)
+    public Task<SuccessResponse> Logout(EmptyRequest request)
     {
-        return Task.FromResult(EmptyResponse.Failed("not implemented yet"));
+        return Task.FromResult(SuccessResponse.Failed("not implemented yet"));
     }
-    public async Task<EmptyResponse> ForgotPassword(ForgotPasswordRequest request)
+    public async Task<SuccessResponse> ForgotPassword(ForgotPasswordRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null)
-            return EmptyResponse.Failed($"User with email {request.Email} not found!");
+            return SuccessResponse.Failed($"User with email {request.Email} not found!");
 
-        return EmptyResponse.Failed("not implemented");
+        return SuccessResponse.Failed("not implemented");
     }
 
     private string CreateJWT(User user)

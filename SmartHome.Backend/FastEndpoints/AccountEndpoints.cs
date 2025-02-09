@@ -5,7 +5,7 @@ using static SmartHome.Common.Api.IAccountService;
 
 namespace SmartHome.Backend.FastEndpoints;
 
-public class RegisterEndpoint : BasicEndpointBase<RegisterRequest, EmptyResponse>
+public class RegisterEndpoint : BasicEndpointBase<RegisterRequest, SuccessResponse>
 {
     public required IAccountService AccountService { get; set; }
     public override void Configure()
@@ -50,7 +50,7 @@ public class RefreshEndpoint : BasicEndpointBase<TokenRequest, TokenResponse>
     }
 }
 
-public class ForgotPasswordEndpoint : BasicEndpointBase<ForgotPasswordRequest, EmptyResponse>
+public class ForgotPasswordEndpoint : BasicEndpointBase<ForgotPasswordRequest, SuccessResponse>
 {
     public required IAccountService AccountService { get; set; }
     public override void Configure()

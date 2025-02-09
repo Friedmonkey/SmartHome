@@ -12,9 +12,9 @@ public class InternalAccountService : IAccountService
         this._api = api;
     }
 
-    public async Task<EmptyResponse> Register(RegisterRequest request)
+    public async Task<SuccessResponse> Register(RegisterRequest request)
     {
-        return await _api.Post<EmptyResponse>(SharedConfig.Urls.Account.RegisterUrl, request, authenticated:false);
+        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Account.RegisterUrl, request, authenticated:false);
     }
     public async Task<TokenResponse> Login(LoginRequest request)
     {
@@ -25,13 +25,13 @@ public class InternalAccountService : IAccountService
         throw new Exception("dont manually call this!");
         return await _api.Refresh();
     }
-    public async Task<EmptyResponse> Logout(EmptyRequest request)
+    public async Task<SuccessResponse> Logout(EmptyRequest request)
     {
         await _api.Logout();
-        return EmptyResponse.Success();
+        return SuccessResponse.Success();
     }
-    public async Task<EmptyResponse> ForgotPassword(ForgotPasswordRequest request)
+    public async Task<SuccessResponse> ForgotPassword(ForgotPasswordRequest request)
     {
-        return await _api.Post<EmptyResponse>(SharedConfig.Urls.Account.ForgotPasswordUrl, request, authenticated:false);
+        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Account.ForgotPasswordUrl, request, authenticated:false);
     }
 }

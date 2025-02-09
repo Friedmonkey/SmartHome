@@ -23,6 +23,7 @@ public class Program
 
         //builder.Services.AddScoped<IDatabase, MemoryDatabase>();
         builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
 
         builder.Services.AddFastEndpoints().SwaggerDocument();
 

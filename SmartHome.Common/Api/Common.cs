@@ -3,9 +3,7 @@
 namespace SmartHome.Common.Api;
 
 public record EmptyRequest();
-public record EmptyResponse() : Response<EmptyResponse>
+public record SuccessResponse() : Response<SuccessResponse>
 {
-    public static EmptyResponse Success() => new EmptyResponse();
+    public static SuccessResponse Success() => new SuccessResponse();
 };
-
-public record TokenResponse(string JWT, string Refresh) : Response<TokenResponse>;

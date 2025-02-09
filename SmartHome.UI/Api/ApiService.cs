@@ -35,7 +35,7 @@ public class ApiService
 
     public async Task Logout()
     {
-        var response = await Delete<EmptyResponse>(SharedConfig.Urls.Account.LogoutUrl);
+        var response = await Delete<SuccessResponse>(SharedConfig.Urls.Account.LogoutUrl);
 
         await _sessionStorageService.RemoveItemAsync(JWT_KEY);
         await _sessionStorageService.RemoveItemAsync(REFRESH_KEY);
@@ -73,9 +73,9 @@ public class ApiService
 
         return response;
     }
-    public async Task<T> Get<T>(string url, bool authenticated = true) where T : Response<T>
+    public async Task<T> Get<T>(string url, object data, bool authenticated = true) where T : Response<T>
     {
-        return await Send<T>(authenticated, HttpMethod.Get, url);
+        return await Send<T>(authenticated, HttpMethod.Get, url, data);
     }
     public async Task<T> Post<T>(string url, object data, bool authenticated = true) where T : Response<T>
     {
