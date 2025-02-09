@@ -5,7 +5,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>07006181-0216-4c49-a607-f4fec647a076</UserSecretsId>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,8 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
-    <ProjectReference Include="..\UltraEndpoints.Generator\UltraEndpoints.Generator.csproj" OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

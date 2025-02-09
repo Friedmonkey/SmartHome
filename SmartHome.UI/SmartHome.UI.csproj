@@ -4,7 +4,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,8 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
-    <ProjectReference Include="..\UltraEndpoints.Generator\UltraEndpoints.Generator.csproj" OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
