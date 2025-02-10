@@ -3,10 +3,10 @@ using SmartHome.Database.Entities;
 
 namespace SmartHome.Database.Configuration;
 
-public class RoutineEntityTypeConfiguration
-    : EntityBaseTypeConfigurationBase<DeviceAction>
+public class DeviceEntityTypeConfiguration
+    : EntityBaseTypeConfigurationBase<Device>
 {
-    protected override void ConfigureEntity(EntityTypeBuilder<DeviceAction> builder)
+    protected override void ConfigureEntity(EntityTypeBuilder<Device> builder)
     {
         builder
             .Property(x => x.Name)
@@ -15,23 +15,23 @@ public class RoutineEntityTypeConfiguration
             .HasColumnOrder(1);
 
         builder
-            .Property(x => x.Config)
+            .Property(x => x.DeviceTypeId)
             .IsRequired()
             .HasColumnOrder(2); 
         
         builder
-            .Property(x => x.DeviceId)
+            .Property(x => x.Config)
             .IsRequired()
             .HasColumnOrder(3);
         
         builder
-            .Property(x => x.RoutineId)
+            .Property(x => x.RoomId)
             .IsRequired()
             .HasColumnOrder(4);
 
-        builder.HasIndex(x => new {x.DeviceId, x.RoutineId})
+        builder.HasIndex(x => new {x.Name})
             .IsUnique()
-            .HasDatabaseName("UX_Device_Routine")   
+            .HasDatabaseName("UX_Name")
             .HasFilter(null);
     }
 }

@@ -10,7 +10,7 @@ public class Create(SmartHomeDbContext _SmartHomeDbContext)
 
     protected override void ConfigureEndpoint()
     {
-        Post("ser/create");
+        Post("User/create");
         Roles(RoleNames.Select(x => x.ToString()).ToArray());
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SmartHome.Database;
 
 namespace SmartHome.Backend.Auth;
 
@@ -9,17 +10,6 @@ public static class AuthSetupExtention
 {
     public static void SetupJWTAuthServices(this IServiceCollection services, BackendConfig config)
     {
-        services.AddDbContextFactory<AuthContext>(options =>
-        {
-            options.UseSqlite($"Data Source=database.db");
-        });
-        services.AddScoped(p =>
-        {
-            var context = p.GetRequiredService<IDbContextFactory<AuthContext>>().CreateDbContext();
-            context.Database.EnsureCreated();
-
-            return context;
-        });
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -50,7 +40,7 @@ public static class AuthSetupExtention
             options.Password.RequireUppercase = true;
             options.SignIn.RequireConfirmedEmail = true;
         })
-.AddEntityFrameworkStores<AuthContext>()
+.AddEntityFrameworkStores<SmartHomeDbContext>()
 .AddDefaultTokenProviders();
 
     }

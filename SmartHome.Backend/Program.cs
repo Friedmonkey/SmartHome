@@ -8,11 +8,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        var config = BackendConfig.GetDefaultConfig();
+        var config = new BackendConfig(builder.Configuration);
 
         // Add services to the container.
         builder.Services.AddSingleton(config);
-
         builder.Services.SetupJWTAuthServices(config);
 
         builder.Services.AddControllers();
