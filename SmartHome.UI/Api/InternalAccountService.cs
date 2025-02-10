@@ -20,10 +20,10 @@ public class InternalAccountService : IAccountService
     {
         return await _api.Login(request);
     }
-    public async Task<TokenResponse> Refresh(TokenRequest request)
+    public Task<TokenResponse> Refresh(TokenRequest request)
     {
         throw new Exception("dont manually call this!");
-        return await _api.Refresh();
+        //return await _api.Refresh();
     }
     public async Task<SuccessResponse> Logout(EmptyRequest request)
     {

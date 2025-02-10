@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SmartHome.Backend.Auth;
 using SmartHome.Common.Api;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using static SmartHome.Common.Api.IAccountService;
@@ -52,18 +53,18 @@ public class AccountService : IAccountService
         if (!signIn.Succeeded)
             return TokenResponse.Failed($"Email or Password is not correct.");
 
-        return new TokenResponse(JWT: CreateJWT(user), Refresh: user.SecurityStamp);
+        return GetTokenResponse(user);
     }
     public async Task<TokenResponse> Refresh(TokenRequest request)
     {
         if (string.IsNullOrEmpty(request.Refresh))
-            return TokenResponse.Failed("refresh was empty");
+            return TokenResponse.Failed("Refresh token was empty.");
 
         var user = await _userManager.Users.FirstOrDefaultAsync(user => user.SecurityStamp == request.Refresh);
         if (user is null)
-            return TokenResponse.Failed("refresh was incorrect");
+            return TokenResponse.Failed("Refresh token was incorrect.");
 
-        return new TokenResponse(JWT: CreateJWT(user), Refresh:user.SecurityStamp);
+        return GetTokenResponse(user);
     }
     public Task<SuccessResponse> Logout(EmptyRequest request)
     {
@@ -78,6 +79,12 @@ public class AccountService : IAccountService
         return SuccessResponse.Failed("not implemented");
     }
 
+    private TokenResponse GetTokenResponse(User user)
+    {
+        if (string.IsNullOrEmpty(user.SecurityStamp))
+            throw new Exception("User Refresh key not set.");
+        return new TokenResponse(JWT: CreateJWT(user), Refresh:user.SecurityStamp);
+    }
     private string CreateJWT(User user)
     {
         var secretkey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_backendConfig.JwtKey));
@@ -85,8 +92,8 @@ public class AccountService : IAccountService
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, user.UserName), // NOTE: this will be the "User.Identity.Name" value
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")), // NOTE: this will be the "User.Identity.Name" value
+            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")),
             new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
         };
 

@@ -4,11 +4,12 @@ using SmartHome.Common.Models;
 namespace SmartHome.UI.Api;
 public static class ResponseExtentions2
 {
-    public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string successMessage = null) where T : Response<T>
+    public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string? successMessage = null) where T : Response<T>
     {
         if (response.EnsureSuccess(snackbar))
         { 
-            snackbar.Add(successMessage, Severity.Info);
+            if (successMessage is not null)
+                snackbar.Add(successMessage, Severity.Info);
         }
     }
     public static bool EnsureSuccess<T>(this Response<T>? response, ISnackbar snackbar) where T : Response<T>
@@ -36,17 +37,31 @@ public static class ResponseExtentions2
 
         return false;
     }
-    public static bool EnforceSuccess<T>(this Response<T>? response) where T : Response<T>
+    //public static string GetError<T>(this Response<T>? response) where T : Response<T>
+    //{
+    //    if (response?._RequestSuccess is null)
+    //        T.Failed
+    //        throw new Exception("Response was empty!");
+
+    //    if (response?._RequestSuccess == true)
+    //        return;
+
+    //    if (string.IsNullOrEmpty(response?._RequestMessage))
+    //        throw new Exception("Response message was empty!");
+    //    else
+    //        throw new Exception(response._RequestMessage);
+    //}
+    public static void EnforceSuccess<T>(this Response<T>? response) where T : Response<T>
     {
         if (response?._RequestSuccess is null)
-            throw new Exception("Response was empty!");
+            throw new ApiError("Response was empty!");
 
         if (response?._RequestSuccess == true)
-            return true;
+            return;
 
         if (string.IsNullOrEmpty(response?._RequestMessage))
-            throw new Exception("Response message was empty!");
+            throw new ApiError("Response message was empty!");
         else
-            throw new Exception(response._RequestMessage);
+            throw new ApiError(response._RequestMessage);
     }
 }

@@ -37,7 +37,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await api.Get<WeatherResponse>(SharedConfig.Urls.WeatherUrl);
+        var response = await api.Get<WeatherResponse>(SharedConfig.Urls.WeatherUrl, authenticated:false);
         if (response.WasSuccess())
         {
             forecasts = response!.Forcasts;

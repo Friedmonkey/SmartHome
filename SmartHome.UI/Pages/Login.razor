@@ -72,10 +72,17 @@ else
 
     private void UserManagerErrorHandeler(string error)
     {
-        var errors = JsonConvert.DeserializeObject<string[]>(error);
-        foreach (var err in errors)
-        {
-            snackBar.Add(err, Severity.Error, opt => opt.RequireInteraction = true);
+        try
+        { 
+            var errors = JsonConvert.DeserializeObject<string[]>(error);
+            foreach (var err in errors ?? ["Error deserializing errors"])
+            {
+                snackBar.Add(err, Severity.Error, opt => opt.RequireInteraction = true);
+            }
+        }
+        catch
+        {   //it probally wasnt json
+            snackBar.Add(error, Severity.Error, opt => opt.RequireInteraction = true);
         }
     }
     private async Task Register()

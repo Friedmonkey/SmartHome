@@ -3,7 +3,6 @@ using FastEndpoints.Swagger;
 using SmartHome.Backend.Api;
 using SmartHome.Backend.Auth;
 using SmartHome.Common.Api;
-using SmartHome.Common.Models;
 
 namespace SmartHome.Backend;
 
