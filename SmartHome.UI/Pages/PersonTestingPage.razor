@@ -23,7 +23,7 @@
         var response = await personService.AddPerson(new (person));
         if (response.EnsureSuccess(snackBar))
         {
-            snackBar.Add("Person was added!");
+            snackBar.Add("Person was added!", Severity.Success);
             name = string.Empty;
             age = 0;
         }
@@ -34,7 +34,7 @@
         var response = await personService.GetPersonByName(new(name));
         if (response.EnsureSuccess(snackBar))
         { 
-            snackBar.Add("Person retrived!");
+            snackBar.Add("Person retrived!", Severity.Success);
             name = response.person.Name;
             age = response.person.Age;
         }
@@ -45,7 +45,7 @@
         var response = await personService.GetPersonByAge(new(age));
         if (response.EnsureSuccess(snackBar))
         {
-            snackBar.Add("Person retrived!");
+            snackBar.Add("Person retrived!", Severity.Success);
             name = response.person.Name;
             age = response.person.Age;
         }

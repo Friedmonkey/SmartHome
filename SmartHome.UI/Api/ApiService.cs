@@ -1,10 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using Blazored.SessionStorage;
 using Microsoft.JSInterop;
 using MudBlazor;
+using Newtonsoft.Json;
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models;
@@ -49,7 +51,7 @@ public class ApiService
         if (response.EnforceSuccess())
         {
             await _sessionStorageService.SetItemAsync(JWT_KEY, response.JWT);
-            await _sessionStorageService.SetItemAsync(JWT_KEY, response.Refresh);
+            await _sessionStorageService.SetItemAsync(REFRESH_KEY, response.Refresh);
             cachedJwt = new JwtSecurityToken(response.JWT);
         }
         
@@ -75,7 +77,13 @@ public class ApiService
     }
     public async Task<T> Get<T>(string url, object data = null, bool authenticated = true) where T : Response<T>
     {
-        return await Send<T>(authenticated, HttpMethod.Get, url, data);
+        if (data is not null)
+        {
+            // Convert the data object to a query string
+            var queryString = ConvertToQueryString(data);
+            url = $"{url}?{queryString}";
+        }
+        return await Send<T>(authenticated, HttpMethod.Get, url, null);
     }
     public async Task<T> Post<T>(string url, object data, bool authenticated = true) where T : Response<T>
     {
@@ -88,6 +96,23 @@ public class ApiService
     public async Task<T> Delete<T>(string url, bool authenticated = true) where T : Response<T>
     {
         return await Send<T>(authenticated, HttpMethod.Delete, url);
+    }
+    private string ConvertToQueryString(object data)
+    {
+        var queryString = new StringBuilder();
+
+        // Serialize the object into key-value pairs for query params
+        foreach (var property in data.GetType().GetProperties())
+        {
+            var value = property.GetValue(data);
+            if (value != null)
+            {
+                queryString.Append($"{Uri.EscapeDataString(property.Name)}={Uri.EscapeDataString(value.ToString())}&");
+            }
+        }
+
+        // Remove the trailing '&'
+        return queryString.ToString().TrimEnd('&');
     }
     private async Task<T> Send<T>(bool authenticate, HttpMethod method, string url, object data = null)
     {
@@ -114,8 +139,8 @@ public class ApiService
 #if DEBUG
             if (ex.Message.StartsWith("TypeError: Failed to fetch"))
             {
-                _snackbarService.Add("BACKEND not enabled", Severity.Error);
-                _snackbarService.Add("TURN ON THE BACK-END, \n Solution Explorer -> SmartHome.Backend -> r-click -> debug -> start new instance", Severity.Error);
+                _snackbarService.Add("BACKEND not enabled", Severity.Error, opt => opt.RequireInteraction = true);
+                _snackbarService.Add("TURN ON THE BACK-END, \n Solution Explorer -> SmartHome.Backend -> r-click -> debug -> start new instance", Severity.Error, opt => opt.RequireInteraction = true);
                 return default(T);
             }
 #endif
@@ -171,7 +196,7 @@ public class ApiService
     {
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"API Error: {response.StatusCode}");
+            throw new Exception($"API Error: {response.StatusCode} {response.ReasonPhrase}");
         }
         return await response.Content.ReadFromJsonAsync<T>() ?? throw new Exception("Unable to parse Json");
     }

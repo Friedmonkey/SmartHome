@@ -1,26 +1,22 @@
 ﻿namespace SmartHome.Backend;
 
-public record BackendConfig
+public class BackendConfig
 {
-    public required string Domain { get; init; }
-    public required string JwtKey { get; init; }
-    public required string FrontenUrl { get; init; }
-    public required string FrontendCorsKey { get; init; }
-    public static BackendConfig GetDefaultConfig()
+    private ConfigurationManager _configurationManager;
+
+    public BackendConfig(ConfigurationManager _configurationManager)
     {
-        return new BackendConfig()
-        {
-#if DEBUG
-            JwtKey = "lol idk",
-            Domain = "http://localhost:7700",
-            FrontenUrl = "https://localhost:7126",
-            FrontendCorsKey = "AllowFrontendDevelopment",
-#else
-            JwtKey = "sooooo verry secuere!11!",
-            Domain = "https://smart.friedmonkey.nl",
-            FrontenUrl = "https://smart-api.friedmonkey.nl",
-            FrontendCorsKey = "AllowFrontendProduction",
-#endif
-        };
+        this._configurationManager = _configurationManager;
     }
+
+    public string GetOption(string name, string? overrideKey = null)
+    {
+        return _configurationManager[overrideKey ?? name] ?? throw new NullReferenceException(name);
+    }
+
+    public string Domain => GetOption("Domain");
+    public string JwtKey => GetOption("JwtKey");
+    public string FrontenUrl => GetOption("FrontenUrl");
+    public string ConnectionString => GetOption("ConnectionString", "ConnectionStrings : SmartHomeDb");
+
 }

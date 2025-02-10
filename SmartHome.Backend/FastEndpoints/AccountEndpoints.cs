@@ -31,7 +31,14 @@ public class LoginEndpoint : BasicEndpointBase<LoginRequest, TokenResponse>
 
     public override async Task HandleAsync(LoginRequest request, CancellationToken ct)
     {
-        await SendAsync(await AccountService.Login(request));
+        try
+        {
+            await SendAsync(await AccountService.Login(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(TokenResponse.Error(ex));
+        }
     }
 }
 
@@ -46,7 +53,14 @@ public class RefreshEndpoint : BasicEndpointBase<TokenRequest, TokenResponse>
 
     public override async Task HandleAsync(TokenRequest request, CancellationToken ct)
     {
-        await SendAsync(await AccountService.Refresh(request));
+        try
+        { 
+            await SendAsync(await AccountService.Refresh(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(TokenResponse.Error(ex));
+        }
     }
 }
 
@@ -61,6 +75,13 @@ public class ForgotPasswordEndpoint : BasicEndpointBase<ForgotPasswordRequest, S
 
     public override async Task HandleAsync(ForgotPasswordRequest request, CancellationToken ct)
     {
-        await SendAsync(await AccountService.ForgotPassword(request));
+        try
+        { 
+            await SendAsync(await AccountService.ForgotPassword(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
     }
 }

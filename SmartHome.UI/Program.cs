@@ -22,10 +22,8 @@ public class Program
         builder.Services.AddMudServices();
         builder.Services.AddMudExtensions();
 
-
-        var config = FrontendConfig.GetDefaultConfig();
-
-        builder.Services.AddSingleton(config);
+        var config = new FrontendConfig(builder.Configuration);
+        builder.Services.AddSingleton<FrontendConfig>(config);
 
         //builder.Services.AddSingleton<JwtAuthenticationStateProvider>();
         //builder.Services.AddSingleton<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthenticationStateProvider>());

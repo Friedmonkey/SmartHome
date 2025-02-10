@@ -38,8 +38,8 @@ public class AccountService : IAccountService
         }
         else
         {
-            string error = string.Join(", ", result.Errors.Select(e => e.Description));
-            return SuccessResponse.Failed(error);
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return SuccessResponse.FailedJson(errors);
         }
     }
     public async Task<TokenResponse> Login(LoginRequest request)

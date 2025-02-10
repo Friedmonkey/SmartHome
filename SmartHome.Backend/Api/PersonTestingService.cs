@@ -7,7 +7,7 @@ namespace SmartHome.Backend.Api;
 
 public class PersonTestingService : IPersonTestingService
 {
-    private List<Person> _persons = new();
+    private static List<Person> _persons = new();
 
     public async Task<SuccessResponse> AddPerson(AddPersonRequest request)
     {
@@ -31,7 +31,7 @@ public class PersonTestingService : IPersonTestingService
         await Task.Delay(500);
         var person = _persons.FirstOrDefault(p => p.Name == request.name);
         if (person is null)
-            return PersonResponse.Failed($"person with name ${request.name} not found");
+            return PersonResponse.Failed($"person with name {request.name} not found");
 
         return new PersonResponse(person);
     }

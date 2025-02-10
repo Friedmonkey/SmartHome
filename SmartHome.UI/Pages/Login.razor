@@ -70,15 +70,29 @@ else
     private bool forgotPasswordVisible = false;
     public string forgotEmailAddress = "";
 
-
+    private void UserManagerErrorHandeler(string error)
+    {
+        var errors = JsonConvert.DeserializeObject<string[]>(error);
+        foreach (var err in errors)
+        {
+            snackBar.Add(err, Severity.Error, opt => opt.RequireInteraction = true);
+        }
+    }
     private async Task Register()
     {
         var result = await accountService.Register(new (email, username, password, passwordConfirm));
-        result.Show(snackBar, "Account created");
+        if (result.CheckSuccess(snackBar, onError:UserManagerErrorHandeler))
+        {
+            snackBar.Add("Account created", Severity.Success);
+        }
     }
     private async Task Authenticate()
     { 
-        await accountService.Login(new (email, password));
+        var result = await accountService.Login(new (email, password));
+        if (result.CheckSuccess(snackBar, onError: UserManagerErrorHandeler))
+        {
+            snackBar.Add("Login success!", Severity.Success);
+        }
     }
     private async Task ForgotPassword()
     {

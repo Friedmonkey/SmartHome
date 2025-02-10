@@ -13,11 +13,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        var config = BackendConfig.GetDefaultConfig();
-
+        var config = new BackendConfig(builder.Configuration);
+        builder.Services.AddSingleton<BackendConfig>(config);
 
         // Add services to the container.
-        builder.Services.AddSingleton(config);
 
         builder.Services.SetupJWTAuthServices(config);
 
@@ -31,10 +30,19 @@ public class Program
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
-        builder.Services.SetupCors(config);
+        const string corsKey = "SmartHomeAllowFrontendCors";
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(corsKey,
+                policy => policy.WithOrigins(config.FrontenUrl)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+            );
+        });
 
         var app = builder.Build();
-        app.UseCors(config.FrontendCorsKey);
+        app.UseCors(corsKey);
 
         app.SetupJWTAuthApp(config);
 

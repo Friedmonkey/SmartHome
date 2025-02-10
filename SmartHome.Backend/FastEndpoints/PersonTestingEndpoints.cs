@@ -17,7 +17,14 @@ public class AddPersonEndpoint : BasicEndpointBase<AddPersonRequest, SuccessResp
 
     public override async Task HandleAsync(AddPersonRequest request, CancellationToken ct)
     {
-        await SendAsync(await Service.AddPerson(request));
+        try
+        { 
+            await SendAsync(await Service.AddPerson(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
     }
 }
 
@@ -26,13 +33,20 @@ public class GetPersonByAgeEndpoint : BasicEndpointBase<GetPersonByAgeRequest, P
     public required IPersonTestingService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.Person.GetByAgeUrl);
+        Get(SharedConfig.Urls.Person.GetByAgeUrl);
         AllowAnonymous();
     }
 
     public override async Task HandleAsync(GetPersonByAgeRequest request, CancellationToken ct)
     {
-        await SendAsync(await Service.GetPersonByAge(request));
+        try
+        { 
+            await SendAsync(await Service.GetPersonByAge(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(PersonResponse.Error(ex));
+        }
     }
 }
 
@@ -41,13 +55,20 @@ public class GetPersonByNameEndpoint : BasicEndpointBase<GetPersonByNameRequest,
     public required IPersonTestingService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.Person.GetByNameUrl);
+        Get(SharedConfig.Urls.Person.GetByNameUrl);
         AllowAnonymous();
     }
 
     public override async Task HandleAsync(GetPersonByNameRequest request, CancellationToken ct)
     {
-        await SendAsync(await Service.GetPersonByName(request));
+        try
+        { 
+            await SendAsync(await Service.GetPersonByName(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(PersonResponse.Error(ex));
+        }
     }
 }
 

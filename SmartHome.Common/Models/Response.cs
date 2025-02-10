@@ -1,4 +1,6 @@
-﻿namespace SmartHome.Common.Models;
+﻿using Newtonsoft.Json;
+
+namespace SmartHome.Common.Models;
 
 public record Response<T>(bool _RequestSuccess = true, string _RequestMessage = "") where T : Response<T>
 {
@@ -16,6 +18,19 @@ public record Response<T>(bool _RequestSuccess = true, string _RequestMessage = 
         // Invoke constructor with default values and set Success = false
         var instance = (T)ctor.Invoke(parameters);
         return instance with { _RequestSuccess = false, _RequestMessage = error };
+    }
+    public static T FailedJson(object obj)
+    { 
+        string json = JsonConvert.SerializeObject(obj);
+        return Failed(json);
+    }
+    public static T Error(Exception ex)
+    {
+#if DEBUG
+        return FailedJson(ex);
+#else
+        return Failed(ex.Message);
+#endif
     }
 }
 
