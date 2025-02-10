@@ -73,7 +73,7 @@ public class ApiService
 
         return response;
     }
-    public async Task<T> Get<T>(string url, object data, bool authenticated = true) where T : Response<T>
+    public async Task<T> Get<T>(string url, object data = null, bool authenticated = true) where T : Response<T>
     {
         return await Send<T>(authenticated, HttpMethod.Get, url, data);
     }

@@ -1,7 +1,8 @@
 ﻿@page "/login"
+@using SmartHome.Common.Api
 @* @inject ApiService api; *@
-@* @inject ISnackbar snackBar; *@
-@inject InternalAccountService accountService;
+@inject ISnackbar snackBar;
+@inject IAccountService accountService;
 
 <h3>Login</h3>
 
@@ -72,7 +73,8 @@ else
 
     private async Task Register()
     {
-        await accountService.Register(new (email, username, password, passwordConfirm));
+        var result = await accountService.Register(new (email, username, password, passwordConfirm));
+        result.Show(snackBar, "Account created");
     }
     private async Task Authenticate()
     { 

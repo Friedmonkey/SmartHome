@@ -1,5 +1,4 @@
-﻿
-using SmartHome.Common.Models;
+﻿using SmartHome.Common.Models;
 
 namespace SmartHome.Common.Api;
 

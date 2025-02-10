@@ -33,7 +33,7 @@ public static class ResponseExtentions2
     }
     public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string successMessage = null) where T : Response<T>
     {
-        if (!response.EnsureSuccess(snackbar))
+        if (response.EnsureSuccess(snackbar))
         { 
             snackbar.Add(successMessage, Severity.Info);
         }

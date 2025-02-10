@@ -32,7 +32,15 @@ public class AccountService : IAccountService
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
-        return SuccessResponse.Success();
+        if (result.Succeeded)
+        {
+            return SuccessResponse.Success();
+        }
+        else
+        {
+            string error = string.Join(", ", result.Errors.Select(e => e.Description));
+            return SuccessResponse.Failed(error);
+        }
     }
     public async Task<TokenResponse> Login(LoginRequest request)
     {
