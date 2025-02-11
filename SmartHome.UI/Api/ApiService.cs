@@ -201,10 +201,14 @@ public class ApiService
     }
 
 
-    private static async Task<T> HandleResponse<T>(HttpResponseMessage response)
+    private static async Task<T> HandleResponse<T>(HttpResponseMessage response) where T : Response<T>
     {
         if (!response.IsSuccessStatusCode)
         {
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return Response<T>.Failed("Authentication failed.");
+            }
             throw new Exception($"API Error: {response.StatusCode} {response.ReasonPhrase}");
         }
         return await response.Content.ReadFromJsonAsync<T>() ?? throw new Exception("Unable to parse Json");

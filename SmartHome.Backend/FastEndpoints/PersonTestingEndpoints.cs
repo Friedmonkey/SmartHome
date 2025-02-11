@@ -1,4 +1,5 @@
-﻿using SmartHome.Backend.Auth;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SmartHome.Backend.Auth;
 using SmartHome.Backend.FastEndpoints.Base;
 using SmartHome.Common;
 using SmartHome.Common.Api;
@@ -13,8 +14,8 @@ public class AddPersonEndpoint : BasicEndpointBase<AddPersonRequest, SuccessResp
     public override void Configure()
     {
         Post(SharedConfig.Urls.Person.AddPersonUrl);
-        Policy(x => 
-        x.RequireRole(AuthRoles.AuthUser));
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
+        Roles(AuthRoles.AuthUser);
     }
 
     public override async Task HandleAsync(AddPersonRequest request, CancellationToken ct)
@@ -36,7 +37,8 @@ public class GetPersonByAgeEndpoint : BasicEndpointBase<GetPersonByAgeRequest, P
     public override void Configure()
     {
         Get(SharedConfig.Urls.Person.GetByAgeUrl);
-        //Roles(AuthRoles.AuthUser);
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
+        Roles(AuthRoles.AuthUser);
     }
 
     //public override async Task<PersonResponse> ExecuteAsync(GetPersonByAgeRequest request, CancellationToken ct)
@@ -70,8 +72,8 @@ public class GetPersonByNameEndpoint : BasicEndpointBase<GetPersonByNameRequest,
     public override void Configure()
     {
         Get(SharedConfig.Urls.Person.GetByNameUrl);
-        //Roles(AuthRoles.AuthUser);
-        AllowAnonymous();
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
+        Roles(AuthRoles.AuthUser);
     }
 
     public override async Task HandleAsync(GetPersonByNameRequest request, CancellationToken ct)
