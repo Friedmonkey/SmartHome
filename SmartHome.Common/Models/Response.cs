@@ -19,11 +19,6 @@ public record Response<T>(bool _RequestSuccess = true, string _RequestMessage = 
         var instance = (T)ctor.Invoke(parameters);
         return instance with { _RequestSuccess = false, _RequestMessage = error };
     }
-    //public T? GetError()
-    //{
-    //    if (!this.WasSuccess())
-    //        return Failed();
-    //}
     public static T FailedJson(object obj)
     { 
         string json = JsonConvert.SerializeObject(obj);

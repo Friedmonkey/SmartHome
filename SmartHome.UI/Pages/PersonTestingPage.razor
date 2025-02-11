@@ -20,12 +20,20 @@
     public async Task AddPerson()
     {
         var person = new Person(name, age);
-        var response = await personService.AddPerson(new (person));
-        if (response.EnsureSuccess(snackBar))
+        try
         {
-            snackBar.Add("Person was added!", Severity.Success);
-            name = string.Empty;
-            age = 0;
+            var response = await personService.AddPerson(new(person));
+            if (response.EnsureSuccess(snackBar))
+            {
+                snackBar.Add("Person was added!", Severity.Success);
+                name = string.Empty;
+                age = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            //fck
         }
     }
 

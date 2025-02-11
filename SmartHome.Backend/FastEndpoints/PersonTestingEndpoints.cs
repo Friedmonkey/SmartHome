@@ -1,4 +1,5 @@
-﻿using SmartHome.Backend.FastEndpoints.Base;
+﻿using SmartHome.Backend.Auth;
+using SmartHome.Backend.FastEndpoints.Base;
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using static SmartHome.Common.Api.IPersonTestingService;
@@ -12,7 +13,7 @@ public class AddPersonEndpoint : BasicEndpointBase<AddPersonRequest, SuccessResp
     public override void Configure()
     {
         Post(SharedConfig.Urls.Person.AddPersonUrl);
-        AllowAnonymous();
+        Roles(AuthRoles.AuthUser);
     }
 
     public override async Task HandleAsync(AddPersonRequest request, CancellationToken ct)
@@ -34,7 +35,7 @@ public class GetPersonByAgeEndpoint : BasicEndpointBase<GetPersonByAgeRequest, P
     public override void Configure()
     {
         Get(SharedConfig.Urls.Person.GetByAgeUrl);
-        AllowAnonymous();
+        //Roles(AuthRoles.AuthUser);
     }
 
     public override async Task HandleAsync(GetPersonByAgeRequest request, CancellationToken ct)
@@ -56,6 +57,7 @@ public class GetPersonByNameEndpoint : BasicEndpointBase<GetPersonByNameRequest,
     public override void Configure()
     {
         Get(SharedConfig.Urls.Person.GetByNameUrl);
+        //Roles(AuthRoles.AuthUser);
         AllowAnonymous();
     }
 

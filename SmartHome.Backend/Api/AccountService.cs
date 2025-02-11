@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using JwtBearer = FastEndpoints.Security.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using SmartHome.Backend.Auth;
 using SmartHome.Common.Api;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using static SmartHome.Common.Api.IAccountService;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SmartHome.Backend.Api;
 
@@ -25,6 +26,8 @@ public class AccountService : IAccountService
 
     public async Task<SuccessResponse> Register(RegisterRequest request)
     {
+        if (request.Password != request.PasswordConfirm)
+            return SuccessResponse.Failed("Passwords do not match");
         var user = new User()
         {
             Email = request.Email,
@@ -87,25 +90,27 @@ public class AccountService : IAccountService
     }
     private string CreateJWT(User user)
     {
-        var secretkey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_backendConfig.JwtKey));
-        var credentials = new SigningCredentials(secretkey, SecurityAlgorithms.HmacSha256);
-
         var claims = new[]
         {
             new Claim(ClaimTypes.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")), // NOTE: this will be the "User.Identity.Name" value
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")),
             new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+            new Claim("role", AuthRoles.AuthUser), //Fastendpoint looks for 'role' by default
         };
 
 #warning change to 15 minutes
 
-        var token = new JwtSecurityToken(
-            issuer: _backendConfig.Domain,
-            audience: _backendConfig.Domain,
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(60),
-            signingCredentials: credentials);
+        var jwtToken = JwtBearer.CreateToken(o =>
+        {
+            o.SigningAlgorithm = SecurityAlgorithms.HmacSha256;
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            o.SigningKey = _backendConfig.JwtKey;
+            o.ExpireAt = DateTime.Now.AddMinutes(60);
+            o.Issuer = _backendConfig.Domain;
+            o.Audience = _backendConfig.Domain;
+            o.User.Claims.AddRange(claims);
+        });
+
+        return jwtToken;
     }
 }
