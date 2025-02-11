@@ -90,13 +90,13 @@ public class AccountService : IAccountService
     }
     private string CreateJWT(User user)
     {
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")), // NOTE: this will be the "User.Identity.Name" value
-            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")),
-            new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
-            //new Claim("role", AuthRoles.AuthUser), //Fastendpoint looks for 'role' by default
-        };
+        //var claims = new[]
+        //{
+        //    new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")), // NOTE: this will be the "User.Identity.Name" value
+        //    new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")),
+        //    new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+        //    //new Claim("role", AuthRoles.AuthUser), //Fastendpoint looks for 'role' by default
+        //};
 
 #warning change to 15 minutes
 
@@ -105,11 +105,11 @@ public class AccountService : IAccountService
             //o.SigningAlgorithm = SecurityAlgorithms.HmacSha256;
 
             o.SigningKey = _backendConfig.JwtSecret;
-            o.User.Claims.AddRange(claims);
+            o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()));
+            o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")));
+            o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")));
             o.User.Roles.Add(AuthRoles.AuthUser);
             o.ExpireAt = DateTime.Now.AddMinutes(60);
-            //o.Issuer = _backendConfig.Domain;
-            //o.Audience = _backendConfig.Domain;
         });
 
         return jwtToken;
