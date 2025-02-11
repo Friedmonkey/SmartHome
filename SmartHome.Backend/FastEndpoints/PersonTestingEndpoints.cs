@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SmartHome.Backend.Auth;
-using SmartHome.Backend.FastEndpoints.Base;
+﻿using SmartHome.Backend.FastEndpoints.Base;
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using static SmartHome.Common.Api.IPersonTestingService;
-
 
 namespace SmartHome.Backend.FastEndpoints;
 
@@ -14,8 +11,7 @@ public class AddPersonEndpoint : BasicEndpointBase<AddPersonRequest, SuccessResp
     public override void Configure()
     {
         Post(SharedConfig.Urls.Person.AddPersonUrl);
-        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
-        Roles(AuthRoles.AuthUser);
+        SecureJwtEndpoint();
     }
 
     public override async Task HandleAsync(AddPersonRequest request, CancellationToken ct)
@@ -37,22 +33,9 @@ public class GetPersonByAgeEndpoint : BasicEndpointBase<GetPersonByAgeRequest, P
     public override void Configure()
     {
         Get(SharedConfig.Urls.Person.GetByAgeUrl);
-        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
-        Roles(AuthRoles.AuthUser);
+        SecureJwtEndpoint();
     }
 
-    //public override async Task<PersonResponse> ExecuteAsync(GetPersonByAgeRequest request, CancellationToken ct)
-    //{
-    //    try
-    //    {
-    //        await SendAsync(await Service.GetPersonByAge(request));
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        await SendAsync(PersonResponse.Error(ex));
-    //    }
-    //    return await base.ExecuteAsync(request, ct);
-    //}
     public override async Task HandleAsync(GetPersonByAgeRequest request, CancellationToken ct)
     {
         try
@@ -72,8 +55,7 @@ public class GetPersonByNameEndpoint : BasicEndpointBase<GetPersonByNameRequest,
     public override void Configure()
     {
         Get(SharedConfig.Urls.Person.GetByNameUrl);
-        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
-        Roles(AuthRoles.AuthUser);
+        SecureJwtEndpoint();
     }
 
     public override async Task HandleAsync(GetPersonByNameRequest request, CancellationToken ct)

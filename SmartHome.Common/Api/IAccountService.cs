@@ -12,10 +12,10 @@ public interface IAccountService
     public record LoginRequest(string Email, string Password);
     public Task<TokenResponse> Login(LoginRequest request);
 
+    public Task<SuccessResponse> Logout(EmptyRequest request);
+
     public record RefreshRequest(string Refresh);
     public Task<TokenResponse> Refresh(RefreshRequest request);
-
-    public Task<SuccessResponse> Logout(EmptyRequest request);
 
     public record ForgotPasswordRequest(string Email);
     public Task<SuccessResponse> ForgotPassword(ForgotPasswordRequest request);

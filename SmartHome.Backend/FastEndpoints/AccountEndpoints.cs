@@ -42,6 +42,28 @@ public class LoginEndpoint : BasicEndpointBase<LoginRequest, TokenResponse>
     }
 }
 
+public class LogoutEndpoint : BasicEndpointBase<EmptyRequest, SuccessResponse>
+{
+    public required IAccountService AccountService { get; set; }
+    public override void Configure()
+    {
+        Delete(SharedConfig.Urls.Account.LogoutUrl);
+        SecureJwtEndpoint();
+    }
+
+    public override async Task HandleAsync(EmptyRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await SendAsync(await AccountService.Logout(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
+    }
+}
+
 public class RefreshEndpoint : BasicEndpointBase<RefreshRequest, TokenResponse>
 {
     public required IAccountService AccountService { get; set; }

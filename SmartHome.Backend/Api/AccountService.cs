@@ -7,7 +7,6 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using static SmartHome.Common.Api.IAccountService;
-using Microsoft.IdentityModel.Tokens;
 
 namespace SmartHome.Backend.Api;
 
@@ -16,12 +15,14 @@ public class AccountService : IAccountService
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly BackendConfig _backendConfig;
+    private readonly ApiContext _apiContext;
 
-    public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, BackendConfig backendConfig)
+    public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, BackendConfig backendConfig, ApiContext apiContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _backendConfig = backendConfig;
+        _apiContext = apiContext;
     }
 
     public async Task<SuccessResponse> Register(RegisterRequest request)
@@ -36,15 +37,7 @@ public class AccountService : IAccountService
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
-        if (result.Succeeded)
-        {
-            return SuccessResponse.Success();
-        }
-        else
-        {
-            var errors = result.Errors.Select(e => e.Description).ToList();
-            return SuccessResponse.FailedJson(errors);
-        }
+        return GetSuccessResponse(result);
     }
     public async Task<TokenResponse> Login(LoginRequest request)
     {
@@ -58,6 +51,12 @@ public class AccountService : IAccountService
 
         return await GetTokenResponse(user);
     }
+    public async Task<SuccessResponse> Logout(EmptyRequest request)
+    {
+        var user = await GetUserFromContext();
+        var result = await _userManager.UpdateSecurityStampAsync(user);
+        return GetSuccessResponse(result);
+    }
     public async Task<TokenResponse> Refresh(RefreshRequest request)
     {
         if (string.IsNullOrEmpty(request.Refresh))
@@ -68,10 +67,6 @@ public class AccountService : IAccountService
             return TokenResponse.Failed("Refresh token was incorrect.");
 
         return await GetTokenResponse(user);
-    }
-    public Task<SuccessResponse> Logout(EmptyRequest request)
-    {
-        return Task.FromResult(SuccessResponse.Failed("not implemented yet"));
     }
     public async Task<SuccessResponse> ForgotPassword(ForgotPasswordRequest request)
     {
@@ -92,6 +87,35 @@ public class AccountService : IAccountService
             return TokenResponse.Failed("User Refresh failed.");
 
         return new TokenResponse(JWT: CreateJWT(user), Refresh:user.SecurityStamp);
+    }
+    private SuccessResponse GetSuccessResponse(IdentityResult? result) 
+    {
+        if (result is null)
+            return SuccessResponse.Failed("IdentityResult was null");
+        if (result.Succeeded)
+        {
+            return SuccessResponse.Success();
+        }
+        else
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return SuccessResponse.FailedJson(errors);
+        }
+    }
+    private async Task<User> GetUserFromContext()
+    {
+        if (_apiContext.User is null)
+            throw new Exception("Unable to get apiContext user");
+
+        var name = _apiContext.User.FindFirstValue(JwtRegisteredClaimNames.Name);
+        if (name is null)
+            throw new Exception("User is missing name claim");
+
+        var user = await _userManager.FindByNameAsync(name);
+        if (user is null)
+            throw new Exception($"User with name {name} does not exist");
+
+        return user;
     }
     private string CreateJWT(User user)
     {

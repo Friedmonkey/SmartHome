@@ -32,7 +32,7 @@
         if (uri.ToLower().StartsWith("login")) 
             return;
         else
-            navManager.NavigateTo($"/login/{Base64Encode(uri)}", true);
+            navManager.NavigateTo($"/login/{Base64Encode(uri)}");
     }
 
     public static void Logout(NavigationManager navManager)
