@@ -3,6 +3,7 @@
 @* @inject ApiService api; *@
 @inject ISnackbar snackBar;
 @inject IAccountService accountService;
+@inject NavigationManager navManager;
 
 <h3>Login</h3>
 
@@ -91,6 +92,9 @@ else
         if (result.CheckSuccess(snackBar, onError:UserManagerErrorHandeler))
         {
             snackBar.Add("Account created", Severity.Success);
+            email = string.Empty;
+            password = string.Empty;
+            loginMode = true; //allow user to login
         }
     }
     private async Task Authenticate()
@@ -99,6 +103,7 @@ else
         if (result.CheckSuccess(snackBar, onError: UserManagerErrorHandeler))
         {
             snackBar.Add("Login success!", Severity.Success);
+            navManager.NavigateTo("/", forceLoad:true);
         }
     }
     private async Task ForgotPassword()

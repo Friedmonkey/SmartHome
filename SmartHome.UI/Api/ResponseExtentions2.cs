@@ -4,12 +4,12 @@ using SmartHome.Common.Models;
 namespace SmartHome.UI.Api;
 public static class ResponseExtentions2
 {
-    public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string? successMessage = null) where T : Response<T>
+    public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string? successMessage = null, Severity severity = Severity.Info) where T : Response<T>
     {
         if (response.EnsureSuccess(snackbar))
         { 
             if (successMessage is not null)
-                snackbar.Add(successMessage, Severity.Info);
+                snackbar.Add(successMessage, severity);
         }
     }
     public static bool EnsureSuccess<T>(this Response<T>? response, ISnackbar snackbar) where T : Response<T>

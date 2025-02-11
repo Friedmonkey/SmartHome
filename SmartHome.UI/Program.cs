@@ -30,6 +30,12 @@ public class Program
 
 
         builder.Services.AddBlazoredSessionStorage();
+        builder.Services.AddScoped<IJwtStoreService, JwtSessionStorageService>();
+
+        builder.Services.AddScoped<JwtAuthStateProvider>(); //we need it directly for the apiservice
+        builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>(); //for autorizeview
+        builder.Services.AddAuthorizationCore();
+
         builder.Services.AddScoped<ApiService>();
         builder.Services.AddScoped<IAccountService, InternalAccountService>();
         builder.Services.AddScoped<IPersonTestingService, InternalPersonTestingService>();

@@ -4,6 +4,11 @@
 @inject IPersonTestingService personService;
 @inject ISnackbar snackBar;
 
+
+<AuthorizeView>
+    <MudText>you are logged in!!!</MudText>
+</AuthorizeView>
+
 <h3>PersonTestingPage</h3>
 <MudTextField @bind-Value="name">enter name</MudTextField>
 <MudTextField @bind-Value="age">enter age</MudTextField>

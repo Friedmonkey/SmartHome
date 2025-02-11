@@ -56,9 +56,9 @@ public class AccountService : IAccountService
         if (!signIn.Succeeded)
             return TokenResponse.Failed($"Email or Password is not correct.");
 
-        return GetTokenResponse(user);
+        return await GetTokenResponse(user);
     }
-    public async Task<TokenResponse> Refresh(TokenRequest request)
+    public async Task<TokenResponse> Refresh(RefreshRequest request)
     {
         if (string.IsNullOrEmpty(request.Refresh))
             return TokenResponse.Failed("Refresh token was empty.");
@@ -67,7 +67,7 @@ public class AccountService : IAccountService
         if (user is null)
             return TokenResponse.Failed("Refresh token was incorrect.");
 
-        return GetTokenResponse(user);
+        return await GetTokenResponse(user);
     }
     public Task<SuccessResponse> Logout(EmptyRequest request)
     {
@@ -82,10 +82,15 @@ public class AccountService : IAccountService
         return SuccessResponse.Failed("not implemented");
     }
 
-    private TokenResponse GetTokenResponse(User user)
+    private async Task<TokenResponse> GetTokenResponse(User user)
     {
         if (string.IsNullOrEmpty(user.SecurityStamp))
-            throw new Exception("User Refresh key not set.");
+            return TokenResponse.Failed("User Refresh key not set.");
+
+        var result = await _userManager.UpdateSecurityStampAsync(user);
+        if (!result.Succeeded)
+            return TokenResponse.Failed("User Refresh failed.");
+
         return new TokenResponse(JWT: CreateJWT(user), Refresh:user.SecurityStamp);
     }
     private string CreateJWT(User user)
@@ -109,7 +114,7 @@ public class AccountService : IAccountService
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")));
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")));
             o.User.Roles.Add(AuthRoles.AuthUser);
-            o.ExpireAt = DateTime.Now.AddMinutes(60);
+            o.ExpireAt = DateTime.Now.AddMinutes(1);
         });
 
         return jwtToken;

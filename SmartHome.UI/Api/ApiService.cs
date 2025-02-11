@@ -15,58 +15,48 @@ namespace SmartHome.UI.Api;
 public class ApiService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IJSRuntime _jsRuntime;
     private readonly ISnackbar _snackbarService;
+    private readonly IJwtStoreService _jwtStoreService;
+    private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
-    private readonly ISessionStorageService _sessionStorageService;
 
-    private const string JWT_KEY = "jwt_token";
-    private const string REFRESH_KEY = "refresh_token";
-    private JwtSecurityToken? cachedJwt = null;
-
-    public ApiService(IHttpClientFactory httpClientFactory, IJSRuntime jsRuntime, ISnackbar snackbarService, FrontendConfig config, ISessionStorageService sessionStorageService)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider)
     {
         _httpClientFactory = httpClientFactory;
-        _jsRuntime = jsRuntime;
         _snackbarService = snackbarService;
         _config = config;
-        _sessionStorageService = sessionStorageService;
+        _jwtStoreService = jwtStoreService;
+        _jwtAuthStateProvider = jwtAuthStateProvider;
     }
 
-    public async Task Logout()
-    {
-        var response = await Delete<SuccessResponse>(SharedConfig.Urls.Account.LogoutUrl);
-
-        await _sessionStorageService.RemoveItemAsync(JWT_KEY);
-        await _sessionStorageService.RemoveItemAsync(REFRESH_KEY);
-
-        cachedJwt = null;
-    }
     public async Task<TokenResponse> Login(LoginRequest request)
     {
         var response = await Post<TokenResponse>(SharedConfig.Urls.Account.LoginUrl, request, authenticated: false);
 
         if (response.WasSuccess())
-        { 
-            await _sessionStorageService.SetItemAsync(JWT_KEY, response.JWT);
-            await _sessionStorageService.SetItemAsync(REFRESH_KEY, response.Refresh);
-            cachedJwt = new JwtSecurityToken(response.JWT);
+        {
+            await _jwtStoreService.SetTokens(response.JWT, response.Refresh);
+            _jwtAuthStateProvider.UpdateAuthState();
         }
         return response;
     }
+    public async Task Logout()
+    {
+        var response = await Delete<SuccessResponse>(SharedConfig.Urls.Account.LogoutUrl);
+        response.Show(_snackbarService, "Logout success!");
+        await _jwtStoreService.RemoveTokens();
+        _jwtAuthStateProvider.UpdateAuthState();
+    }
     public async Task<TokenResponse> Refresh()
     {
-        var jwt = await _sessionStorageService.GetItemAsync<string>(JWT_KEY);
-        var refresh = await _sessionStorageService.GetItemAsync<string>(REFRESH_KEY);
+        var refresh = await _jwtStoreService.GetRefreshToken();
 
-        var request = new TokenRequest(JWT: jwt, Refresh: refresh);
+        var request = new RefreshRequest(Refresh: refresh);
         var response = await Post<TokenResponse>(SharedConfig.Urls.Account.RefreshUrl, request, authenticated: false);
 
         response.EnforceSuccess();
+        await _jwtStoreService.SetTokens(response.JWT, response.Refresh);
 
-        await _sessionStorageService.SetItemAsync(JWT_KEY, response.JWT);
-        await _sessionStorageService.SetItemAsync(REFRESH_KEY, response.Refresh);
-        cachedJwt = new JwtSecurityToken(response.JWT);
         return response;
     }
     public async Task<T> Get<T>(string url, object? data = null, bool authenticated = true) where T : Response<T>
@@ -142,7 +132,7 @@ public class ApiService
     }
     private async Task<AuthenticationHeaderValue> GetAuthHeader()
     {
-        var jwt = await GetJwt();
+        var jwt = await _jwtStoreService.GetJwt();
         if (jwt is null)
             throw new ApiError("User is not authenticated.");
 
@@ -150,7 +140,7 @@ public class ApiService
         if (DateTime.UtcNow >= jwt.ValidTo)
         {
             await Refresh();
-            jwt = await GetJwt();
+            jwt = await _jwtStoreService.GetJwt();
         }
 
         return new AuthenticationHeaderValue("Bearer", jwt!.RawData);
@@ -184,17 +174,7 @@ public class ApiService
     {
         return _httpClientFactory.CreateClient(_config.HttpClientName);
     }
-    public async ValueTask<JwtSecurityToken?> GetJwt()
-    {
-        if (cachedJwt is null)
-        { 
-            string jwt = await _sessionStorageService.GetItemAsync<string>(JWT_KEY);
-            if (!string.IsNullOrEmpty(jwt))
-                cachedJwt = new JwtSecurityToken(jwt);
-        }
 
-        return cachedJwt;
-    }
     private string GetUrl(string url)
     {
         return $"{_config.ApiBaseUrl}/{url}";

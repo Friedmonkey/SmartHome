@@ -12,8 +12,8 @@ public interface IAccountService
     public record LoginRequest(string Email, string Password);
     public Task<TokenResponse> Login(LoginRequest request);
 
-    public record TokenRequest(string JWT, string Refresh);
-    public Task<TokenResponse> Refresh(TokenRequest request);
+    public record RefreshRequest(string Refresh);
+    public Task<TokenResponse> Refresh(RefreshRequest request);
 
     public Task<SuccessResponse> Logout(EmptyRequest request);
 

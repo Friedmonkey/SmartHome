@@ -42,7 +42,7 @@ public class LoginEndpoint : BasicEndpointBase<LoginRequest, TokenResponse>
     }
 }
 
-public class RefreshEndpoint : BasicEndpointBase<TokenRequest, TokenResponse>
+public class RefreshEndpoint : BasicEndpointBase<RefreshRequest, TokenResponse>
 {
     public required IAccountService AccountService { get; set; }
     public override void Configure()
@@ -51,7 +51,7 @@ public class RefreshEndpoint : BasicEndpointBase<TokenRequest, TokenResponse>
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(TokenRequest request, CancellationToken ct)
+    public override async Task HandleAsync(RefreshRequest request, CancellationToken ct)
     {
         try
         { 

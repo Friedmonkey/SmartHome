@@ -11,6 +11,8 @@ public class PersonTestingService : IPersonTestingService
 
     public async Task<SuccessResponse> AddPerson(AddPersonRequest request)
     {
+        if (request.person is null)
+            return SuccessResponse.Failed("request person object was null");
         await Task.Delay(500);
         _persons.Add(request.person);
         return SuccessResponse.Success();
