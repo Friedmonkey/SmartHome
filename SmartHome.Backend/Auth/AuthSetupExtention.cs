@@ -1,5 +1,5 @@
-﻿using FastEndpoints.Security;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -41,10 +41,7 @@ public static class AuthSetupExtention
         //        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(config.JwtKey)),
         //    };
         //});
-        services.AddAuthenticationJwtBearer(options => {
-            options.SigningKey = config.JwtKey;
-            options.SigningStyle = TokenSigningStyle.Symmetric;
-        });
+        services.AddAuthenticationJwtBearer(options => options.SigningKey = config.JwtSecret);
 
         services.AddAuthorization();
 

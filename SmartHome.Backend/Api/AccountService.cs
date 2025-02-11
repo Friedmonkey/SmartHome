@@ -92,23 +92,24 @@ public class AccountService : IAccountService
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")), // NOTE: this will be the "User.Identity.Name" value
+            new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")), // NOTE: this will be the "User.Identity.Name" value
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")),
             new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
-            new Claim("role", AuthRoles.AuthUser), //Fastendpoint looks for 'role' by default
+            //new Claim("role", AuthRoles.AuthUser), //Fastendpoint looks for 'role' by default
         };
 
 #warning change to 15 minutes
 
         var jwtToken = JwtBearer.CreateToken(o =>
         {
-            o.SigningAlgorithm = SecurityAlgorithms.HmacSha256;
+            //o.SigningAlgorithm = SecurityAlgorithms.HmacSha256;
 
-            o.SigningKey = _backendConfig.JwtKey;
-            o.ExpireAt = DateTime.Now.AddMinutes(60);
-            o.Issuer = _backendConfig.Domain;
-            o.Audience = _backendConfig.Domain;
+            o.SigningKey = _backendConfig.JwtSecret;
             o.User.Claims.AddRange(claims);
+            o.User.Roles.Add(AuthRoles.AuthUser);
+            o.ExpireAt = DateTime.Now.AddMinutes(60);
+            //o.Issuer = _backendConfig.Domain;
+            //o.Audience = _backendConfig.Domain;
         });
 
         return jwtToken;

@@ -13,13 +13,14 @@ public class AddPersonEndpoint : BasicEndpointBase<AddPersonRequest, SuccessResp
     public override void Configure()
     {
         Post(SharedConfig.Urls.Person.AddPersonUrl);
-        Roles(AuthRoles.AuthUser);
+        Policy(x => 
+        x.RequireRole(AuthRoles.AuthUser));
     }
 
     public override async Task HandleAsync(AddPersonRequest request, CancellationToken ct)
     {
         try
-        { 
+        {
             await SendAsync(await Service.AddPerson(request));
         }
         catch (Exception ex)
@@ -38,17 +39,29 @@ public class GetPersonByAgeEndpoint : BasicEndpointBase<GetPersonByAgeRequest, P
         //Roles(AuthRoles.AuthUser);
     }
 
-    public override async Task HandleAsync(GetPersonByAgeRequest request, CancellationToken ct)
+    public override async Task<PersonResponse> ExecuteAsync(GetPersonByAgeRequest request, CancellationToken ct)
     {
         try
-        { 
+        {
             await SendAsync(await Service.GetPersonByAge(request));
         }
         catch (Exception ex)
         {
             await SendAsync(PersonResponse.Error(ex));
         }
+        return await base.ExecuteAsync(request, ct);
     }
+    //public override async Task HandleAsync(GetPersonByAgeRequest request, CancellationToken ct)
+    //{
+    //    try
+    //    { 
+    //        await SendAsync(await Service.GetPersonByAge(request));
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        await SendAsync(PersonResponse.Error(ex));
+    //    }
+    //}
 }
 
 public class GetPersonByNameEndpoint : BasicEndpointBase<GetPersonByNameRequest, PersonResponse>

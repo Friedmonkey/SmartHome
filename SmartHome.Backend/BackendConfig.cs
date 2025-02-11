@@ -15,7 +15,7 @@ public class BackendConfig
     }
 
     public string Domain => GetOption("Domain");
-    public string JwtKey => GetOption("JwtKey");
+    public string JwtSecret => GetOption("JwtSecret");
     public string FrontenUrl => GetOption("FrontenUrl");
     public string ConnectionString => GetOption("ConnectionString", "ConnectionStrings : SmartHomeDb");
 
