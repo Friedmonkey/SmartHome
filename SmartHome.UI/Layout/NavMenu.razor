@@ -5,3 +5,54 @@
     <MudNavLink Href="login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Login</MudNavLink>
     <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
 </MudNavMenu>
+
+@code{
+    public static void Redirect(NavigationManager navManager, string? base64)
+    { 
+        if (base64 != null)
+        {
+            var url = Base64Decode(base64);
+
+            if (url.StartsWith("http") && !url.ToLower().StartsWith(navManager.BaseUri.ToLower())) //we do not want to rediract to offsite urls
+            {
+                Console.WriteLine($"Offsite url detected: redirection to \"{url}\" was blocked.");
+                navManager.NavigateTo("/", true);
+                return;
+            }
+
+            navManager.NavigateTo(url, true);
+            return;
+        }
+
+        navManager.NavigateTo("/", true);
+    }
+    public static void Login(NavigationManager navManager)
+    {
+        var uri = navManager.ToBaseRelativePath(navManager.Uri);
+        if (uri.ToLower().StartsWith("login")) 
+            return;
+        else
+            navManager.NavigateTo($"/login/{Base64Encode(uri)}", true);
+    }
+
+    public static void Logout(NavigationManager navManager)
+    {
+        var uri = navManager.ToBaseRelativePath(navManager.Uri);
+        if (uri == "/")
+            navManager.NavigateTo("/logout");
+        else
+            navManager.NavigateTo($"/logout/{Base64Encode(uri)}");
+    }
+
+
+    public static string Base64Encode(string plainText)
+    {
+        var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+        return System.Convert.ToBase64String(plainTextBytes);
+    }
+    public static string Base64Decode(string base64EncodedData)
+    {
+        var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+        return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+    }
+}

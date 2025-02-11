@@ -1,15 +1,13 @@
 ﻿@page "/login"
+@page "/login/{base64}"
+
 @using SmartHome.Common.Api
-@* @inject ApiService api; *@
+@inject ApiService api;
 @inject ISnackbar snackBar;
 @inject IAccountService accountService;
 @inject NavigationManager navManager;
 
 <h3>Login</h3>
-
-@* <MudTextField @bind-Value="email">Email</MudTextField>
-<MudTextField @bind-Value="password">Password</MudTextField>
-<MudButton OnClick="OnClick">Login</MudButton> *@
 
 @if (loginMode)
 {
@@ -62,6 +60,9 @@ else
 
 
 @code {
+    [Parameter]
+    public string? base64 { get; set; }
+
     private bool loginMode = true;
     public string username = "";
     public string email = "";
@@ -103,25 +104,11 @@ else
         if (result.CheckSuccess(snackBar, onError: UserManagerErrorHandeler))
         {
             snackBar.Add("Login success!", Severity.Success);
-            navManager.NavigateTo("/", forceLoad:true);
+            NavMenu.Redirect(navManager, base64);
         }
     }
     private async Task ForgotPassword()
     {
         await accountService.ForgotPassword(new(forgotEmailAddress));
     }
-
-
-    // public async Task OnClick()
-    // {
-    //     var loginRequest = new LoginRequest(this.email, this.password);
-
-    //     var loginResponse = await api.Post<TokenResponse>(SharedConfig.Urls.LoginUrl, loginRequest);
-
-    //     if (loginResponse.WasSuccess())
-    //     {
-    //         // Use loginResponse object
-    //         Console.WriteLine(loginResponse!.JWT);
-    //     }
-    // }
 }

@@ -2,10 +2,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SmartHome.UI.Api;
-using SmartHome.UI.Auth;
 using MudBlazor.Services;
 using MudExtensions.Services;
-using SmartHome.Common.Models;
 using SmartHome.Common.Api;
 using Blazored.SessionStorage;
 
