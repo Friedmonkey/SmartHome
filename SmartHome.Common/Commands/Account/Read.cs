@@ -2,11 +2,8 @@
 
 namespace SmartHome.Common.Commands.Account;
 
-public class ReadResponse(
-    Guid Id,
-    string Name)
-    : IReadResponse
+public class ReadResponse(string Id, string Name) : IReadResponse
 {
-    public Guid Id { get; } = Id;
+    public Guid Id { get; } = Guid.Parse(Id);
     public string Name { get; } = Name;
 }

@@ -4,8 +4,8 @@ using SmartHome.Common.Commands.Account;
 
 namespace SmartHome.Backend.Features.User;
 
-public class Delete(SmartHomeDbContext _SmartHomeDbContext)
-    : DeleteEndpointBase<DeleteCommand, Entity.Account, DeleteCommandValidator>(_SmartHomeDbContext)
+public class Delete(SmartHomeContext _SmartHomeDbContext)
+    : DeleteEndpointBase<DeleteCommand, Common.Models.Entities.Account, DeleteCommandValidator>(_SmartHomeDbContext)
 {
     protected override UserRole[] RoleNames => [UserRole.Admin];
 

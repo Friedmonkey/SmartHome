@@ -1,11 +1,12 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Commands.Base;
+using SmartHome.Common.Models.Entities;
 
 namespace SmartHome.Backend.Features;
 
 public abstract class DeleteEndpointBase<TRequest, TEntity, TValidator>
-    (SmartHomeDbContext SmartHomeDbContext)
+    (SmartHomeContext SmartHomeDbContext)
     : EndpointBase<TRequest, Results<Ok, NotFound>, TValidator>
     where TRequest : notnull, IDeleteCommand
     where TEntity : class, IEntityBase

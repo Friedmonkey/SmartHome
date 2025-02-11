@@ -1,11 +1,12 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Commands.Base;
+using SmartHome.Common.Models.Entities;
 
 namespace SmartHome.Backend.Features;
 
 public abstract class UpdateEndpointBase<TRequest, TResponse, TEntity, TMapper, TValidator>
-    (SmartHomeDbContext SmartHomeDbContext)
+    (SmartHomeContext SmartHomeDbContext)
     : EndpointBase<TRequest, Results<Ok<TResponse>, NotFound>, TMapper, TValidator>
     where TRequest : notnull, IUpdateCommand
     where TResponse : notnull

@@ -1,4 +1,7 @@
+using Microsoft.Extensions.Options;
 using SmartHome.Backend.Auth;
+using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace SmartHome.Backend;
 
@@ -17,9 +20,12 @@ public class Program
         builder.Services.AddControllers();
 
         builder.Services.AddOpenApi();
+        builder.Services.AddSwaggerGen();
 
         builder.Services.SetupCors(config);
-        builder.Services.AddSqlServer<SmartHomeDbContext>(builder.Configuration["SmartHomeDb"]);
+
+        var ConnectionString = builder.Configuration.GetConnectionString("DBConnection");
+        builder.Services.AddDbContext<SmartHomeContext>(options => options.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString)));
 
         builder.Services.AddFastEndpoints();
 
@@ -32,6 +38,8 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
 
         app.UseHttpsRedirection();

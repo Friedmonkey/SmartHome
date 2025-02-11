@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SmartHome.Database;
 
 namespace SmartHome.Backend.Auth;
 
@@ -40,7 +39,7 @@ public static class AuthSetupExtention
             options.Password.RequireUppercase = true;
             options.SignIn.RequireConfirmedEmail = true;
         })
-.AddEntityFrameworkStores<SmartHomeDbContext>()
+.AddEntityFrameworkStores<SmartHomeContext>()
 .AddDefaultTokenProviders();
 
     }

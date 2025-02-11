@@ -3,8 +3,7 @@ using SmartHome.Common.Commands.Account;
 using SmartHome.Common.Models.Enums;
 
 namespace SmartHome.Backend.Features.User;
-public class Read(SmartHomeDbContext _SmartHomeDbContext)
-    : EndpointWithoutRequest<Ok<List<ReadResponse>>>
+public class Read(SmartHomeContext _SmartHomeDbContext) : EndpointWithoutRequest<Ok<List<ReadResponse>>>
 {
     public override void Configure()
     {
@@ -15,8 +14,9 @@ public class Read(SmartHomeDbContext _SmartHomeDbContext)
 
     public override async Task<Ok<List<ReadResponse>>> ExecuteAsync(CancellationToken ct)
     {
+
         var customers = await _SmartHomeDbContext
-            .Accounts!
+            .Accounts
             .Select(x => new ReadResponse(x.Id, x.Name!))
             .ToListAsync(ct);
 

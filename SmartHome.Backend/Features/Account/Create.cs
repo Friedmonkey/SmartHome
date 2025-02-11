@@ -3,8 +3,8 @@ using SmartHome.Common.Models.Enums;
 
 namespace SmartHome.Backend.Features.Account;
 
-public class Create(SmartHomeDbContext _SmartHomeDbContext)
-    : CreateEndpointBase<CreateCommand, CreateResponse, Entity.Account, CreateMapper, CreateCommandValidator>(_SmartHomeDbContext)
+public class Create(SmartHomeContext _SmartHomeDbContext)
+    : CreateEndpointBase<CreateCommand, CreateResponse, Common.Models.Entities.Account, CreateMapper, CreateCommandValidator>(_SmartHomeDbContext)
 {
     protected override UserRole[] RoleNames => [UserRole.Admin];
 
@@ -15,9 +15,9 @@ public class Create(SmartHomeDbContext _SmartHomeDbContext)
     }
 }
 
-public class CreateMapper : Mapper<CreateCommand, CreateResponse, Entity.Account>
+public class CreateMapper : Mapper<CreateCommand, CreateResponse, Common.Models.Entities.Account>
 {
-    public override Entity.Account ToEntity(CreateCommand r)
+    public override Common.Models.Entities.Account ToEntity(CreateCommand r)
     {
         return new Entity.Account
         {
@@ -25,8 +25,8 @@ public class CreateMapper : Mapper<CreateCommand, CreateResponse, Entity.Account
         };
     }
 
-    public override CreateResponse FromEntity(Entity.Account e)
-    {
-        return new CreateResponse(e.Id);
-    }
+    //public override CreateResponse FromEntity(SmartHome.Common.Models.Entities.Account e)
+    //{
+    //    return new CreateResponse(e.Guid);
+    //}
 }
