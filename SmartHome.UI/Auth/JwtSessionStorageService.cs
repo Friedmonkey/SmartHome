@@ -2,7 +2,7 @@
 using SmartHome.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace SmartHome.UI.Api;
+namespace SmartHome.UI.Auth;
 
 public class JwtSessionStorageService : IJwtStoreService
 {

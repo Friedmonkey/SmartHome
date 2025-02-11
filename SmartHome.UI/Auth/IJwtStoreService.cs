@@ -1,6 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 
-namespace SmartHome.UI.Api;
+namespace SmartHome.UI.Auth;
 
 public interface IJwtStoreService
 {

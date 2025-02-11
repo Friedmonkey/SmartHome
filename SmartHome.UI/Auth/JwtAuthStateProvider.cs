@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 
-namespace SmartHome.UI.Api;
+namespace SmartHome.UI.Auth;
 
 public class JwtAuthStateProvider : AuthenticationStateProvider
 {
@@ -21,17 +21,20 @@ public class JwtAuthStateProvider : AuthenticationStateProvider
         NotifyAuthenticationStateChanged(GetAuthenticationState());
     }
 
+    private static readonly AuthenticationState Unauthorized = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
     private async Task<AuthenticationState> GetAuthenticationState()
     {
         var jwt = await _jwtStoreService.GetJwt();
-        var identity = new ClaimsIdentity();
 
-        if (jwt is not null)
-        {
-            identity = new ClaimsIdentity(jwt!.Claims, "jwt");
-        }
+        if (jwt is null)
+            return Unauthorized;
 
+        var identity = new ClaimsIdentity(jwt.Claims, "jwt");
         var user = new ClaimsPrincipal(identity);
-        return new AuthenticationState(user);
+        if (user.IsUser())
+            return new AuthenticationState(user);
+
+        Console.WriteLine("Invalid user ClaimsPrincipal!!");
+        return Unauthorized;
     }
 }

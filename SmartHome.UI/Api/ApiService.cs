@@ -8,6 +8,7 @@ using MudBlazor;
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models;
+using SmartHome.UI.Auth;
 using static SmartHome.Common.Api.IAccountService;
 
 namespace SmartHome.UI.Api;

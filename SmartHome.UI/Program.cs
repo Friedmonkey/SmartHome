@@ -6,6 +6,7 @@ using MudBlazor.Services;
 using MudExtensions.Services;
 using SmartHome.Common.Api;
 using Blazored.SessionStorage;
+using SmartHome.UI.Auth;
 
 namespace SmartHome.UI;
 
