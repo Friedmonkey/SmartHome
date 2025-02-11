@@ -22,4 +22,8 @@
     <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\css\" />
+  </ItemGroup>
+
 </Project>
