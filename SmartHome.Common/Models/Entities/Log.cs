@@ -1,5 +1,4 @@
-﻿using SmartHome.Common.Models.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 namespace SmartHome.Common.Models.Entities;
 public class Log
