@@ -36,7 +36,7 @@ public class Program
             options.Password.RequireUppercase = true;
             options.SignIn.RequireConfirmedEmail = true;
         })
-        .AddEntityFrameworkStores<AuthContext>()
+        .AddEntityFrameworkStores<SmartHomeContext>()
         .AddDefaultTokenProviders();
 
         //builder.Services.SetupJWTAuthServices(config);
