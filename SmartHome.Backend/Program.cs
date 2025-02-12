@@ -7,6 +7,7 @@ using SmartHome.Common.Api;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 using FastEndpoints.Swagger;
+using SmartHome.Database;
 //using Microsoft.EntityFrameworkCore;
 
 namespace SmartHome.Backend;
@@ -21,18 +22,7 @@ public class Program
         builder.Services.AddSingleton<BackendConfig>(config);
 
         // Add services to the container.
-        //database for now, needs to be replaced
-        builder.Services.AddDbContextFactory<AuthContext>(options =>
-        {
-            options.UseSqlite($"Data Source=database.db");
-        });
-        builder.Services.AddScoped(p =>
-        {
-            var context = p.GetRequiredService<IDbContextFactory<AuthContext>>().CreateDbContext();
-            context.Database.EnsureCreated();
-
-            return context;
-        });
+        builder.Services.AddDbContext<SmartHomeContext>(options => options.UseMySql(config.ConnectionString, ServerVersion.AutoDetect(config.ConnectionString)));
 
         //jwt auth
         builder.Services.AddAuthenticationJwtBearer(options => options.SigningKey = config.JwtSecret);
