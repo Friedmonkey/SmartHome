@@ -25,5 +25,13 @@ public class SharedConfig
             public const string GetByAgeUrl = PersonBase + "getByAge";
             public const string GetByNameUrl = PersonBase + "getByName";
         }
+
+        private const string SmartHomeBase = ApiBase + "SmartHome/";
+        public static class SmartHome
+        {
+            public const string AddPersonUrl = SmartHomeBase + "add";
+            public const string GetByAgeUrl = SmartHomeBase + "getByAge";
+            public const string GetByNameUrl = SmartHomeBase + "getByName";
+        }
     }
 }
