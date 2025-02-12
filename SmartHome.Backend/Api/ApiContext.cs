@@ -15,5 +15,5 @@ public class ApiContext
     }
 
     public ClaimsPrincipal? User => _contextAccessor?.HttpContext?.User;
-    public SmartHomeContext Context => _dbContext;
+    public SmartHomeContext DbContext => _dbContext;
 }
