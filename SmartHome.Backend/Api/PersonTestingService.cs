@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models;
+using SmartHome.Database;
 using static SmartHome.Common.Api.IPersonTestingService;
 
 namespace SmartHome.Backend.Api;
@@ -8,6 +10,22 @@ namespace SmartHome.Backend.Api;
 public class PersonTestingService : IPersonTestingService
 {
     private static List<Person> _persons = new();
+
+    private readonly ApiContext _context;
+
+    public PersonTestingService(ApiContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<DeviceListResponse> TestDb(TestDbRequest request)
+    {
+        var result = await _context.DbContext.Devices.ToListAsync();
+        if (result == null)
+            return DeviceListResponse.Failed("Not Devices found in DataBase");
+        else
+            return new DeviceListResponse(result);
+    }
 
     public async Task<SuccessResponse> AddPerson(AddPersonRequest request)
     {
@@ -37,4 +55,6 @@ public class PersonTestingService : IPersonTestingService
 
         return new PersonResponse(person);
     }
+
+   
 }
