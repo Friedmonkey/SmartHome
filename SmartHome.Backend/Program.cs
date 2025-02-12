@@ -46,6 +46,7 @@ public class Program
         //add our services
 
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
         builder.Services.AddScoped<ApiContext>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
