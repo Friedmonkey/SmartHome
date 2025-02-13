@@ -12,8 +12,8 @@ using SmartHome.Database;
 namespace SmartHome.Database.Migrations
 {
     [DbContext(typeof(SmartHomeContext))]
-    [Migration("20250212132138_Init-database")]
-    partial class Initdatabase
+    [Migration("20250213085108_added-routine-entity")]
+    partial class addedroutineentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,9 +27,9 @@ namespace SmartHome.Database.Migrations
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Account", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -54,9 +54,9 @@ namespace SmartHome.Database.Migrations
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Device", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("JsonObjectConfig")
                         .IsRequired()
@@ -66,70 +66,21 @@ namespace SmartHome.Database.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(20)");
 
-                    b.Property<string>("RoleGuid")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("RoomGuid")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("Devices");
                 });
 
-            modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAccess", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("DeviceId")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("SmartUserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DeviceAccesses");
-                });
-
-            modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAction", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("JsonObjectConfig")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("RoutineId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DeviceAction");
-                });
-
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Home", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -150,9 +101,9 @@ namespace SmartHome.Database.Migrations
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Log", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Action")
                         .IsRequired()
@@ -161,9 +112,8 @@ namespace SmartHome.Database.Migrations
                     b.Property<DateTime>("CreateOn")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -171,48 +121,36 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SmartHomeId");
+
                     b.ToTable("Log");
-                });
-
-            modelBuilder.Entity("SmartHome.Common.Models.Entities.Role", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Role");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Room", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("varchar(20)");
 
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SmartHomeId");
 
                     b.ToTable("Room");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Routine", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -222,39 +160,104 @@ namespace SmartHome.Database.Migrations
                         .IsRequired()
                         .HasColumnType("binary(7)");
 
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SmartHomeId");
+
                     b.ToTable("Routine");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartUser", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("AccountId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("SmartHomeId");
+
                     b.ToTable("SmartUser");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Device", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Log", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Home", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SmartHome");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Room", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Home", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SmartHome");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Routine", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Home", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SmartHome");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartUser", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartHome.Common.Models.Entities.Home", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("SmartHome");
                 });
 #pragma warning restore 612, 618
         }
