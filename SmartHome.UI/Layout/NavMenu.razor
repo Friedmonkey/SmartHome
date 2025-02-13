@@ -1,8 +1,35 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
-    <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
-    <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
+﻿@inject SmartHomeState smartHomeState;
+
+<MudNavMenu>
+    <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+        Smart Homes
+    </MudNavLink>
+    @if (smartHomeState.SelectedSmartHomeId is not null)
+    {
+        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/overview")" Icon="@Icons.Material.Filled.Dashboard">
+            Overview
+        </MudNavLink>
+
+        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/devices")" Icon="@Icons.Material.Filled.Devices">
+            Devices
+        </MudNavLink>
+
+        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/logs")" Icon="@Icons.Material.Filled.List">
+            Logs
+        </MudNavLink>
+
+        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/routines")" Icon="@Icons.Material.Filled.Autorenew">
+            Routines
+        </MudNavLink>
+    }
+    else
+    { 
+        <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+        <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
+        <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
+        <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
+    }
+
 </MudNavMenu>
 
 @code{

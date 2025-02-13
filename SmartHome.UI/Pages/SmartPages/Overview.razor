@@ -1,12 +1,12 @@
 ﻿@page "/smarthome/{SmartGuid}/overview"
 @attribute [Authorize]
 
+@inject SmartHomeState smartHomeState;
 
 <MudText>Get all devices here</MudText>
 
 @code {
-    [Parameter]
-    public Guid SmartGuid { get; set; }
+    private Guid smartHomeId => smartHomeState.SelectedSmartHomeId ?? throw new Exception("No smart home selected!");
 
     protected override Task OnInitializedAsync()
     {
