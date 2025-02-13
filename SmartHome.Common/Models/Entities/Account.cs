@@ -5,10 +5,6 @@ namespace SmartHome.Common.Models.Entities;
 
 public class Account : Entity
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column(TypeName = "varchar(60)")]
-    public string Id { get; set; }
 
     [Required]
     [Column(TypeName = "varchar(20)")]
