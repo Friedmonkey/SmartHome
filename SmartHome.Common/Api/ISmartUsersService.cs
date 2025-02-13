@@ -13,9 +13,9 @@ public interface ISmartUserService
 
     public Task<SuccessResponse> Create(CreateRequest request);
 
-    public Task<SmartUserResponse> GetSmartUsersOfAccount(RequestByGuid request); // return list of SmartUser
+    public Task<SmartUserResponse> GetSmartUsersOfAccount(GuidRequest request); // return list of SmartUser
     
-    public Task<SuccessResponse> Delete(RequestByGuid request);
+    public Task<SuccessResponse> Delete(GuidRequest request);
     
     public Task<SuccessResponse> Update(UpdateRequest request);
 

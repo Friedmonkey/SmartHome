@@ -2,7 +2,6 @@
 
 namespace SmartHome.Common.Api;
 
-public record RequestByGuid(Guid Id);
 
 public interface IRoomService
 {
@@ -13,9 +12,9 @@ public interface IRoomService
 
     public Task<SuccessResponse> Create(CreateRequest request);
 
-    public Task<RoomsResponse> GetRoomsOfSmartHome(RequestByGuid request); // return list of Rooms
+    public Task<RoomsResponse> GetRoomsOfSmartHome(GuidRequest request); // return list of Rooms
     
-    public Task<SuccessResponse> Delete(RequestByGuid request);
+    public Task<SuccessResponse> Delete(GuidRequest request);
     
     public Task<SuccessResponse> Update(CreateRequest request);
 

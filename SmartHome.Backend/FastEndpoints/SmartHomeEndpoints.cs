@@ -20,7 +20,7 @@ public class CreateSmartHomeEndpoint : BasicEndpointBase<CreateSmartHomeRequest,
     }
 }
 
-public class GetSmartHomesOfSmartUser : BasicEndpointBase<RequestByGuid, SmartHomeResponse>
+public class GetSmartHomesOfSmartUser : BasicEndpointBase<GuidRequest, SmartHomeResponse>
 {
     public required ISmartHomeService SmartHomeService { get; set; }
     public override void Configure()
@@ -29,7 +29,7 @@ public class GetSmartHomesOfSmartUser : BasicEndpointBase<RequestByGuid, SmartHo
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(RequestByGuid request, CancellationToken ct)
+    public override async Task HandleAsync(GuidRequest request, CancellationToken ct)
     {
         await SendAsync(await SmartHomeService.GetSmartHomesOfSmartUser(request));
     }
@@ -49,7 +49,7 @@ public class UpdateSmartHomeEndpoint : BasicEndpointBase<UpdateSmartHomeRequest,
         await SendAsync(await SmartHomeService.UpdateSmartHome(request));
     }
 }
-public class DeleteSmartHomeEndpoint : BasicEndpointBase<RequestByGuid, SuccessResponse>
+public class DeleteSmartHomeEndpoint : BasicEndpointBase<GuidRequest, SuccessResponse>
 {
     public required ISmartHomeService SmartHomeService { get; set; }
     public override void Configure()
@@ -58,7 +58,7 @@ public class DeleteSmartHomeEndpoint : BasicEndpointBase<RequestByGuid, SuccessR
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(RequestByGuid request, CancellationToken ct)
+    public override async Task HandleAsync(GuidRequest request, CancellationToken ct)
     {
         await SendAsync(await SmartHomeService.DeleteSmartHome(request));
     }

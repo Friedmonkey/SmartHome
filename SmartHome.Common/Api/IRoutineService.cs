@@ -13,9 +13,9 @@ public interface IRoutineService
 
     public Task<SuccessResponse> Create(CreateRequest request);
 
-    public Task<RoutinesResponse> GetRoutineOfSmartHome(RequestByGuid request); // return list of Rooms
+    public Task<RoutinesResponse> GetRoutineOfSmartHome(GuidRequest request); // return list of Rooms
     
-    public Task<SuccessResponse> Delete(RequestByGuid request);
+    public Task<SuccessResponse> Delete(GuidRequest request);
     
     public Task<SuccessResponse> Update(CreateRequest request);
 

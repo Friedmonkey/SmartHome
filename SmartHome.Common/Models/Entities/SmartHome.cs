@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartHome.Common.Models.Entities;
-public class Home : Entity
+public class SmartHome : Entity
 {
     [Required]
     [Column(TypeName = "varchar(20)")]

@@ -17,7 +17,7 @@
         public DbSet<Log> Log { get; set; }
         public DbSet<Room> Room { get; set; }
         public DbSet<Routine> Routine { get; set; }
-        public DbSet<Home> Home { get; set; }
+        public DbSet<SmartHome> Home { get; set; }
         public DbSet<SmartUser> SmartUser { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

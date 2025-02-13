@@ -12,9 +12,9 @@ public interface IDeviceActionService
 
     public Task<SuccessResponse> Create(CreateRequest request);
 
-    public Task<DeviceActionsResponse> GetDeviceActionsOfSmartHome(RequestByGuid request); // return list of DeviceActions
+    public Task<DeviceActionsResponse> GetDeviceActionsOfSmartHome(GuidRequest request); // return list of DeviceActions
     
-    public Task<SuccessResponse> Delete(RequestByGuid request);
+    public Task<SuccessResponse> Delete(GuidRequest request);
     
     public Task<SuccessResponse> Update(CreateRequest request);
 

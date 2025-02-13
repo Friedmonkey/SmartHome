@@ -19,5 +19,5 @@ public class Log
     [Required]
     public Guid SmartHomeId { get; set; }
 
-    public Home? SmartHome { get; set; }
+    public SmartHome? SmartHome { get; set; }
 }

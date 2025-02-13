@@ -34,7 +34,7 @@ public class SmartUserService : ISmartUserService
         }
     }
 
-    public async Task<SuccessResponse> Delete(RequestByGuid request)
+    public async Task<SuccessResponse> Delete(GuidRequest request)
     {
         try
         {
@@ -52,7 +52,7 @@ public class SmartUserService : ISmartUserService
         }
     }
 
-    public async Task<SmartUserResponse> GetSmartUsersOfAccount(RequestByGuid request)
+    public async Task<SmartUserResponse> GetSmartUsersOfAccount(GuidRequest request)
     {
         try
         {

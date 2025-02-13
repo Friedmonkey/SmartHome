@@ -20,7 +20,7 @@ public class CreateSmartUserEndpoint : BasicEndpointBase<CreateRequest, SuccessR
     }
 }
 
-public class GetSmartUsersOfSmartUser : BasicEndpointBase<RequestByGuid, SmartUserResponse>
+public class GetSmartUsersOfSmartUser : BasicEndpointBase<GuidRequest, SmartUserResponse>
 {
     public required ISmartUserService SmartUserService { get; set; }
     public override void Configure()
@@ -29,7 +29,7 @@ public class GetSmartUsersOfSmartUser : BasicEndpointBase<RequestByGuid, SmartUs
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(RequestByGuid request, CancellationToken ct)
+    public override async Task HandleAsync(GuidRequest request, CancellationToken ct)
     {
         await SendAsync(await SmartUserService.GetSmartUsersOfAccount(request));
     }
@@ -49,7 +49,7 @@ public class UpdateSmartUserEndpoint : BasicEndpointBase<UpdateRequest, SuccessR
         await SendAsync(await SmartUserService.Update(request));
     }
 }
-public class DeleteSmartUserEndpoint : BasicEndpointBase<RequestByGuid, SuccessResponse>
+public class DeleteSmartUserEndpoint : BasicEndpointBase<GuidRequest, SuccessResponse>
 {
     public required ISmartUserService SmartUserService { get; set; }
     public override void Configure()
@@ -58,7 +58,7 @@ public class DeleteSmartUserEndpoint : BasicEndpointBase<RequestByGuid, SuccessR
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(RequestByGuid request, CancellationToken ct)
+    public override async Task HandleAsync(GuidRequest request, CancellationToken ct)
     {
         await SendAsync(await SmartUserService.Delete(request));
     }

@@ -16,5 +16,5 @@ public class SmartUser : Entity
     public UserRole RoleId { get; set; }
 
     public Account? Account { get; set; }
-    public Home? SmartHome { get; set; }
+    public SmartHome? SmartHome { get; set; }
 }

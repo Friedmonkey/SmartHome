@@ -15,7 +15,7 @@ public class SmartHomeService : ISmartHomeService
     }
     public async Task<SuccessResponse> CreateSmartHome(CreateSmartHomeRequest request)
     {
-       Home home = new(){ Id = Guid.NewGuid(), Name = request.name, SSID = request.ssId, SSPassword = request.ssPassword};
+        Common.Models.Entities.SmartHome home = new(){ Id = Guid.NewGuid(), Name = request.name, SSID = request.ssId, SSPassword = request.ssPassword};
        try
        {
            var result = await _apiContext.DbContext.Home.AddAsync(home);
@@ -32,7 +32,7 @@ public class SmartHomeService : ISmartHomeService
        }
     }
 
-    public async Task<SuccessResponse> DeleteSmartHome(RequestByGuid request)
+    public async Task<SuccessResponse> DeleteSmartHome(GuidRequest request)
     {
         try
         {
@@ -56,9 +56,9 @@ public class SmartHomeService : ISmartHomeService
         }
     }
 
-    public async Task<SmartHomeResponse> GetSmartHomesOfSmartUser(RequestByGuid request)
+    public async Task<SmartHomeResponse> GetSmartHomesOfSmartUser(GuidRequest request)
     {
-        List<Home?> homes =  await _apiContext.DbContext.SmartUser
+        List<SmartHome?> homes =  await _apiContext.DbContext.SmartUser
             .Where(su => su.AccountId == request.Id)
             .Select(su => su.SmartHome)
             .ToListAsync();
