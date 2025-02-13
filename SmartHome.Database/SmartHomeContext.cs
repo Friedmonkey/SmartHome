@@ -12,13 +12,13 @@ public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCor
     {
     }
     public DbSet<DeviceAccess> DeviceAccesses { get; set; }
-    public DbSet<DeviceAction> DeviceAction { get; set; }
+    public DbSet<DeviceAction> DeviceActions { get; set; }
     public DbSet<Device> Devices { get; set; }
-    public DbSet<Log> Log { get; set; }
-    public DbSet<Room> Room { get; set; }
-    public DbSet<Routine> Routine { get; set; }
-    public DbSet<SmartHome> Home { get; set; }
-    public DbSet<SmartUser> SmartUser { get; set; }
+    public DbSet<Log> Logs { get; set; }
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<Routine> Routines { get; set; }
+    public DbSet<SmartHomeModel> SmartHomes { get; set; }
+    public DbSet<SmartUserModel> SmartUsers { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //auth
@@ -28,13 +28,13 @@ public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCor
         modelBuilder.Entity<IdentityUserToken<Guid>>().HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
 
         //entities
-        modelBuilder.Entity<SmartUser>()
+        modelBuilder.Entity<SmartUserModel>()
            .HasOne(su => su.Account)
            .WithMany()
            .HasForeignKey(su => su.AccountId)
            .OnDelete(DeleteBehavior.Cascade); // Your existing rule
 
-        modelBuilder.Entity<SmartUser>()
+        modelBuilder.Entity<SmartUserModel>()
             .HasOne(su => su.SmartHome)
             .WithMany()
             .HasForeignKey(su => su.SmartHomeId)

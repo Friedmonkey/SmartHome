@@ -1,0 +1,23 @@
+﻿@inject SmartHomeState smartHomeState;
+
+<MudCard>
+    <MudCardHeader>
+        <MudSkeleton Animation="Animation.Wave" Width="60%" />
+    </MudCardHeader>
+    <MudCardContent>
+        <MudSkeleton Animation="Animation.Wave" />
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public bool IsInvite { get; set; }
+
+    [Parameter]
+    public SmartHomeModel Home { get; set; }
+
+    public void OpenHome(Guid smartHomeId)
+    { 
+        smartHomeState.SetSelectedSmartHome(smartHomeId);
+    }
+}

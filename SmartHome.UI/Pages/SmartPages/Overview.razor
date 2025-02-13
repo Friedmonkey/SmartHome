@@ -1,0 +1,31 @@
+﻿@page "/smarthome/{SmartGuid}/overview"
+@attribute [Authorize]
+
+@inject SmartHomeState smartHomeState;
+@inject NavigationManager navManager;
+
+<MudText>Get all devices here</MudText>
+
+@code {
+    [Parameter]
+    public string? SmartGuid { get; set; }
+
+    private Guid SmartHomeId;
+
+    protected override Task OnInitializedAsync()
+    {
+        if (SmartGuid is null)
+        {
+            smartHomeState.SetSelectedSmartHome(null);
+        }
+        else
+        {
+            if (!Guid.TryParse(SmartGuid, out SmartHomeId))
+                navManager.NavigateTo("/smarthome"); 
+            smartHomeState.SetSelectedSmartHome(SmartHomeId);
+        }
+
+        //load devices or something
+        return base.OnInitializedAsync();
+    }
+}

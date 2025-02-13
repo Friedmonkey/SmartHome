@@ -2,7 +2,8 @@
 public enum UserRole
 {
     None = 0,
-    User = 10,
-    Admin = 20,
-    Gast = 30,
+    User = 1,
+    Admin = 2,
+    Guest = 4,
+    InvitationPending = 8,
 }

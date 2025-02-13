@@ -9,6 +9,7 @@ using Blazored.SessionStorage;
 using SmartHome.UI.Auth;
 using Blazored.LocalStorage;
 using SmartHome.UI.Profile;
+using SmartHome.UI.Layout;
 
 namespace SmartHome.UI;
 
@@ -41,8 +42,12 @@ public class Program
         builder.Services.AddAuthorizationCore();
 
         builder.Services.AddScoped<ApiService>();
-        builder.Services.AddScoped<IAccountService, InternalAccountService>();
-        builder.Services.AddScoped<IPersonTestingService, InternalPersonTestingService>();
+        builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
+        builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
+
+        //keep track of selected smarthome
+        builder.Services.AddScoped<SmartHomeState>();
 
         var application = builder.Build();
         await application.RunAsync();

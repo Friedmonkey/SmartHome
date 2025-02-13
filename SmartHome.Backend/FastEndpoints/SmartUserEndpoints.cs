@@ -25,7 +25,7 @@ public class GetSmartUsersOfSmartUser : BasicEndpointBase<GuidRequest, SmartUser
     public required ISmartUserService SmartUserService { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.SmartUser.AddSmartUserUrl);
+        Post(SharedConfig.Urls.SmartUser.AddSmartUserUrl+"bellglrglr");
         AllowAnonymous();
     }
 

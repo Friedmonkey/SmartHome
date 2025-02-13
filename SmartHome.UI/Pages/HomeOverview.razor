@@ -1,0 +1,69 @@
+﻿@page "/smarthome"
+@attribute [Authorize]
+
+@inject ISnackbar snackBar;
+@inject ISmartHomeService smartHomeService;
+@inject NavigationManager navManager;
+
+<MudButton OnClick="() => createDialogVisible = true">Create</MudButton>
+<MudGrid>
+    @foreach (var smartHome in joinedSmartHomes)
+    {
+        <MudItem>
+            <SmartHomeCard Home="smartHome" />
+        </MudItem>
+    }
+</MudGrid>
+
+<MudGrid>
+    @foreach (var smartHome in invitedSmartHomes)
+    {
+        <MudItem>
+            <SmartHomeCard Home="smartHome" IsInvite="true" />
+        </MudItem>
+    }
+</MudGrid>
+
+<MudDialog @bind-Visible="createDialogVisible">
+    <TitleContent>
+        <MudText>Create new SmartHome</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>SmartHome name:</MudText>
+        <MudTextField T="string" Label="Name" @bind-Value="createName" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CreateSmartHome">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<SmartHomeModel> joinedSmartHomes = new();
+    private List<SmartHomeModel> invitedSmartHomes = new();
+
+    private bool createDialogVisible = false;
+    private string createName = "smartHome";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var joined = await smartHomeService.GetJoinedSmartHomes(new());
+        if (joined.EnsureSuccess(snackBar))
+        {
+            joinedSmartHomes = joined.homes;
+        }
+
+        var invited = await smartHomeService.GetSmartHomeInvites(new());
+        if (invited.EnsureSuccess(snackBar))
+        {
+            invitedSmartHomes = joined.homes;
+        }
+    }
+
+    private async Task CreateSmartHome()
+    {
+        var request = new CreateSmartHomeRequest(createName);
+        var result = await smartHomeService.CreateSmartHome(request);
+        result.Show(snackBar, "Smart home created!");
+        navManager.NavigateTo($"/smarthome/{result.Id}/overview");
+    }
+}

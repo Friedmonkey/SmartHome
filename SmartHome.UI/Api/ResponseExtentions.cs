@@ -1,8 +1,9 @@
 ﻿using MudBlazor;
+using SmartHome.Common;
 using SmartHome.Common.Models;
 
 namespace SmartHome.UI.Api;
-public static class ResponseExtentions2
+public static class ResponseExtentions
 {
     public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string? successMessage = null, Severity severity = Severity.Info) where T : Response<T>
     {
@@ -37,20 +38,6 @@ public static class ResponseExtentions2
 
         return false;
     }
-    //public static string GetError<T>(this Response<T>? response) where T : Response<T>
-    //{
-    //    if (response?._RequestSuccess is null)
-    //        T.Failed
-    //        throw new Exception("Response was empty!");
-
-    //    if (response?._RequestSuccess == true)
-    //        return;
-
-    //    if (string.IsNullOrEmpty(response?._RequestMessage))
-    //        throw new Exception("Response message was empty!");
-    //    else
-    //        throw new Exception(response._RequestMessage);
-    //}
     public static void EnforceSuccess<T>(this Response<T>? response) where T : Response<T>
     {
         if (response?._RequestSuccess is null)
@@ -63,5 +50,10 @@ public static class ResponseExtentions2
             throw new ApiError("Response message was empty!");
         else
             throw new ApiError(response._RequestMessage);
+    }
+
+    public static bool WasSuccess<T>(this Response<T>? response) where T : Response<T>
+    {   //handles null too
+        return response?._RequestSuccess == true;
     }
 }

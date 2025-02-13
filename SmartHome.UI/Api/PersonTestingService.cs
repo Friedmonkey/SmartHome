@@ -4,11 +4,11 @@ using static SmartHome.Common.Api.IPersonTestingService;
 
 namespace SmartHome.UI.Api;
 
-public class InternalPersonTestingService : IPersonTestingService
+public class PersonTestingService : IPersonTestingService
 {
     private readonly ApiService _api;
 
-    public InternalPersonTestingService(ApiService api)
+    public PersonTestingService(ApiService api)
     {
         this._api = api;
     }

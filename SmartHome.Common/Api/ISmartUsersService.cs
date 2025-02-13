@@ -6,7 +6,7 @@ namespace SmartHome.Common.Api;
 
 public interface ISmartUserService
 {
-    public record SmartUserResponse(List<SmartUser> SmartUsers) : Response<SmartUserResponse>;
+    public record SmartUserResponse(List<SmartUserModel> SmartUsers) : Response<SmartUserResponse>;
     
     public record CreateRequest(Guid SmartHomeId, Guid AccountId, UserRole RoleId);
     public record UpdateRequest(Guid id, Guid SmartHomeId, Guid AccountId, UserRole RoleId);

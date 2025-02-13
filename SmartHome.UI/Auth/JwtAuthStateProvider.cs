@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using SmartHome.Common;
 using System.Security.Claims;
 
 namespace SmartHome.UI.Auth;
