@@ -1,0 +1,23 @@
+﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Lamp-Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+    <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
+        @if(Ingeschakeld) {
+            <MudImage Width="150" Height="150" Src="Afbeeldingen/licht-uit.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
+        } else {
+            <MudImage Width="150" Height="150" Src="Afbeeldingen/licht-aan.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
+        }
+        <MudText Typo="Typo.h3" Class="Lamp-Name">@LampTitel</MudText>
+    </MudPaper>
+    <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
+        <MudSwitch @bind-Value="Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        @if (Helderheid != null) {<MudSlider Style="width: 90%" Size="Size.Large" Value="@Helderheid">Helderheid</MudSlider>}
+        @if (Kleur != null) {<MudColorPicker Label="Kleur" ColorPickerView="ColorPickerView.Palette" />}
+    </MudPaper>
+</MudPaper>
+
+@code {
+    public bool Ingeschakeld = false;
+    public string WashProgramma = "";
+    public int Helderheid = 0;
+    public string Kleur = "1";
+    public string LampTitel = "Lamp1";
+}

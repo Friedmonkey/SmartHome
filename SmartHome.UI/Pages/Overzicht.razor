@@ -1,0 +1,49 @@
+﻿@using SmartHome.UI.Components;
+@using SmartHome.Common.Api;
+@inject IDeviceService deviceService;
+@inject ISnackbar snackBar;
+@page "/"
+
+@{
+    string OverzichtContent = @"<h3 style='text-align: center'>Test Kamer</h3>";
+
+    GetDevices();
+    string test = "";
+}
+
+
+@code {
+    private async Task GetDevices()
+    {
+        try
+        {
+            var Devices = await deviceService.GetDevicesByHouseId(new("1"));
+            Devices.Show(snackBar);
+            string hoi = "";
+        } catch
+        {
+            
+        }
+        
+    }
+}
+
+@((MarkupString)OverzichtContent)
+<MudDivider DividerType='DividerType.Middle' Class='my-6' />
+<MudPaper Class="d-flex flex-wrap gap-12 justify-center" Elevation="0">
+
+    @for(int i = 0; i < 1; i++) {
+        <Lamp></Lamp>  
+        <Wasmachine></Wasmachine>
+        <Wifi_Router></Wifi_Router>
+        <Televisie></Televisie>
+    }
+</MudPaper>
+
+<style>
+    .Overzicht {
+        background-color: green;
+        width: 100%;
+        height: 100%;
+    }
+</style>

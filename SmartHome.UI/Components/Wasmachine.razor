@@ -1,0 +1,23 @@
+﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Lamp-Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+    <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
+        <MudImage Width="150" Height="150" Src="Afbeeldingen/wasmachine.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
+        <MudText Typo="Typo.h3" Class="Lamp-Name">@LampTitel</MudText>
+    </MudPaper>
+    <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
+        <MudSwitch @bind-Value="Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        <MudSelect @bind-Value="WashProgramma" Label="Programma" Variant="Variant.Outlined">
+            <MudSelectItem Value="@("Gekleurde was")" />
+            <MudSelectItem Value="@("Katoen")" />
+            <MudSelectItem Value="@("Spijker Broeken")" />
+        </MudSelect>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary">Starten</MudButton>
+    </MudPaper>
+</MudPaper>
+
+
+@code {
+    public bool Ingeschakeld = false;
+    public string WashProgramma = "";
+    public int Helderheid;
+    public string LampTitel = "Lamp1";
+}

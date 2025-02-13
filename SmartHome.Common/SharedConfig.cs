@@ -26,5 +26,12 @@ public class SharedConfig
             public const string GetByAgeUrl = PersonBase + "getByAge";
             public const string GetByNameUrl = PersonBase + "getByName";
         }
+
+        private const string DeviceBase = ApiBase + "device/";
+        public static class Device
+        {
+            public const string GetAllDevices = DeviceBase + "GetAllDevices";
+            public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
+        }
     }
 }

@@ -38,6 +38,7 @@ public class Program
         builder.Services.AddScoped<ApiService>();
         builder.Services.AddScoped<IAccountService, InternalAccountService>();
         builder.Services.AddScoped<IPersonTestingService, InternalPersonTestingService>();
+        builder.Services.AddScoped<IDeviceService, InternalDeviceService>();
 
         var application = builder.Build();
         await application.RunAsync();
