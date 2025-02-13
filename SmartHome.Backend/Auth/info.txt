@@ -1,2 +1,0 @@
-﻿used tutorial:
-https://www.reddit.com/r/csharp/comments/u6n8nz/the_bullshitless_aspnet_blazor_wasm_jwt/?rdt=58007

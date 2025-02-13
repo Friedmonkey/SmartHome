@@ -1,16 +1,17 @@
 ﻿namespace SmartHome.Database;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Database.Auth;
 
-public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityDbContext<User, Role, long>
+public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityDbContext<AuthAccount, Role, Guid>
 {
     public SmartHomeContext(DbContextOptions<SmartHomeContext> options) : base(options)
     {
     }
-    public DbSet<Account> Accounts { get; set; }
+    public DbSet<OldAccount> Accounts { get; set; }
     public DbSet<DeviceAccess> DeviceAccesses { get; set; }
     public DbSet<DeviceAction> DeviceAction { get; set; }
     public DbSet<Device> Devices { get; set; }
@@ -21,6 +22,13 @@ public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCor
     public DbSet<SmartUser> SmartUser { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        //auth
+        modelBuilder.Entity<AuthAccount>().HasKey(aa => aa.Id);
+        modelBuilder.Entity<IdentityUserLogin<Guid>>().HasKey(l => new { l.LoginProvider, l.ProviderKey });
+        modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(r => new { r.UserId, r.RoleId });
+        modelBuilder.Entity<IdentityUserToken<Guid>>().HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+
+        //entities
         modelBuilder.Entity<SmartUser>()
            .HasOne(su => su.Account)
            .WithMany()

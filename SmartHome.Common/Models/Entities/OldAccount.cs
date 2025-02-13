@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SmartHome.Common.Models.Entities;
 
-public class Account : Entity
+public class OldAccount : Entity
 {
 
     [Required]
