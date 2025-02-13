@@ -1,6 +1,7 @@
 ﻿@inject SmartHomeState smartHomeState;
 
 <MudNavMenu>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
     <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
         Smart Homes
     </MudNavLink>
@@ -24,7 +25,6 @@
     }
     else
     { 
-        <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
         <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
         <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
         <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>

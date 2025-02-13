@@ -88,11 +88,18 @@ namespace SmartHome.Backend.Api
 
         public async Task<SmartHomeResponse> GetHomesFromIds(List<Guid> ids)
         {
+            if (ids.Count == 0)
+                return new SmartHomeResponse(new());
+
+
             var smartHomes = await _ctx.DbContext.SmartHomes
-                .Where(sh => ids.Contains(sh.Id))
-                .ToListAsync();
+                    .Where(home => ids.Contains(home.Id))
+                    .ToListAsync();
+
             return new SmartHomeResponse(smartHomes);
         }
+
+
         private IQueryable<SmartUserModel> GetSmartUsers()
         {
             var userId = _ctx.GetLoggedInId();
