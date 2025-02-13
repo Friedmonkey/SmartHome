@@ -11,7 +11,7 @@ public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCor
     public SmartHomeContext(DbContextOptions<SmartHomeContext> options) : base(options)
     {
     }
-    public DbSet<OldAccount> Accounts { get; set; }
+    //public DbSet<AuthAccount> Accounts { get; set; }
     public DbSet<DeviceAccess> DeviceAccesses { get; set; }
     public DbSet<DeviceAction> DeviceAction { get; set; }
     public DbSet<Device> Devices { get; set; }
