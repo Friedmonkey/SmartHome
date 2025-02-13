@@ -41,8 +41,8 @@ public class Program
         builder.Services.AddAuthorizationCore();
 
         builder.Services.AddScoped<ApiService>();
-        builder.Services.AddScoped<IAccountService, InternalAccountService>();
-        builder.Services.AddScoped<IPersonTestingService, InternalPersonTestingService>();
+        builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
 
         var application = builder.Build();
         await application.RunAsync();
