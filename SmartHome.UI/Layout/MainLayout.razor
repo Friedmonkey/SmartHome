@@ -11,19 +11,25 @@
 <CascadingValue Name="pref" Value="preferences">
     <MudLayout>
         <MudAppBar Elevation="0">
-            @*  <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" /> *@
             <MudSpacer />
             <ThemeToggle />
             <AuthorizeView>
                 <Authorized>
-                    <MudButton Style="width:7%;" OnClick="() => NavMenu.Logout(navManager)">LOGOUT</MudButton>
-                    <Avatar Username="@context.User.GetUserName()" ProfilePicture="@context.User.GetProfilePicture()" />
-                    <MudText Class="mx-4">@context.User.GetUserName()</MudText>
+                    <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <ActivatorContent>
+                            <Avatar Username="@context.User.GetUserName()" ProfilePicture="@context.User.GetProfilePicture()" />
+                            <MudButton>@context.User.GetUserName()</MudButton>
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem Label="Profile" />
+                            <MudMenuItem Label="About" />
+                            <MudMenuItem Label="Logout" OnClick="() => NavMenu.Logout(navManager)" />
+                        </ChildContent>
+                    </MudMenu>
                 </Authorized>
                 <NotAuthorized>
                     <MudAvatar>?</MudAvatar>
                     <MudButton Style="width:7%;" OnClick="() => NavMenu.Login(navManager)">LOGIN</MudButton>
-                    @* <MudText Class="mx-4">Guest</MudText> *@
                 </NotAuthorized>
             </AuthorizeView>
             <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/"/>
@@ -54,12 +60,11 @@
         isDarkMode = newPreferences.DarkMode;
         StateHasChanged();
     }
+
     public void Dispose()
     {
-       profileService.OnChange -= ProfileServiceOnOnChange;
+        profileService.OnChange -= ProfileServiceOnOnChange;
     }
-
-    //private bool darkMode;
 
     MudTheme CustomTheme = new MudTheme()
     {

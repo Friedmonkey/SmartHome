@@ -37,7 +37,7 @@ public class Program
         builder.Services.AddScoped<ProfileService>();
 
         builder.Services.AddScoped<JwtAuthStateProvider>(); //we need it directly for the apiservice
-        builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>(); //for autorizeview
+        builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthStateProvider>()); //very fucking important otherwise auth will desync
         builder.Services.AddAuthorizationCore();
 
         builder.Services.AddScoped<ApiService>();
