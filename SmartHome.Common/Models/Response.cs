@@ -35,11 +35,3 @@ public record Response<T>(bool _RequestSuccess = true, string _RequestMessage = 
 #endif
     }
 }
-
-public static class ResponseExtentions
-{
-    public static bool WasSuccess<T>(this Response<T>? response) where T : Response<T>
-    {   //handles null too
-        return response?._RequestSuccess == true;
-    }
-}

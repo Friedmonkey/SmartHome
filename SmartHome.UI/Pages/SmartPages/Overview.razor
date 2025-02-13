@@ -1,0 +1,16 @@
+﻿@page "/smarthome/{SmartGuid}/overview"
+@attribute [Authorize]
+
+
+<MudText>Get all devices here</MudText>
+
+@code {
+    [Parameter]
+    public Guid SmartGuid { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        //load devices or something
+        return base.OnInitializedAsync();
+    }
+}

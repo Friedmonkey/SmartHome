@@ -34,16 +34,16 @@ public class SharedConfig
             public const string InviteToSmartHomeUrl = SmartHomeBase + "invite";
             public const string AcceptInviteToSmartHomeUrl = SmartHomeBase + "acceptInvite";
             public const string getJoinedUrl = SmartHomeBase + "getJoined";
-            public const string getInvitesUrl = SmartHomeBase + "getJoined";
+            public const string getInvitesUrl = SmartHomeBase + "getInvited";
         }
 
         private const string SmartUserBase = ApiBase + "SmartUser/";
         public static class SmartUser
         {
             public const string AddSmartUserUrl = SmartUserBase + "add";
-            public const string UpdateSmartHomeUrl = SmartHomeBase + "update";
-            public const string GetSmartUsersOfSmartUserUrl = SmartHomeBase + "getsmartuserofaccount";
-            public const string DeleteSmartUserUrl = SmartHomeBase + "Delete";
+            public const string UpdateSmartHomeUrl = SmartUserBase + "update";
+            public const string GetSmartUsersOfSmartUserUrl = SmartUserBase + "getsmartuserofaccount";
+            public const string DeleteSmartUserUrl = SmartUserBase + "Delete";
         }
     }
 }
