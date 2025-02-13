@@ -11,9 +11,9 @@ public interface IDeviceService
 
     public Task<SuccessResponse> Create(CreateRequest request);
 
-    public Task<DevicesResponse> GetDevicesOfSmartHome(RequestByGuid request); // return list of Devices
+    public Task<DevicesResponse> GetDevicesOfSmartHome(GuidRequest request); // return list of Devices
     
-    public Task<SuccessResponse> Delete(RequestByGuid request);
+    public Task<SuccessResponse> Delete(GuidRequest request);
     
     public Task<SuccessResponse> Update(CreateRequest request);
 

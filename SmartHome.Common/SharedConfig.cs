@@ -30,9 +30,19 @@ public class SharedConfig
         private const string SmartHomeBase = ApiBase + "SmartHome/";
         public static class SmartHome
         {
-            public const string AddPersonUrl = SmartHomeBase + "add";
-            public const string GetByAgeUrl = SmartHomeBase + "getByAge";
-            public const string GetByNameUrl = SmartHomeBase + "getByName";
+            public const string AddSmartHomeUrl = SmartHomeBase + "add";
+            public const string UpdateSmartHomeUrl = SmartHomeBase + "update";
+            public const string GetSmartHomesOfSmartUserUrl = SmartHomeBase + "getsmarthomesofsmartuser";
+            public const string DeleteSmartHomeUrl = SmartHomeBase + "Delete";
+        }
+
+        private const string SmartUserBase = ApiBase + "SmartUser/";
+        public static class SmartUser
+        {
+            public const string AddSmartUserUrl = SmartUserBase + "add";
+            public const string UpdateSmartHomeUrl = SmartHomeBase + "update";
+            public const string GetSmartUsersOfSmartUserUrl = SmartHomeBase + "getsmartuserofaccount";
+            public const string DeleteSmartUserUrl = SmartHomeBase + "Delete";
         }
     }
 }
