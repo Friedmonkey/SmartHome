@@ -7,25 +7,25 @@ namespace SmartUser.Backend.Api;
 
 public class SmartUserService : ISmartUserService
 {
-    private readonly ApiContext _apiContext;
+    private readonly ApiContext _ctx;
 
     public SmartUserService(ApiContext apiContext)
     {
-        _apiContext = apiContext;
+        _ctx = apiContext;
     }
 
     public async Task<SuccessResponse> Create(CreateRequest request)
     {
         try
         {
-            var result = await _apiContext.DbContext.SmartUser.AddAsync(new()
+            var result = await _ctx.DbContext.SmartUsers.AddAsync(new()
             {
                 Id = Guid.NewGuid(),
                 AccountId = request.AccountId,
-                RoleId = request.RoleId,
+                Role = request.RoleId,
                 SmartHomeId = request.SmartHomeId
             });
-            await _apiContext.DbContext.SaveChangesAsync();
+            await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
         }
         catch (Exception ex)
@@ -38,12 +38,12 @@ public class SmartUserService : ISmartUserService
     {
         try
         {
-            var result = await _apiContext.DbContext.SmartUser.FindAsync(request.Id);
+            var result = await _ctx.DbContext.SmartUsers.FindAsync(request.Id);
             if (result == null) {
                 return SuccessResponse.Failed("Smart User not found");
             }
-            _apiContext.DbContext.SmartUser.Remove(result);
-            await _apiContext.DbContext.SaveChangesAsync();
+            _ctx.DbContext.SmartUsers.Remove(result);
+            await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
         }
         catch (Exception ex)
@@ -56,7 +56,7 @@ public class SmartUserService : ISmartUserService
     {
         try
         {
-            var smartUsers = await _apiContext.DbContext.SmartUser
+            var smartUsers = await _ctx.DbContext.SmartUsers
             .Where(su => su.AccountId == request.Id)
             .ToListAsync();
             if (smartUsers is null)
@@ -76,17 +76,17 @@ public class SmartUserService : ISmartUserService
 
     public async Task<SuccessResponse> Update(UpdateRequest request)
     {
-        var SmartUser = await _apiContext.DbContext.SmartUser.FindAsync(request.id);
+        var SmartUser = await _ctx.DbContext.SmartUsers.FindAsync(request.id);
         if (SmartUser is null)
         {
             return SuccessResponse.Failed("Not Found");
         }
         SmartUser.SmartHomeId = request.SmartHomeId;
         SmartUser.AccountId = request.AccountId;
-        SmartUser.RoleId = request.RoleId;
+        SmartUser.Role = request.RoleId;
         try
         {
-            await _apiContext.DbContext.SaveChangesAsync();
+            await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
         }
         catch (Exception ex)

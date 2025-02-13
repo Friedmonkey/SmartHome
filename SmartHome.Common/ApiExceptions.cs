@@ -1,4 +1,4 @@
-﻿namespace SmartHome.UI.Api
+﻿namespace SmartHome.Common
 {
     public class ApiError : Exception
     {

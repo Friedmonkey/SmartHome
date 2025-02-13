@@ -1,65 +1,116 @@
 ﻿using SmartHome.Backend.FastEndpoints.Base;
-using SmartHome.Common;
 using SmartHome.Common.Api;
+using SmartHome.Common;
 using static SmartHome.Common.Api.ISmartHomeService;
 
 namespace SmartHome.Backend.FastEndpoints;
 
-public class CreateSmartHomeEndpoint : BasicEndpointBase<CreateSmartHomeRequest, SuccessResponse>
+public class CreateSmartHomeEndpoint : BasicEndpointBase<CreateSmartHomeRequest, GuidResponse>
 {
-    public required ISmartHomeService SmartHomeService { get; set; }
+    public required ISmartHomeService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.SmartHome.AddSmartHomeUrl);
-        AllowAnonymous();
+        Post(SharedConfig.Urls.SmartHome.CreateSmartHomeUrl);
+        SecureJwtEndpoint();
     }
 
     public override async Task HandleAsync(CreateSmartHomeRequest request, CancellationToken ct)
     {
-        await SendAsync(await SmartHomeService.CreateSmartHome(request));
+        try
+        {
+            await SendAsync(await Service.CreateSmartHome(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(GuidResponse.Error(ex));
+        }
     }
 }
 
-public class GetSmartHomesOfSmartUser : BasicEndpointBase<GuidRequest, SmartHomeResponse>
+public class InviteToSmartHomeEndpoint : BasicEndpointBase<InviteRequest, SuccessResponse>
 {
-    public required ISmartHomeService SmartHomeService { get; set; }
+    public required ISmartHomeService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.SmartHome.AddSmartHomeUrl);
-        AllowAnonymous();
+        Post(SharedConfig.Urls.SmartHome.InviteToSmartHomeUrl);
+        SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(GuidRequest request, CancellationToken ct)
+    public override async Task HandleAsync(InviteRequest request, CancellationToken ct)
     {
-        await SendAsync(await SmartHomeService.GetSmartHomesOfSmartUser(request));
+        try
+        {
+            await SendAsync(await Service.InviteToSmartHome(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
     }
 }
 
-public class UpdateSmartHomeEndpoint : BasicEndpointBase<UpdateSmartHomeRequest, SuccessResponse>
+public class AcceptSmartHomeInviteEndpoint : BasicEndpointBase<AcceptInviteRequest, SuccessResponse>
 {
-    public required ISmartHomeService SmartHomeService { get; set; }
+    public required ISmartHomeService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.SmartHome.UpdateSmartHomeUrl);
-        AllowAnonymous();
+        Post(SharedConfig.Urls.SmartHome.AcceptInviteToSmartHomeUrl);
+        SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(UpdateSmartHomeRequest request, CancellationToken ct)
+    public override async Task HandleAsync(AcceptInviteRequest request, CancellationToken ct)
     {
-        await SendAsync(await SmartHomeService.UpdateSmartHome(request));
+        try
+        {
+            await SendAsync(await Service.AcceptSmartHomeInvite(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
     }
 }
-public class DeleteSmartHomeEndpoint : BasicEndpointBase<GuidRequest, SuccessResponse>
+
+public class GetJoinedSmartHomesEndpoint : BasicEndpointBase<EmptyRequest, SmartHomeResponse>
 {
-    public required ISmartHomeService SmartHomeService { get; set; }
+    public required ISmartHomeService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.SmartHome.DeleteSmartHomeUrl);
-        AllowAnonymous();
+        Get(SharedConfig.Urls.SmartHome.getJoinedUrl);
+        SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(GuidRequest request, CancellationToken ct)
+    public override async Task HandleAsync(EmptyRequest request, CancellationToken ct)
     {
-        await SendAsync(await SmartHomeService.DeleteSmartHome(request));
+        try
+        {
+            await SendAsync(await Service.GetJoinedSmartHomes(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SmartHomeResponse.Error(ex));
+        }
+    }
+}
+
+public class GetSmartHomeInvitesEndpoint : BasicEndpointBase<EmptyRequest, SmartHomeResponse>
+{
+    public required ISmartHomeService Service { get; set; }
+    public override void Configure()
+    {
+        Get(SharedConfig.Urls.SmartHome.getInvitesUrl);
+        SecureJwtEndpoint();
+    }
+
+    public override async Task HandleAsync(EmptyRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await SendAsync(await Service.GetSmartHomeInvites(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SmartHomeResponse.Error(ex));
+        }
     }
 }

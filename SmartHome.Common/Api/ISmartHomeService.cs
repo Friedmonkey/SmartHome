@@ -5,26 +5,17 @@ namespace SmartHome.Common.Api;
 
 public interface ISmartHomeService
 {
-    public record SmartHomeResponse(List<Models.Entities.SmartHome> homes) : Response<SmartHomeResponse>;
-
+    public record SmartHomeResponse(List<SmartHomeModel> homes) : Response<SmartHomeResponse>;
 
     public record CreateSmartHomeRequest(string name);
     public Task<GuidResponse> CreateSmartHome(CreateSmartHomeRequest request);
 
-    public record InviteToSmartHomeRequest(Guid smartHome, string email);
-    public Task<SuccessResponse> InviteToSmartHome(InviteToSmartHomeRequest request);
+    public record InviteRequest(Guid smartHome, string email);
+    public Task<SuccessResponse> InviteToSmartHome(InviteRequest request);
 
+    public record AcceptInviteRequest(Guid smartHome);
+    public Task<SuccessResponse> AcceptSmartHomeInvite(AcceptInviteRequest request);
 
-    public Task<SmartHomeResponse> GetSmartHomesOfSmartUser(GuidRequest request);
-    public Task<SmartHomeResponse> GetSmartHomeInvitesOfSmartUser(GuidRequest request);
-
-
-
-
-    
-    public Task<SuccessResponse> DeleteSmartHome(GuidRequest request);
-    
-
-    public record UpdateSmartHomeRequest(Guid smartHome, string name, string ssId, string ssPassword);    
-    public Task<SuccessResponse> UpdateSmartHome(UpdateSmartHomeRequest request);
+    public Task<SmartHomeResponse> GetJoinedSmartHomes(EmptyRequest request);
+    public Task<SmartHomeResponse> GetSmartHomeInvites(EmptyRequest request);
 }

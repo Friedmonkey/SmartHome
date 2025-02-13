@@ -5,7 +5,7 @@ using SmartHome.Database.Auth;
 
 namespace SmartHome.Common.Models.Entities;
 
-public class SmartUser : Entity
+public class SmartUserModel : Entity
 {
     [Required]
     public Guid AccountId { get; set; }
@@ -14,8 +14,8 @@ public class SmartUser : Entity
     public Guid SmartHomeId { get; set; }
 
     [Required]
-    public UserRole RoleId { get; set; }
+    public UserRole Role { get; set; }
 
     public AuthAccount? Account { get; set; }
-    public SmartHome? SmartHome { get; set; }
+    public SmartHomeModel? SmartHome { get; set; }
 }

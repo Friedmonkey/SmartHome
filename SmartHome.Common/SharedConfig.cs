@@ -30,10 +30,11 @@ public class SharedConfig
         private const string SmartHomeBase = ApiBase + "SmartHome/";
         public static class SmartHome
         {
-            public const string AddSmartHomeUrl = SmartHomeBase + "add";
-            public const string UpdateSmartHomeUrl = SmartHomeBase + "update";
-            public const string GetSmartHomesOfSmartUserUrl = SmartHomeBase + "getsmarthomesofsmartuser";
-            public const string DeleteSmartHomeUrl = SmartHomeBase + "Delete";
+            public const string CreateSmartHomeUrl = SmartHomeBase + "create";
+            public const string InviteToSmartHomeUrl = SmartHomeBase + "invite";
+            public const string AcceptInviteToSmartHomeUrl = SmartHomeBase + "acceptInvite";
+            public const string getJoinedUrl = SmartHomeBase + "getJoined";
+            public const string getInvitesUrl = SmartHomeBase + "getJoined";
         }
 
         private const string SmartUserBase = ApiBase + "SmartUser/";

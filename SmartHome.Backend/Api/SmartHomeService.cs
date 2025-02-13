@@ -1,95 +1,103 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
+using SmartHome.Common.Models.Enums;
 using static SmartHome.Common.Api.ISmartHomeService;
 
-namespace SmartHome.Backend.Api;
-
-public class SmartHomeService : ISmartHomeService
+namespace SmartHome.Backend.Api
 {
-    private readonly ApiContext _apiContext;
+    public class SmartHomeService : ISmartHomeService
+    {
+        private readonly ApiContext _ctx;
 
-    public SmartHomeService(ApiContext apiContext)
-    {
-        _apiContext = apiContext;
-    }
-    public async Task<SuccessResponse> CreateSmartHome(CreateSmartHomeRequest request)
-    {
-        Common.Models.Entities.SmartHome home = new(){ Id = Guid.NewGuid(), Name = request.name, SSID = request.ssId, SSPassword = request.ssPassword};
-       try
-       {
-           var result = await _apiContext.DbContext.Home.AddAsync(home);
-           await _apiContext.DbContext.SaveChangesAsync();
-           if (result is null)
-               return SuccessResponse.Failed("SmartHomeRequest was null");
-           else
-           {
-               return SuccessResponse.Success();
-           }
-       }
-       catch (Exception ex) {
-           return SuccessResponse.FailedJson(ex);
-       }
-    }
-
-    public async Task<SuccessResponse> DeleteSmartHome(GuidRequest request)
-    {
-        try
+        public SmartHomeService(ApiContext ctx)
         {
-            var deletedhome = await (_apiContext.DbContext.Home.Where(h => h.Id == request.Id)).FirstOrDefaultAsync();
-            if (deletedhome is null)
+            _ctx = ctx;
+        }
+
+        public async Task<GuidResponse> CreateSmartHome(CreateSmartHomeRequest request)
+        {
+            var home = new SmartHomeModel()
             {
-                return SuccessResponse.Failed("Not Found");
-            }
-            var result = _apiContext.DbContext.Home.Remove(deletedhome);
+                Id = Guid.NewGuid(),
+                Name = request.name,
+                SSID = string.Empty,
+                SSPassword = string.Empty,
+            };
+            var homeResult = await _ctx.DbContext.SmartHomes.AddAsync(home);
+            var smartUser = new SmartUserModel()
+            { 
+                AccountId = _ctx.GetLoggedInId(),
+                SmartHomeId = homeResult.Entity.Id,
+                Role = UserRole.Admin,
+            };
+            await _ctx.DbContext.SmartUsers.AddAsync(smartUser);
+
+            await _ctx.DbContext.SaveChangesAsync();
+
+            return new GuidResponse(homeResult.Entity.Id);
+        }
+        public async Task<SuccessResponse> InviteToSmartHome(InviteRequest request)
+        {
+            await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
+
+            var acc = await _ctx.GetAccountByEmail(request.email);
+
+            var smartUser = new SmartUserModel() 
+            {
+                AccountId = acc.Id,
+                SmartHomeId = request.smartHome,
+                Role = UserRole.InvitationPending,
+            };
+
+            var result = await _ctx.DbContext.SmartUsers.AddAsync(smartUser);
             if (result is null)
-                return SuccessResponse.Failed("SmartHomeRequest was null");
-            else
-            {
-                await _apiContext.DbContext.SaveChangesAsync();
-                return SuccessResponse.Success();
-            }
-        }
-        catch (Exception ex)
-        {
-            return SuccessResponse.FailedJson(ex);
-        }
-    }
-
-    public async Task<SmartHomeResponse> GetSmartHomesOfSmartUser(GuidRequest request)
-    {
-        List<SmartHome?> homes =  await _apiContext.DbContext.SmartUser
-            .Where(su => su.AccountId == request.Id)
-            .Select(su => su.SmartHome)
-            .ToListAsync();
-        if (homes is null)
-        {
-            return SmartHomeResponse.Failed("Not Found");
-        }
-        else
-        {
-            return new SmartHomeResponse(homes!);
-        }
-    }
-
-    public async Task<SuccessResponse> UpdateSmartHome(UpdateSmartHomeRequest request)
-    {
-        var home = await _apiContext.DbContext.Home.FindAsync(request.Id);
-        if (home is null)
-            return SuccessResponse.Failed("Not Found");
-
-        home.Name = request.name;
-        home.SSID = request.ssId;
-        home.SSPassword = request.ssPassword;
-
-        try
-        {
-            await _apiContext.DbContext.SaveChangesAsync();
+                return SuccessResponse.Failed("Failed to send invitation");
             return SuccessResponse.Success();
         }
-        catch (Exception ex)
+        public async Task<SuccessResponse> AcceptSmartHomeInvite(AcceptInviteRequest request)
         {
-            return SuccessResponse.FailedJson(ex);
+            var smartUser = await _ctx.GetLoggedInSmartUser(request.smartHome);
+
+            if (smartUser.Role != UserRole.InvitationPending)
+                return SuccessResponse.Failed("You dont have an invitation.");
+
+            smartUser.Role = UserRole.User;
+
+            await _ctx.DbContext.SaveChangesAsync();
+            return SuccessResponse.Success();
+        }
+        public async Task<SmartHomeResponse> GetJoinedSmartHomes(EmptyRequest request)
+        {
+            var smartHomeIds = await GetSmartUsers()
+                .Where(su => su.Role == UserRole.Admin || su.Role == UserRole.User || su.Role == UserRole.Guest)
+                .Select(su => su.SmartHomeId)
+                .ToListAsync();
+
+            return await GetHomesFromIds(smartHomeIds);
+        }
+        public async Task<SmartHomeResponse> GetSmartHomeInvites(EmptyRequest request)
+        {
+            var smartHomeIds = await GetSmartUsers()
+                .Where(su => su.Role == UserRole.InvitationPending)
+                .Select(su => su.SmartHomeId)
+                .ToListAsync();
+
+            return await GetHomesFromIds(smartHomeIds);
+        }
+
+        public async Task<SmartHomeResponse> GetHomesFromIds(List<Guid> ids)
+        {
+            var smartHomes = await _ctx.DbContext.SmartHomes
+                .Where(sh => ids.Contains(sh.Id))
+                .ToListAsync();
+            return new SmartHomeResponse(smartHomes);
+        }
+        private IQueryable<SmartUserModel> GetSmartUsers()
+        {
+            var userId = _ctx.GetLoggedInId();
+            var smartUsers = _ctx.DbContext.SmartUsers.Where(su => su.AccountId == userId);
+            return smartUsers;
         }
     }
 }

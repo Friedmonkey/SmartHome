@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace SmartHome.UI.Auth;
+namespace SmartHome.Common;
 
 public static class ClaimsPrincipalExtensions
 {
@@ -11,6 +11,7 @@ public static class ClaimsPrincipalExtensions
         {
             JwtRegisteredClaimNames.Name,
             JwtRegisteredClaimNames.Email,
+            JwtRegisteredClaimNames.Sub,
         };
         return HasAllClaims(claimsPrincipal, userClaims);
     }
@@ -32,7 +33,7 @@ public static class ClaimsPrincipalExtensions
 
     public static string GetUserName(this ClaimsPrincipal claimsPrincipal)
     {
-        return GetRequiredClaimValue(claimsPrincipal, "name");
+        return GetRequiredClaimValue(claimsPrincipal, JwtRegisteredClaimNames.Name);
     }
 
     public static string? GetProfilePicture(this ClaimsPrincipal claimsPrincipal)
@@ -42,7 +43,12 @@ public static class ClaimsPrincipalExtensions
 
     public static string GetEmail(this ClaimsPrincipal claimsPrincipal)
     {
-        return GetRequiredClaimValue(claimsPrincipal, "email");
+        return GetRequiredClaimValue(claimsPrincipal, JwtRegisteredClaimNames.Email);
+    }
+    public static Guid GetID(this ClaimsPrincipal claimsPrincipal)
+    {
+        var id = GetRequiredClaimValue(claimsPrincipal, JwtRegisteredClaimNames.Sub);
+        return Guid.Parse(id);
     }
 }
 

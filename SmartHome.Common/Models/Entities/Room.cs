@@ -12,5 +12,5 @@ public class Room : Entity
     [Required]
     public Guid SmartHomeId { get; set; }
 
-    public SmartHome? SmartHome { get; set; }
+    public SmartHomeModel? SmartHome { get; set; }
 }

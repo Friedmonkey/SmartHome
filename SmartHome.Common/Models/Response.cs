@@ -26,6 +26,8 @@ public record Response<T>(bool _RequestSuccess = true, string _RequestMessage = 
     }
     public static T Error(Exception ex)
     {
+        if (ex is ApiError apiError && (apiError.IsFatal == false))
+            return Failed(apiError.Error);
 #if DEBUG
         return FailedJson(ex);
 #else

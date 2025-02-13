@@ -12,5 +12,5 @@ public class DeviceAccess : Entity
     public Guid SmartUserId { get; set; }
 
     public Device Device { get; set; }
-    public SmartUser SmartUser { get; set; }
+    public SmartUserModel SmartUser { get; set; }
 }

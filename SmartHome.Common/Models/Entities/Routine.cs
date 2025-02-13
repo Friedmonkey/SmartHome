@@ -19,6 +19,6 @@ public class Routine : Entity
     [Column(TypeName = "binary(7)")]
     public byte RepeatDays { get; set; }
 
-    public SmartHome SmartHome { get; set; }
+    public SmartHomeModel SmartHome { get; set; }
     
 }
