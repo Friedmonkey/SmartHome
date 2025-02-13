@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SmartHome.Backend.Auth;
 using SmartHome.Common.Models;
+using SmartHome.Database.Auth;
 
 namespace SmartHome.Backend.FastEndpoints.Base;
 

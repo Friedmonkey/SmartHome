@@ -16,7 +16,14 @@ public class RegisterEndpoint : BasicEndpointBase<RegisterRequest, SuccessRespon
 
     public override async Task HandleAsync(RegisterRequest request, CancellationToken ct)
     {
-        await SendAsync(await AccountService.Register(request));
+        try
+        { 
+            await SendAsync(await AccountService.Register(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
     }
 }
 

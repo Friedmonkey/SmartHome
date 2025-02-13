@@ -1,4 +1,4 @@
-﻿namespace SmartHome.Backend.Auth;
+﻿namespace SmartHome.Database.Auth;
 
 public static class AuthRoles
 {

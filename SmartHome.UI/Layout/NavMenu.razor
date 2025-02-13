@@ -2,7 +2,6 @@
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
     <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
     <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
-    @* <MudNavLink Href="login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Login</MudNavLink> *@
     <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
 </MudNavMenu>
 
@@ -16,15 +15,15 @@
             if (url.StartsWith("http") && !url.ToLower().StartsWith(navManager.BaseUri.ToLower())) //we do not want to rediract to offsite urls
             {
                 Console.WriteLine($"Offsite url detected: redirection to \"{url}\" was blocked.");
-                navManager.NavigateTo("/", true);
+                navManager.NavigateTo("/");
                 return;
             }
 
-            navManager.NavigateTo(url, true);
+            navManager.NavigateTo(url);
             return;
         }
 
-        navManager.NavigateTo("/", true);
+        navManager.NavigateTo("/");
     }
     public static void Login(NavigationManager navManager)
     {

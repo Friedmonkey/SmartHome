@@ -1,23 +1,24 @@
 ﻿using JwtBearer = FastEndpoints.Security.JwtBearer;
+using static SmartHome.Common.Api.IAccountService;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SmartHome.Backend.Auth;
 using SmartHome.Common.Api;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using static SmartHome.Common.Api.IAccountService;
+using SmartHome.Database.Auth;
 
 namespace SmartHome.Backend.Api;
 
 public class AccountService : IAccountService
 {
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
+    private readonly UserManager<AuthAccount> _userManager;
+    private readonly SignInManager<AuthAccount> _signInManager;
     private readonly BackendConfig _backendConfig;
     private readonly ApiContext _apiContext;
 
-    public AccountService(UserManager<User> userManager, SignInManager<User> signInManager, BackendConfig backendConfig, ApiContext apiContext)
+    public AccountService(UserManager<AuthAccount> userManager, SignInManager<AuthAccount> signInManager, BackendConfig backendConfig, ApiContext apiContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -29,7 +30,7 @@ public class AccountService : IAccountService
     {
         if (request.Password != request.PasswordConfirm)
             return SuccessResponse.Failed("Passwords do not match");
-        var user = new User()
+        var user = new AuthAccount()
         {
             Email = request.Email,
             UserName = request.Username,
@@ -77,7 +78,7 @@ public class AccountService : IAccountService
         return SuccessResponse.Failed("not implemented");
     }
 
-    private async Task<TokenResponse> GetTokenResponse(User user)
+    private async Task<TokenResponse> GetTokenResponse(AuthAccount user)
     {
         if (string.IsNullOrEmpty(user.SecurityStamp))
             return TokenResponse.Failed("User Refresh key not set.");
@@ -102,7 +103,7 @@ public class AccountService : IAccountService
             return SuccessResponse.FailedJson(errors);
         }
     }
-    private async Task<User> GetUserFromContext()
+    private async Task<AuthAccount> GetUserFromContext()
     {
         if (_apiContext.User is null)
             throw new Exception("Unable to get apiContext user");
@@ -117,22 +118,12 @@ public class AccountService : IAccountService
 
         return user;
     }
-    private string CreateJWT(User user)
+    private string CreateJWT(AuthAccount user)
     {
-        //var claims = new[]
-        //{
-        //    new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")), // NOTE: this will be the "User.Identity.Name" value
-        //    new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")),
-        //    new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
-        //    //new Claim("role", AuthRoles.AuthUser), //Fastendpoint looks for 'role' by default
-        //};
-
 #warning change to 15 minutes
 
         var jwtToken = JwtBearer.CreateToken(o =>
         {
-            //o.SigningAlgorithm = SecurityAlgorithms.HmacSha256;
-
             o.SigningKey = _backendConfig.JwtSecret;
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()));
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")));
