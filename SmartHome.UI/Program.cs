@@ -7,6 +7,8 @@ using MudExtensions.Services;
 using SmartHome.Common.Api;
 using Blazored.SessionStorage;
 using SmartHome.UI.Auth;
+using Blazored.LocalStorage;
+using SmartHome.UI.Profile;
 
 namespace SmartHome.UI;
 
@@ -30,6 +32,9 @@ public class Program
 
         builder.Services.AddBlazoredSessionStorage();
         builder.Services.AddScoped<IJwtStoreService, JwtSessionStorageService>();
+        
+        builder.Services.AddBlazoredLocalStorage();
+        builder.Services.AddScoped<ProfileService>();
 
         builder.Services.AddScoped<JwtAuthStateProvider>(); //we need it directly for the apiservice
         builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>(); //for autorizeview
