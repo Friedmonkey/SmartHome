@@ -1,18 +1,76 @@
 ﻿@page "/smarthome/{SmartGuid}/overview"
 @attribute [Authorize]
-
 @inject SmartHomeState smartHomeState;
 @inject NavigationManager navManager;
+@using SmartHome.UI.Components;
+@using SmartHome.Common.Api;
+@using SmartHome.Common.Models.Entities;
+@using SmartHome.Common.Models.Enums;
+@inject IDeviceService deviceService;
+@inject ISnackbar snackBar;
 
-<MudText>Get all devices here</MudText>
+@foreach (Room room in roomList)
+{
+    List<Device> list = deviceList.Where(d => d.RoomId == room.Id).ToList();
+    //Ga door all rooms in de roomLists
+    @if (list.Count > 0)
+    {
+        //Zet room name op het scherm
+        <h3 style='text-align: center'>@room.Name</h3>
+        <MudDivider DividerType='DividerType.Middle' Class='my-6' />
+        <MudPaper Class="d-flex flex-wrap align-center gap-12 Apparaaat-Container" Elevation="0">
+            @for (int d = 0; d < list.Count; d++)
+            {
+                //Zet de apparaten op het scherm bij de room
+                switch (list[d].Type)
+                {
+                    case DeviceType.Lamp:
+                        <Lamp Id="@list[d].Id" Name="@list[d].Name" config="@list[d].JsonObjectConfig"></Lamp>
+                        break;
+                    case DeviceType.Televisie:
+                        <Televisie Name="@list[d].Name" Config="@list[d].JsonObjectConfig"></Televisie>
+                        break;
+                    case DeviceType.Wasmachine:
+                        <Wasmachine Name="@list[d].Name" Config="@list[d].JsonObjectConfig"></Wasmachine>
+                        break;
+                    case DeviceType.Router:
+                        <Wifi_Router Id="@list[d].Id" Name="@list[d].Name" Config="@list[d].JsonObjectConfig"></Wifi_Router>
+                        break;
+                }
+            }
+        </MudPaper>
+    }
+}
+
+<style>
+
+    .Apparaaat-Container {
+        margin-left: 4%;
+        margin-bottom: 35px;
+        background-color: transparent;
+    }
+
+    .Overzicht {
+        background-color: green;
+        width: 100%;
+        height: 100%;
+    }
+</style>
 
 @code {
-    [Parameter]
+
+     [Parameter]
     public string? SmartGuid { get; set; }
 
     private Guid SmartHomeId;
 
-    protected override Task OnInitializedAsync()
+    bool DataLoaded = false;
+
+    List<Device> deviceList = new List<Device>();
+    List<Room> roomList = new List<Room>();
+    HttpClient httpClient = new HttpClient();
+
+    protected override async Task OnInitializedAsync()
     {
         if (SmartGuid is null)
         {
@@ -21,11 +79,35 @@
         else
         {
             if (!Guid.TryParse(SmartGuid, out SmartHomeId))
-                navManager.NavigateTo("/smarthome"); 
+                navManager.NavigateTo("/smarthome");
             smartHomeState.SetSelectedSmartHome(SmartHomeId);
         }
 
-        //load devices or something
-        return base.OnInitializedAsync();
+        //Haal de Kamers en apparten op uit de DataBase met de APi
+        await GetDevices();
+        await GetRooms();
+
+    }
+
+    private async Task GetDevices()
+    {
+        var Devices = await deviceService.GetDevicesByHouseId(new(SmartHomeId));
+        if (Devices.WasSuccess())
+        {
+            //Zet de apparaten in een lijst
+            deviceList = Devices.Devices;
+        }
+    }
+
+    protected async Task GetRooms()
+    {
+
+        var Rooms = await deviceService.GetRoomsByHouseId(new(SmartHomeId));
+        if (Rooms.WasSuccess())
+        {
+            //Zet de kamers in een lijst
+            roomList = Rooms.Rooms.ToList();
+            StateHasChanged();
+        }
     }
 }

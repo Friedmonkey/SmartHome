@@ -16,6 +16,8 @@ namespace SmartHome.Backend.Api
 
         public async Task<DiviceListResponse> GetDevicesByHouseId(DeviceListRequest request)
         {
+            var smartUser = await _context.GetLoggedInSmartUser(request.HomeGuid);
+
             var result = await _context.DbContext.Devices.ToListAsync();
 
             if (result == null)
