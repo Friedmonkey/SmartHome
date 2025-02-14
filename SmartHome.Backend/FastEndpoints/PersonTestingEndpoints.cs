@@ -26,6 +26,7 @@ public class AddPersonEndpoint : BasicEndpointBase<AddPersonRequest, SuccessResp
         }
     }
 }
+
 public class GetPersonByAgeEndpoint : BasicEndpointBase<GetPersonByAgeRequest, PersonResponse>
 {
     public required IPersonTestingService Service { get; set; }

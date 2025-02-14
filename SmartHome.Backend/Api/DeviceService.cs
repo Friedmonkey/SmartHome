@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using static SmartHome.Common.Api.IDeviceService;

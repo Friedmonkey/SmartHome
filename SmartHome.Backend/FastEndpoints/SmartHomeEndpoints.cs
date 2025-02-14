@@ -49,7 +49,7 @@ public class InviteToSmartHomeEndpoint : BasicEndpointBase<InviteRequest, Succes
     }
 }
 
-public class AcceptSmartHomeInviteEndpoint : BasicEndpointBase<AcceptInviteRequest, SuccessResponse>
+public class AcceptSmartHomeInviteEndpoint : BasicEndpointBase<SmartHomeRequest, SuccessResponse>
 {
     public required ISmartHomeService Service { get; set; }
     public override void Configure()
@@ -58,7 +58,7 @@ public class AcceptSmartHomeInviteEndpoint : BasicEndpointBase<AcceptInviteReque
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(AcceptInviteRequest request, CancellationToken ct)
+    public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
     {
         try
         {
