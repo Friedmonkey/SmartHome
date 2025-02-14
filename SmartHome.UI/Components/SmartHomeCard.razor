@@ -1,0 +1,26 @@
+﻿@inject SmartHomeState smartHomeState;
+@inject NavigationManager navManager;
+
+<MudCard Elevation="11">
+    <MudCardHeader>
+        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Home" />
+    </MudCardHeader>
+    <MudCardContent>
+        <MudText>@Home.Name</MudText>
+        <MudButton OnClick="OpenHome">Open home</MudButton>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public bool IsInvite { get; set; }
+
+    [Parameter]
+    public SmartHomeModel Home { get; set; }
+
+    public void OpenHome()
+    { 
+        smartHomeState.SetSelectedSmartHome(Home.Id);
+        navManager.NavigateTo($"/smarthome/{Home.Id}/overview");
+    }
+}

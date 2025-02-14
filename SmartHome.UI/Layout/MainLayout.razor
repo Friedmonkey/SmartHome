@@ -1,59 +1,73 @@
-﻿@using SmartHome.UI.Auth
-@inherits LayoutComponentBase
+﻿@using SmartHome.UI.Auth;
+@inherits LayoutComponentBase;
 @inject NavigationManager navManager;
+@inject ProfileService profileService;
 
-<MudThemeProvider />
+<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme="CustomTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <MudAppBar Elevation="0">
-        @*  <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" /> *@
-        <MudSpacer />
-        <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="CustomTheme"/>
-        @if (_isDarkMode)
-        {
-            <MudTooltip Text="Switch to light mode">
-                <MudIconButton OnClick="ChangeDarkMode" Icon="@Icons.Material.TwoTone.LightMode" Color="Color.Warning" />
-            </MudTooltip>
-        }
-        else
-        {
-            <MudTooltip Text="Switch to dark mode">
-                <MudIconButton OnClick="ChangeDarkMode" Icon="@Icons.Material.Rounded.DarkMode" Color="@Color.Warning" />
-            </MudTooltip>
-        }
-        <AuthorizeView>
-            <Authorized>
-                <MudButton Style="width:7%;" OnClick="() => NavMenu.Logout(navManager)">LOGOUT</MudButton>
-                <Avatar Username="@context.User.GetUserName()" ProfilePicture="@context.User.GetProfilePicture()" />
-                <MudText Class="mx-4">@context.User.GetUserName()</MudText>
-            </Authorized>
-            <NotAuthorized>
-                <MudAvatar>?</MudAvatar>
-                <MudButton Style="width:7%;" OnClick="() => NavMenu.Login(navManager)">LOGIN</MudButton>
-                @* <MudText Class="mx-4">Guest</MudText> *@
-            </NotAuthorized>
-        </AuthorizeView>
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/"/>
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/MudBlazor/MudBlazor/"/>
-    </MudAppBar>
-    <SideMenu />
-    <MudMainContent>
-        <div class="pa-4">
-            @Body
-        </div>
-    </MudMainContent>
-</MudLayout>
+<CascadingValue Name="pref" Value="preferences">
+    <MudLayout>
+        <MudAppBar Elevation="0">
+            <MudSpacer />
+            <ThemeToggle />
+            <AuthorizeView>
+                <Authorized>
+                    <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <ActivatorContent>
+                            <Avatar Username="@context.User.GetUserName()" ProfilePicture="@context.User.GetProfilePicture()" />
+                            <MudButton>@context.User.GetUserName()</MudButton>
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem Label="Profile" />
+                            <MudMenuItem Label="About" />
+                            <MudMenuItem Label="Logout" OnClick="() => NavMenu.Logout(navManager)" />
+                        </ChildContent>
+                    </MudMenu>
+                </Authorized>
+                <NotAuthorized>
+                    <MudAvatar>?</MudAvatar>
+                    <MudButton Style="width:7%;" OnClick="() => NavMenu.Login(navManager)">LOGIN</MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
+            <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/"/>
+            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/MudBlazor/MudBlazor/"/>
+        </MudAppBar>
+        <SideMenu />
+        <MudMainContent>
+            <div class="pa-4">
+                @Body
+            </div>
+        </MudMainContent>
+    </MudLayout>
+</CascadingValue>
 
 @code{
-    private bool _isDarkMode;
-    private void ChangeDarkMode() => _isDarkMode = !_isDarkMode;
+    private bool isDarkMode;
+    private Preferences preferences = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        profileService.OnChange += ProfileServiceOnOnChange;
+        preferences = await profileService.GetPreferences();
+        isDarkMode = preferences.DarkMode;
+    }
+    private void ProfileServiceOnOnChange(Preferences newPreferences)
+    {
+        preferences = newPreferences;
+        isDarkMode = newPreferences.DarkMode;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        profileService.OnChange -= ProfileServiceOnOnChange;
+    }
 
     MudTheme CustomTheme = new MudTheme()
-    { 
+    {
         PaletteLight = new PaletteLight()
         {
             AppbarBackground = new MudBlazor.Utilities.MudColor("#f8f9faff"),
@@ -64,10 +78,11 @@
             Divider = new MudBlazor.Utilities.MudColor("#424242ff"),
         },
         PaletteDark = new PaletteDark()
-        { 
+        {
             AppbarBackground = new MudBlazor.Utilities.MudColor("#27272fcc"),
             Primary = new MudBlazor.Utilities.MudColor(Colors.Blue.Darken2),
             Divider = new MudBlazor.Utilities.MudColor("#bebec0"),
         }
     };
+
 }

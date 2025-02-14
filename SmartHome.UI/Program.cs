@@ -7,6 +7,9 @@ using MudExtensions.Services;
 using SmartHome.Common.Api;
 using Blazored.SessionStorage;
 using SmartHome.UI.Auth;
+using Blazored.LocalStorage;
+using SmartHome.UI.Profile;
+using SmartHome.UI.Layout;
 
 namespace SmartHome.UI;
 
@@ -30,15 +33,24 @@ public class Program
 
         builder.Services.AddBlazoredSessionStorage();
         builder.Services.AddScoped<IJwtStoreService, JwtSessionStorageService>();
+        
+        builder.Services.AddBlazoredLocalStorage();
+        builder.Services.AddScoped<ProfileService>();
 
         builder.Services.AddScoped<JwtAuthStateProvider>(); //we need it directly for the apiservice
-        builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>(); //for autorizeview
+        builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthStateProvider>()); //very fucking important otherwise auth will desync
         builder.Services.AddAuthorizationCore();
 
         builder.Services.AddScoped<ApiService>();
-        builder.Services.AddScoped<IAccountService, InternalAccountService>();
-        builder.Services.AddScoped<IPersonTestingService, InternalPersonTestingService>();
+
+        builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
+        builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
         builder.Services.AddScoped<IDeviceService, InternalDeviceService>();
+
+        //keep track of selected smarthome
+        builder.Services.AddScoped<SmartHomeState>();
+
 
         var application = builder.Build();
         await application.RunAsync();

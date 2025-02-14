@@ -1,14 +1,13 @@
 using FastEndpoints;
-//using FastEndpoints.Swagger;
 using Microsoft.EntityFrameworkCore;
 using SmartHome.Backend.Api;
-using SmartHome.Backend.Auth;
 using SmartHome.Common.Api;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 using FastEndpoints.Swagger;
 using SmartHome.Database;
-//using Microsoft.EntityFrameworkCore;
+using SmartHome.Database.Auth;
+using SmartUser.Backend.Api;
 
 namespace SmartHome.Backend;
 
@@ -29,7 +28,7 @@ public class Program
         builder.Services.AddAuthorization();
 
         //setup user in database
-        builder.Services.AddIdentity<User, Role>(options =>
+        builder.Services.AddIdentity<AuthAccount, Role>(options =>
         {
             options.User.RequireUniqueEmail = true;
             options.Password.RequireDigit = true;
@@ -51,6 +50,8 @@ public class Program
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
+        builder.Services.AddScoped<ISmartUserService, SmartUserService>();
+        builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
 
         builder.Services.AddFastEndpoints();
         builder.Services.SwaggerDocument();

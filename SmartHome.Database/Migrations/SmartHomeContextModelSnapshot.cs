@@ -22,38 +22,106 @@ namespace SmartHome.Database.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("SmartHome.Common.Models.Entities.Account", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("int");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("longtext");
 
-                    b.Property<string>("PasswordHashed")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("longtext");
 
-                    b.Property<string>("SecurityStamp")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Accounts");
+                    b.ToTable("RoleClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.ToTable("UserLogins");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("UserTokens");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Device", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("JsonObjectConfig")
                         .IsRequired()
@@ -63,51 +131,45 @@ namespace SmartHome.Database.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(20)");
 
-                    b.Property<string>("RoleGuid")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("RoomId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAccess", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("DeviceId")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("SmartUserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
+                    b.Property<Guid>("SmartUserId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("SmartUserId");
 
                     b.ToTable("DeviceAccesses");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAction", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("JsonObjectConfig")
                         .IsRequired()
@@ -117,20 +179,97 @@ namespace SmartHome.Database.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(20)");
 
-                    b.Property<string>("RoutineId")
+                    b.Property<Guid>("RoutineId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("RoutineId");
+
+                    b.ToTable("DeviceActions");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Log", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("varchar(60)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("DeviceAction");
+                    b.HasIndex("SmartHomeId");
+
+                    b.ToTable("Logs");
                 });
 
-            modelBuilder.Entity("SmartHome.Common.Models.Entities.Home", b =>
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Room", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SmartHomeId");
+
+                    b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Routine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<byte[]>("RepeatDays")
+                        .IsRequired()
+                        .HasColumnType("binary(7)");
+
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SmartHomeId");
+
+                    b.ToTable("Routines");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartHomeModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -146,116 +285,205 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Home");
+                    b.ToTable("SmartHomes");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartUserModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SmartHomeId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("SmartHomeId");
+
+                    b.ToTable("SmartUsers");
+                });
+
+            modelBuilder.Entity("SmartHome.Database.Auth.AuthAccount", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SmartHome.Database.Auth.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Device", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAccess", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartHome.Common.Models.Entities.SmartUserModel", "SmartUser")
+                        .WithMany()
+                        .HasForeignKey("SmartUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+
+                    b.Navigation("SmartUser");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAction", b =>
+                {
+                    b.HasOne("SmartHome.Common.Models.Entities.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartHome.Common.Models.Entities.Routine", "Routine")
+                        .WithMany()
+                        .HasForeignKey("RoutineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+
+                    b.Navigation("Routine");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Log", b =>
                 {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                    b.HasOne("SmartHome.Common.Models.Entities.SmartHomeModel", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<DateTime>("CreateOn")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Log");
-                });
-
-            modelBuilder.Entity("SmartHome.Common.Models.Entities.Role", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Role");
+                    b.Navigation("SmartHome");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Room", b =>
                 {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                    b.HasOne("SmartHome.Common.Models.Entities.SmartHomeModel", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Room");
+                    b.Navigation("SmartHome");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Routine", b =>
                 {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                    b.HasOne("SmartHome.Common.Models.Entities.SmartHomeModel", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<byte[]>("RepeatDays")
-                        .IsRequired()
-                        .HasColumnType("binary(7)");
-
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Routine");
+                    b.Navigation("SmartHome");
                 });
 
-            modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartUser", b =>
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartUserModel", b =>
                 {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(60)");
+                    b.HasOne("SmartHome.Database.Auth.AuthAccount", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("AccountId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.HasOne("SmartHome.Common.Models.Entities.SmartHomeModel", "SmartHome")
+                        .WithMany()
+                        .HasForeignKey("SmartHomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Navigation("Account");
 
-                    b.Property<string>("SmartHomeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SmartUser");
+                    b.Navigation("SmartHome");
                 });
 #pragma warning restore 612, 618
         }

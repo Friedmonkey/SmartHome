@@ -23,6 +23,12 @@
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_content/CodeBeam.MudBlazor.Extensions/MudExtensions.min.js"></script>
+
+    <script>
+        window.prefersDarkMode = function () {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+    </script>
 </body>
 
 </html>

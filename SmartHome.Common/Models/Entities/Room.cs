@@ -5,16 +5,12 @@ namespace SmartHome.Common.Models.Entities;
 
 public class Room : Entity
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column(TypeName = "varchar(60)")]
-    public string Id { get; set; }
-
     [Required]
     [Column(TypeName = "varchar(20)")]
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     [Required]
-    [Column(TypeName = "varchar(60)")]
-    public string SmartHomeId { get; set; }
+    public Guid SmartHomeId { get; set; }
+
+    public SmartHomeModel? SmartHome { get; set; }
 }
