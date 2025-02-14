@@ -55,7 +55,7 @@ namespace SmartHome.Backend.Api
                 return SuccessResponse.Failed("Failed to send invitation");
             return SuccessResponse.Success();
         }
-        public async Task<SuccessResponse> AcceptSmartHomeInvite(AcceptInviteRequest request)
+        public async Task<SuccessResponse> AcceptSmartHomeInvite(SmartHomeRequest request)
         {
             var smartUser = await _ctx.GetLoggedInSmartUser(request.smartHome);
 

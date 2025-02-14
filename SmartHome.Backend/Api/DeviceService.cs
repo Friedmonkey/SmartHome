@@ -1,46 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
-using static SmartHome.Common.Api.IDeviceService;
+using static SmartHome.Common.Api.INewDeviceService;
 
 namespace SmartHome.Backend.Api
 {
-    public class DeviceService : IDeviceService
+    public class DeviceService : INewDeviceService
     {
-        private readonly ApiContext _context;
-
-        public DeviceService(ApiContext context)
+        private ApiContext _ctx;
+        public DeviceService(ApiContext apiContext)
         {
-            _context = context;
+            _ctx = apiContext;
+        }
+        public async Task<GuidResponse> CreateDevice(CreateDeviceRequest request)
+        {   //only admins can create devices
+            await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
+
+            Device device = new Device()
+            { 
+                Name = request.deviceName,
+                 = request.deviceType
+            };
+            await _ctx.DbContext.Devices.AddAsync(device);
+            throw new NotImplementedException();
         }
 
-        public async Task<DiviceListResponse> GetDevicesByHouseId(DeviceListRequest request)
+        public async Task<DeviceListResponse> GetRoomsAndDevicesForUser(SmartHomeRequest request)
         {
-            var result = await _context.DbContext.Devices.ToListAsync();
-
-            if (result == null)
-                return DiviceListResponse.Failed("Not Devices found in DataBase");
-            else
-                return new DiviceListResponse(result);
-        }
-
-        public async Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request)
-        {
-            var result = await _context.DbContext.Rooms.ToListAsync();
-
-            if (result == null)
-                return RoomListResponse.Failed("Not Devices found in DataBase");
-            else
-                return new RoomListResponse(result);
-        }
-
-        public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
-        {
-            var result = await _context.DbContext.Devices
-                .Where(d => d.Id == request.DeviceId)
-                .ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JsonObjectConfig, request.ConfigJson));
-
-            return SuccessResponse.Success();
+            var smartUser = await _ctx.GetLoggedInSmartUser(request.smartHome);
+            throw new NotImplementedException();
         }
     }
 }

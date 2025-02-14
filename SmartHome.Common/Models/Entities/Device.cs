@@ -5,7 +5,6 @@ using System.Text.Json.Nodes;
 namespace SmartHome.Common.Models.Entities;
 public class Device : Entity
 {
-
     [Required]
     [Column(TypeName = "varchar(20)")]
     public string Name { get; set; }

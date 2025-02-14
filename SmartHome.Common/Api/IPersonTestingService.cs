@@ -7,7 +7,6 @@ public record PersonResponse(Person person) : Response<PersonResponse>;
 
 public interface IPersonTestingService
 {
-
     public record AddPersonRequest(Person person);
     Task<SuccessResponse> AddPerson(AddPersonRequest request);
 
