@@ -15,13 +15,13 @@ namespace SmartHome.Common.Api
     public interface IDeviceService
     {
         ///Maak een Response aan
-        public record DeviceListRequest(string HomeGuid);
+        public record DeviceListRequest(Guid HomeGuid);
         Task<DiviceListResponse> GetDevicesByHouseId(DeviceListRequest request);
 
-        public record RoomListRequest(string HomeGuid);
+        public record RoomListRequest(Guid HomeGuid);
         Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request);
 
-        public record UpdateDeviceConfigRequest(string DeviceId, string ConfigJson);
+        public record UpdateDeviceConfigRequest(Guid DeviceId, string ConfigJson);
         Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request);
     }
 }

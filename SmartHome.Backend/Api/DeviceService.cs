@@ -26,7 +26,7 @@ namespace SmartHome.Backend.Api
 
         public async Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request)
         {
-            var result = await _context.DbContext.Room.ToListAsync();
+            var result = await _context.DbContext.Rooms.ToListAsync();
 
             if (result == null)
                 return RoomListResponse.Failed("Not Devices found in DataBase");

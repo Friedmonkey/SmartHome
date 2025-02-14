@@ -10,7 +10,7 @@ public class SharedConfig
 
         private const string AccountBase = ApiBase + "account/";
         public static class Account
-        { 
+        {
             public const string RegisterUrl = AccountBase + "register";
             public const string LoginUrl = AccountBase + "login";
             public const string RefreshUrl = AccountBase + "refresh";
@@ -33,7 +33,8 @@ public class SharedConfig
             public const string GetAllDevices = DeviceBase + "GetAllDevices";
             public const string GetAllRooms = DeviceBase + "GetAllRooms";
             public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
-            
+        }
+
         private const string SmartHomeBase = ApiBase + "SmartHome/";
         public static class SmartHome
         {
