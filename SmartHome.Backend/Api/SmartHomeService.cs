@@ -21,8 +21,8 @@ namespace SmartHome.Backend.Api
             {
                 Id = Guid.NewGuid(),
                 Name = request.name,
-                SSID = string.Empty,
-                SSPassword = string.Empty,
+                SSID = request.wifiname,
+                SSPassword = request.password,
             };
             var homeResult = await _ctx.DbContext.SmartHomes.AddAsync(home);
             var smartUser = new SmartUserModel()
@@ -69,30 +69,24 @@ namespace SmartHome.Backend.Api
         }
         public async Task<SmartHomeResponse> GetJoinedSmartHomes(EmptyRequest request)
         {
-            var smartHomeIds = await GetSmartUsers()
+            var smartHomeIds = GetSmartUsers()
                 .Where(su => su.Role == UserRole.Admin || su.Role == UserRole.User || su.Role == UserRole.Guest)
-                .Select(su => su.SmartHomeId)
-                .ToListAsync();
+                .Select(su => su.SmartHomeId);
 
             return await GetHomesFromIds(smartHomeIds);
         }
         public async Task<SmartHomeResponse> GetSmartHomeInvites(EmptyRequest request)
         {
-            var smartHomeIds = await GetSmartUsers()
+            var smartHomeIds = GetSmartUsers()
                 .Where(su => su.Role == UserRole.InvitationPending)
-                .Select(su => su.SmartHomeId)
-                .ToListAsync();
+                .Select(su => su.SmartHomeId);
 
             return await GetHomesFromIds(smartHomeIds);
         }
 
-        public async Task<SmartHomeResponse> GetHomesFromIds(List<Guid> ids)
+        public async Task<SmartHomeResponse> GetHomesFromIds(IQueryable<Guid> ids)
         {
-            if (ids.Count == 0)
-                return new SmartHomeResponse(new());
-
-
-            var smartHomes = await _ctx.DbContext.SmartHomes
+             var smartHomes = await _ctx.DbContext.SmartHomes
                     .Where(home => ids.Contains(home.Id))
                     .ToListAsync();
 

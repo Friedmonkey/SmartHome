@@ -6,23 +6,37 @@
 @inject NavigationManager navManager;
 
 <MudButton OnClick="() => createDialogVisible = true">Create</MudButton>
-<MudGrid>
-    @foreach (var smartHome in joinedSmartHomes)
-    {
-        <MudItem>
-            <SmartHomeCard Home="smartHome" />
-        </MudItem>
-    }
-</MudGrid>
-
-<MudGrid>
-    @foreach (var smartHome in invitedSmartHomes)
-    {
-        <MudItem>
-            <SmartHomeCard Home="smartHome" IsInvite="true" />
-        </MudItem>
-    }
-</MudGrid>
+<MudExpansionPanel Expanded="true" Class="mt-2">
+    <TitleContent>
+        <MudText>Joined homes</MudText>
+    </TitleContent>
+    <ChildContent>
+        <MudGrid>
+            @foreach (var smartHome in joinedSmartHomes)
+            {
+                <MudItem>
+                    <SmartHomeCard Home="smartHome" />
+                </MudItem>
+            }
+        </MudGrid>
+    </ChildContent>
+</MudExpansionPanel>
+<MudDivider />
+<MudExpansionPanel Expanded="true" Class="mt-2">
+    <TitleContent>
+        <MudText>Invited homes</MudText>
+    </TitleContent>
+    <ChildContent>
+        <MudGrid>
+            @foreach (var smartHome in invitedSmartHomes)
+            {
+                <MudItem>
+                    <SmartHomeCard Home="smartHome" IsInvite="true" />
+                </MudItem>
+            }
+        </MudGrid>
+    </ChildContent>
+</MudExpansionPanel>
 
 <MudDialog @bind-Visible="createDialogVisible">
     <TitleContent>
@@ -55,7 +69,7 @@
         var invited = await smartHomeService.GetSmartHomeInvites(new());
         if (invited.EnsureSuccess(snackBar))
         {
-            invitedSmartHomes = joined.homes;
+            invitedSmartHomes = invited.homes;
         }
     }
 
