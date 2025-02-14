@@ -45,6 +45,10 @@
     <DialogContent>
         <MudText>SmartHome name:</MudText>
         <MudTextField T="string" Label="Name" @bind-Value="createName" />
+        <MudText>SmartHome wifi name:</MudText>
+        <MudTextField T="string" Label="Name" @bind-Value="wifiName" />
+        <MudText>SmartHome wifi password:</MudText>
+        <MudTextField T="string" Label="Name" @bind-Value="wifiPassword" />
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="CreateSmartHome">Create</MudButton>
@@ -57,6 +61,8 @@
 
     private bool createDialogVisible = false;
     private string createName = "smartHome";
+    private string wifiName = "blah blah";
+    private string wifiPassword = "blah blah";
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,7 +81,7 @@
 
     private async Task CreateSmartHome()
     {
-        var request = new CreateSmartHomeRequest(createName);
+        var request = new CreateSmartHomeRequest(createName, wifiName, wifiPassword);
         var result = await smartHomeService.CreateSmartHome(request);
         result.Show(snackBar, "Smart home created!");
         navManager.NavigateTo($"/smarthome/{result.Id}/overview");
