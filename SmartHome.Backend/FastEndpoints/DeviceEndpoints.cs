@@ -19,7 +19,7 @@ namespace SmartHome.Backend.FastEndpoints
         {
             try
             {
-                await SendAsync(await Service.GetDevicesByHouseId(request));
+                await SendAsync(await Service.GetDevicesByHomeId(request));
             }
             catch (Exception ex)
             {

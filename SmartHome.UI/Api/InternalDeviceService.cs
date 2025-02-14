@@ -13,7 +13,7 @@ namespace SmartHome.UI.Api
             this._api = api;
         }
 
-        public async Task<DiviceListResponse> GetDevicesByHouseId(DeviceListRequest request)
+        public async Task<DiviceListResponse> GetDevicesByHomeId(DeviceListRequest request)
         {
             return await _api.Get<DiviceListResponse>(SharedConfig.Urls.Device.GetAllDevices, request, false);
         }

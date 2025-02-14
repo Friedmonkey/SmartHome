@@ -16,7 +16,7 @@ namespace SmartHome.Common.Api
     {
         ///Maak een Response aan
         public record DeviceListRequest(Guid HomeGuid);
-        Task<DiviceListResponse> GetDevicesByHouseId(DeviceListRequest request);
+        Task<DiviceListResponse> GetDevicesByHomeId(DeviceListRequest request);
 
         public record RoomListRequest(Guid HomeGuid);
         Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request);
