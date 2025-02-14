@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\css\**" />
+    <Content Remove="wwwroot\css\**" />
+    <EmbeddedResource Remove="wwwroot\css\**" />
+    <None Remove="wwwroot\css\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
     <PackageReference Include="CodeBeam.MudBlazor.Extensions" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
@@ -20,10 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
 </Project>

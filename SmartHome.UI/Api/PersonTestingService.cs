@@ -4,11 +4,11 @@ using static SmartHome.Common.Api.IPersonTestingService;
 
 namespace SmartHome.UI.Api;
 
-public class InternalPersonTestingService : IPersonTestingService
+public class PersonTestingService : IPersonTestingService
 {
     private readonly ApiService _api;
 
-    public InternalPersonTestingService(ApiService api)
+    public PersonTestingService(ApiService api)
     {
         this._api = api;
     }
@@ -26,5 +26,10 @@ public class InternalPersonTestingService : IPersonTestingService
     public async Task<PersonResponse> GetPersonByName(GetPersonByNameRequest request)
     {
         return await _api.Get<PersonResponse>(SharedConfig.Urls.Person.GetByNameUrl, request);
+    }
+
+    public async Task<DeviceListResponse> TestDb(TestDbRequest request)
+    {
+        return await _api.Get<DeviceListResponse>(SharedConfig.Urls.Person.GetDevices, request);
     }
 }

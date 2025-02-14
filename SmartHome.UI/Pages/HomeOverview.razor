@@ -1,0 +1,89 @@
+﻿@page "/smarthome"
+@attribute [Authorize]
+
+@inject ISnackbar snackBar;
+@inject ISmartHomeService smartHomeService;
+@inject NavigationManager navManager;
+
+<MudButton OnClick="() => createDialogVisible = true">Create</MudButton>
+<MudExpansionPanel Expanded="true" Class="mt-2">
+    <TitleContent>
+        <MudText>Joined homes</MudText>
+    </TitleContent>
+    <ChildContent>
+        <MudGrid>
+            @foreach (var smartHome in joinedSmartHomes)
+            {
+                <MudItem>
+                    <SmartHomeCard Home="smartHome" />
+                </MudItem>
+            }
+        </MudGrid>
+    </ChildContent>
+</MudExpansionPanel>
+<MudDivider />
+<MudExpansionPanel Expanded="true" Class="mt-2">
+    <TitleContent>
+        <MudText>Invited homes</MudText>
+    </TitleContent>
+    <ChildContent>
+        <MudGrid>
+            @foreach (var smartHome in invitedSmartHomes)
+            {
+                <MudItem>
+                    <SmartHomeCard Home="smartHome" IsInvite="true" />
+                </MudItem>
+            }
+        </MudGrid>
+    </ChildContent>
+</MudExpansionPanel>
+
+<MudDialog @bind-Visible="createDialogVisible">
+    <TitleContent>
+        <MudText>Create new SmartHome</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>SmartHome name:</MudText>
+        <MudTextField T="string" Label="Name" @bind-Value="createName" />
+        <MudText>SmartHome wifi name:</MudText>
+        <MudTextField T="string" Label="Name" @bind-Value="wifiName" />
+        <MudText>SmartHome wifi password:</MudText>
+        <MudTextField T="string" Label="Name" @bind-Value="wifiPassword" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CreateSmartHome">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<SmartHomeModel> joinedSmartHomes = new();
+    private List<SmartHomeModel> invitedSmartHomes = new();
+
+    private bool createDialogVisible = false;
+    private string createName = "smartHome";
+    private string wifiName = "blah blah";
+    private string wifiPassword = "blah blah";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var joined = await smartHomeService.GetJoinedSmartHomes(new());
+        if (joined.EnsureSuccess(snackBar))
+        {
+            joinedSmartHomes = joined.homes;
+        }
+
+        var invited = await smartHomeService.GetSmartHomeInvites(new());
+        if (invited.EnsureSuccess(snackBar))
+        {
+            invitedSmartHomes = invited.homes;
+        }
+    }
+
+    private async Task CreateSmartHome()
+    {
+        var request = new CreateSmartHomeRequest(createName, wifiName, wifiPassword);
+        var result = await smartHomeService.CreateSmartHome(request);
+        result.Show(snackBar, "Smart home created!");
+        navManager.NavigateTo($"/smarthome/{result.Id}/overview");
+    }
+}

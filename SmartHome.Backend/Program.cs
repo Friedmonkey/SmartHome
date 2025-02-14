@@ -1,13 +1,13 @@
 using FastEndpoints;
-//using FastEndpoints.Swagger;
 using Microsoft.EntityFrameworkCore;
 using SmartHome.Backend.Api;
-using SmartHome.Backend.Auth;
 using SmartHome.Common.Api;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 using FastEndpoints.Swagger;
-//using Microsoft.EntityFrameworkCore;
+using SmartHome.Database;
+using SmartHome.Database.Auth;
+using SmartUser.Backend.Api;
 
 namespace SmartHome.Backend;
 
@@ -21,32 +21,21 @@ public class Program
         builder.Services.AddSingleton<BackendConfig>(config);
 
         // Add services to the container.
-        //database for now, needs to be replaced
-        builder.Services.AddDbContextFactory<AuthContext>(options =>
-        {
-            options.UseSqlite($"Data Source=database.db");
-        });
-        builder.Services.AddScoped(p =>
-        {
-            var context = p.GetRequiredService<IDbContextFactory<AuthContext>>().CreateDbContext();
-            context.Database.EnsureCreated();
-
-            return context;
-        });
+        builder.Services.AddDbContext<SmartHomeContext>(options => options.UseMySql(config.ConnectionString, ServerVersion.AutoDetect(config.ConnectionString)));
 
         //jwt auth
         builder.Services.AddAuthenticationJwtBearer(options => options.SigningKey = config.JwtSecret);
         builder.Services.AddAuthorization();
 
         //setup user in database
-        builder.Services.AddIdentity<User, Role>(options =>
+        builder.Services.AddIdentity<AuthAccount, Role>(options =>
         {
             options.User.RequireUniqueEmail = true;
             options.Password.RequireDigit = true;
             options.Password.RequireUppercase = true;
             options.SignIn.RequireConfirmedEmail = true;
         })
-        .AddEntityFrameworkStores<AuthContext>()
+        .AddEntityFrameworkStores<SmartHomeContext>()
         .AddDefaultTokenProviders();
 
         //builder.Services.SetupJWTAuthServices(config);
@@ -56,9 +45,12 @@ public class Program
         //add our services
 
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
         builder.Services.AddScoped<ApiContext>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
+        builder.Services.AddScoped<ISmartUserService, SmartUserService>();
+        builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
 
         builder.Services.AddFastEndpoints();
         builder.Services.SwaggerDocument();

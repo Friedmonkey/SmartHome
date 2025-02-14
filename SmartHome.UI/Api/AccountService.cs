@@ -3,11 +3,11 @@ using SmartHome.Common.Api;
 using static SmartHome.Common.Api.IAccountService;
 namespace SmartHome.UI.Api;
 
-public class InternalAccountService : IAccountService
+public class AccountService : IAccountService
 {
     private readonly ApiService _api;
 
-    public InternalAccountService(ApiService api)
+    public AccountService(ApiService api)
     {
         this._api = api;
     }
