@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 namespace SmartHome.Common.Models.Entities;
-public class Log
-    : Entity
+public class Log : Entity
 {
     [Required]
     [Column(TypeName = "varchar(60)")]

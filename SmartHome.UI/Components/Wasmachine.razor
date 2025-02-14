@@ -1,0 +1,57 @@
+﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+    <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
+        <MudImage Width="150" Height="150" Src="Afbeeldingen/wasmachine.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
+        <MudText Typo="Typo.h3" Class="Lamp-Name">@_WasMachineName</MudText>
+    </MudPaper>
+    <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
+        <MudSwitch @bind-Value="@_WasConfig.Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        <MudSelect @bind-Value="@_WasConfig.Programma" Label="Programma" Variant="Variant.Outlined">
+            <MudSelectItem Value="@("Gekleurde was")" />
+            <MudSelectItem Value="@("Katoen")" />
+            <MudSelectItem Value="@("Spijker Broeken")" />
+        </MudSelect>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary">Starten</MudButton>
+    </MudPaper>
+</MudPaper>
+
+
+@code {
+    private WasMachineConfig _WasConfig;
+
+    [Parameter]
+    public string Config
+    {
+        get
+        {
+            return JsonConvert.SerializeObject(_WasConfig);
+        }
+
+        set
+        {
+            _WasConfig = JsonConvert.DeserializeObject<WasMachineConfig>(value);
+        }
+    }
+
+    class WasMachineConfig
+    {
+        public bool Ingeschakeld { get; set; }
+
+        public string Programma { get; set; }
+    }
+
+    private string _WasMachineName = "Unknown";
+
+    [Parameter]
+    public string Name
+    {
+        get
+        {
+            return _WasMachineName;
+        }
+
+        set
+        {
+            _WasMachineName = value;
+        }
+    }
+}

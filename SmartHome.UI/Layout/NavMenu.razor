@@ -29,10 +29,11 @@
         <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
         <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
     }
-
 </MudNavMenu>
 
 @code{
+
+
     public static void Redirect(NavigationManager navManager, string? base64)
     { 
         if (base64 != null)

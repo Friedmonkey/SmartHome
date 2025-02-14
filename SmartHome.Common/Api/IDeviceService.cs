@@ -1,21 +1,27 @@
 ﻿using SmartHome.Common.Models;
+using SmartHome.Common.Models.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SmartHome.Common.Api;
-
-public interface IDeviceService
+namespace SmartHome.Common.Api
 {
-    public record Response(object Device) : Response<Response>;
-    public record DevicesResponse(List<object> Devices) : Response<DevicesResponse>;
-    
-    public record CreateRequest(string Name, Guid SmartHomeId);
+    public record DiviceListResponse(List<Device> Devices) : Response<DiviceListResponse>;
 
-    public Task<SuccessResponse> Create(CreateRequest request);
+    public record RoomListResponse(List<Room> Rooms) : Response<RoomListResponse>;
 
-    public Task<DevicesResponse> GetDevicesOfSmartHome(GuidRequest request); // return list of Devices
-    
-    public Task<SuccessResponse> Delete(GuidRequest request);
-    
-    public Task<SuccessResponse> Update(CreateRequest request);
+    public interface IDeviceService
+    {
+        ///Maak een Response aan
+        public record DeviceListRequest(Guid HomeGuid);
+        Task<DiviceListResponse> GetDevicesByHouseId(DeviceListRequest request);
 
+        public record RoomListRequest(Guid HomeGuid);
+        Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request);
 
+        public record UpdateDeviceConfigRequest(Guid DeviceId, string ConfigJson);
+        Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request);
+    }
 }

@@ -42,12 +42,15 @@ public class Program
         builder.Services.AddAuthorizationCore();
 
         builder.Services.AddScoped<ApiService>();
+
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
+        builder.Services.AddScoped<IDeviceService, InternalDeviceService>();
 
         //keep track of selected smarthome
         builder.Services.AddScoped<SmartHomeState>();
+
 
         var application = builder.Build();
         await application.RunAsync();
