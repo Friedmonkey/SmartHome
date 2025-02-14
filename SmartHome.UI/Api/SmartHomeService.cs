@@ -12,16 +12,16 @@ public class SmartHomeService : ISmartHomeService
     {
         this._api = api;
     }
-    public async Task<GuidResponse> CreateSmartHome(ISmartHomeService.CreateSmartHomeRequest request)
+    public async Task<GuidResponse> CreateSmartHome(CreateSmartHomeRequest request)
     {
         return await _api.Post<GuidResponse>(SharedConfig.Urls.SmartHome.CreateSmartHomeUrl, request);
     }
 
-    public async Task<SuccessResponse> InviteToSmartHome(ISmartHomeService.InviteRequest request)
+    public async Task<SuccessResponse> InviteToSmartHome(InviteRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.InviteToSmartHomeUrl, request);
     }
-    public async Task<SuccessResponse> AcceptSmartHomeInvite(ISmartHomeService.AcceptInviteRequest request)
+    public async Task<SuccessResponse> AcceptSmartHomeInvite(SmartHomeRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.AcceptInviteToSmartHomeUrl, request);
     }

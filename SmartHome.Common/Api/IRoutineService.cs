@@ -1,4 +1,5 @@
 ﻿using SmartHome.Common.Models;
+using SmartHome.Common.Models.Entities;
 using static SmartHome.Common.Api.IRoutineService;
 
 namespace SmartHome.Common.Api;
@@ -6,6 +7,17 @@ namespace SmartHome.Common.Api;
 
 public interface IRoutineService
 {
+    public record RoutineListResponse(List<Routine> routines) : Response<RoutineListResponse>;
+    public Task<RoutineListResponse> GetRoutinesForUser(SmartHomeRequest request);
+
+        
+
+
+
+
+
+
+
     public record Response(object Routine) : Response<Response>;
     public record RoutinesResponse(List<object> Routines) : Response<RoutinesResponse>;
     

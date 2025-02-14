@@ -26,27 +26,6 @@ public class AddPersonEndpoint : BasicEndpointBase<AddPersonRequest, SuccessResp
         }
     }
 }
-public class GetDivicesEndpoint : BasicEndpointBase<TestDbRequest, DeviceListResponse>
-{
-    public required IPersonTestingService Service { get; set; }
-    public override void Configure()
-    {
-        Get(SharedConfig.Urls.Person.GetDevices);
-        AllowAnonymous();
-    }
-
-    public override async Task HandleAsync(TestDbRequest request, CancellationToken ct)
-    {
-        try
-        {
-            await SendAsync(await Service.TestDb(request));
-        }
-        catch (Exception ex)
-        {
-            await SendAsync(DeviceListResponse.Error(ex));
-        }
-    }
-}
 
 public class GetPersonByAgeEndpoint : BasicEndpointBase<GetPersonByAgeRequest, PersonResponse>
 {

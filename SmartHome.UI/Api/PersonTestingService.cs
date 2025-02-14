@@ -27,9 +27,4 @@ public class PersonTestingService : IPersonTestingService
     {
         return await _api.Get<PersonResponse>(SharedConfig.Urls.Person.GetByNameUrl, request);
     }
-
-    public async Task<DeviceListResponse> TestDb(TestDbRequest request)
-    {
-        return await _api.Get<DeviceListResponse>(SharedConfig.Urls.Person.GetDevices, request);
-    }
 }
