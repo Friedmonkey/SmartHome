@@ -20,7 +20,11 @@ public class Device : Entity
 
     [Required]
     [Column(TypeName = "varchar(60)")]
-    public string RoomGuid { get; set; }
+    public string RoomId { get; set; }
+
+    [Required]
+    [Column(TypeName = "varchar(60)")]
+    public string Type { get; set; }
 
     [Required]
     [Column(TypeName = "varchar(60)")]

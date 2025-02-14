@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
+using SmartHome.Common.Models.Entities;
 using static SmartHome.Common.Api.IDeviceService;
 
 namespace SmartHome.Backend.Api
@@ -23,9 +24,21 @@ namespace SmartHome.Backend.Api
                 return new DiviceListResponse(result);
         }
 
+        public async Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request)
+        {
+            var result = await _context.DbContext.Room.ToListAsync();
+
+            if (result == null)
+                return RoomListResponse.Failed("Not Devices found in DataBase");
+            else
+                return new RoomListResponse(result);
+        }
+
         public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
         {
-            var result = await _context.DbContext.Devices.ToListAsync();
+            var result = await _context.DbContext.Devices
+                .Where(d => d.Id == request.DeviceId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JsonObjectConfig, request.ConfigJson));
 
             return SuccessResponse.Success();
         }

@@ -28,6 +28,28 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
+    public class GetRoomEndpoint : BasicEndpointBase<RoomListRequest, RoomListResponse>
+    {
+        public required IDeviceService Service { get; set; }
+        public override void Configure()
+        {
+            Get(SharedConfig.Urls.Device.GetAllRooms);
+            AllowAnonymous();
+        }
+
+        public override async Task HandleAsync(RoomListRequest request, CancellationToken ct)
+        {
+            try
+            {
+                await SendAsync(await Service.GetRoomsByHouseId(request));
+            }
+            catch (Exception ex)
+            {
+                await SendAsync(RoomListResponse.Error(ex));
+            }
+        }
+    }
+
     public class UpdateDivicesConfigEndpoint : BasicEndpointBase<UpdateDeviceConfigRequest, SuccessResponse>
     {
         public required IDeviceService Service { get; set; }

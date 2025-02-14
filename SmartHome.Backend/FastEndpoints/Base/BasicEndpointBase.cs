@@ -15,3 +15,4 @@ public abstract class BasicEndpointBase<TRequest, TResponse>: Endpoint<TRequest,
         Roles(AuthRoles.AuthUser);
     }
 }
+

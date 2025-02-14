@@ -81,7 +81,9 @@ namespace SmartHome.Database.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     JsonObjectConfig = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    RoomGuid = table.Column<string>(type: "varchar(60)", nullable: false)
+                    RoomId = table.Column<string>(type: "varchar(60)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Type = table.Column<string>(type: "varchar(20)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RoleGuid = table.Column<string>(type: "varchar(60)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),

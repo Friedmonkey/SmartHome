@@ -31,6 +31,7 @@ public class SharedConfig
         public static class Device
         {
             public const string GetAllDevices = DeviceBase + "GetAllDevices";
+            public const string GetAllRooms = DeviceBase + "GetAllRooms";
             public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
         }
     }

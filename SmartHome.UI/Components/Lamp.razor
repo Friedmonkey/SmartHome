@@ -1,23 +1,95 @@
-﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Lamp-Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+﻿@using SmartHome.Common.Api;
+@inject IDeviceService deviceService;
+
+<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
-        @if(Ingeschakeld) {
-            <MudImage Width="150" Height="150" Src="Afbeeldingen/licht-uit.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
-        } else {
+        @if (_LampConfig.Ingeschakeld)
+        {
             <MudImage Width="150" Height="150" Src="Afbeeldingen/licht-aan.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
+        } else {
+            <MudImage Width="150" Height="150" Src="Afbeeldingen/licht-uit.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
         }
-        <MudText Typo="Typo.h3" Class="Lamp-Name">@LampTitel</MudText>
+        <MudText Typo="Typo.h3" Class="Lamp-Name">@_LampName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
-        <MudSwitch @bind-Value="Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
-        @if (Helderheid != null) {<MudSlider Style="width: 90%" Size="Size.Large" Value="@Helderheid">Helderheid</MudSlider>}
-        @if (Kleur != null) {<MudColorPicker Label="Kleur" ColorPickerView="ColorPickerView.Palette" />}
+        <MudSwitch @onclick="@(e => UpdateConfig(!_LampConfig.Ingeschakeld))" @bind-Value="@_LampConfig.Ingeschakeld" Label="@Status" Color="Color.Warning" UncheckedColor="Color.Dark" />
+        @if (_LampConfig.Helderheid != null) {<MudSlider Style="width: 90%" Size="Size.Large" Value="@_LampConfig.Helderheid">Helderheid</MudSlider>}
+        @if (_LampConfig != null) {<MudColorPicker Label="Kleur" ColorPickerView="ColorPickerView.Palette" />}
     </MudPaper>
 </MudPaper>
 
 @code {
-    public bool Ingeschakeld = false;
-    public string WashProgramma = "";
-    public int Helderheid = 0;
-    public string Kleur = "1";
-    public string LampTitel = "Lamp1";
+    string Status = "Uitgeschakeld";
+    private LampConfig _LampConfig;
+
+    [Parameter]
+    public string Config
+    {
+        get
+        {
+            return JsonConvert.SerializeObject(_LampConfig);
+        }
+
+        set
+        {
+            _LampConfig = JsonConvert.DeserializeObject<LampConfig>(value);
+            UpdateStatus();
+            StateHasChanged();
+        }
+    }
+
+    class LampConfig
+    {
+        public bool Ingeschakeld { get; set; }
+
+        public int Helderheid { get; set; }
+
+        public string Kleur { get; set; }
+    }
+
+    private void UpdateStatus()
+    {
+        if (_LampConfig.Ingeschakeld)
+        {
+            Status = "Ingeschakeld";
+        }
+        else
+        {
+            Status = "Uitgeschakeld";
+        }
+    }
+
+    private string _Id = "";
+
+    [Parameter]
+    public string Id
+    {
+        set
+        {
+            _Id = value;
+        }
+    }
+
+    private async Task UpdateConfig(bool CheckIngeschakeld)
+    {
+        _LampConfig.Ingeschakeld = CheckIngeschakeld;
+        var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_LampConfig)));
+        UpdateStatus();
+    }
+
+    private string _LampName = "Unkown";
+
+    [Parameter]
+    public string Name
+    {
+        get
+        {
+            return _LampName;
+        }
+
+        set
+        {
+            _LampName = value;
+        }
+    }
 }

@@ -67,9 +67,13 @@ namespace SmartHome.Database.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(60)");
 
-                    b.Property<string>("RoomGuid")
+                    b.Property<string>("RoomId")
                         .IsRequired()
                         .HasColumnType("varchar(60)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("SmartHomeId")
                         .IsRequired()

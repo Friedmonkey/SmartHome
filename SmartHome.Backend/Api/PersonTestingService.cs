@@ -18,15 +18,6 @@ public class PersonTestingService : IPersonTestingService
         _context = context;
     }
 
-    public async Task<DeviceListResponse> TestDb(TestDbRequest request)
-    {
-        var result = await _context.DbContext.Devices.ToListAsync();
-        if (result == null)
-            return DeviceListResponse.Failed("Not Devices found in DataBase");
-        else
-            return new DeviceListResponse(result);
-    }
-
     public async Task<SuccessResponse> AddPerson(AddPersonRequest request)
     {
         if (request.person is null)

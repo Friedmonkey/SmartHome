@@ -1,5 +1,5 @@
 ﻿<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Overzicht</MudNavLink>
+    <MudNavLink Href="Overzicht" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Overzicht</MudNavLink>
     <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
     <MudNavLink Href="weather" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>
     @* <MudNavLink Href="login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Login</MudNavLink> *@
@@ -7,6 +7,8 @@
 </MudNavMenu>
 
 @code{
+
+
     public static void Redirect(NavigationManager navManager, string? base64)
     { 
         if (base64 != null)

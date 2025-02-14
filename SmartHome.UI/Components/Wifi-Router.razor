@@ -1,18 +1,86 @@
-﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Lamp-Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+﻿@using SmartHome.Common.Api;
+@inject IDeviceService deviceService;
+
+<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
         <MudImage Width="150" Height="150" Src="Afbeeldingen/router.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
-
-
-        <MudText Typo="Typo.h3" Class="Lamp-Name">@LampTitel</MudText>
+        <MudText Typo="Typo.h3" Class="Lamp-Name">@_RouterName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
-        <MudSwitch @bind-Value="Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        <MudSwitch @onclick="@(e => UpdateConfig(!_RouterConfig.Ingeschakeld))" @bind-Value="@_RouterConfig.Ingeschakeld" Label="@Status" Color="Color.Warning" UncheckedColor="Color.Dark" />
     </MudPaper>
 </MudPaper>
 
+
 @code {
-    public bool Ingeschakeld = false;
-    public string WashProgramma = "";
-    public int Helderheid;
-    public string LampTitel = "Lamp1";
+    private RouterConfig _RouterConfig;
+
+    [Parameter]
+    public string Config
+    {
+        get
+        {
+            return JsonConvert.SerializeObject(_RouterConfig);
+        }
+
+        set
+        {
+            _RouterConfig = JsonConvert.DeserializeObject<RouterConfig>(value);
+            UpdateStatus();
+            StateHasChanged();
+        }
+    }
+
+    string Status = "Uitgeschakeld";
+
+    private void UpdateStatus()
+    {
+        if (_RouterConfig.Ingeschakeld)
+        {
+            Status = "Ingeschakeld";
+        }
+        else
+        {
+            Status = "Uitgeschakeld";
+        }
+    }
+
+    private string _Id = "";
+
+    [Parameter]
+    public string Id
+    {
+        set
+        {
+            _Id = value;
+        }
+    }
+
+    private async Task UpdateConfig(bool CheckIngeschakeld)
+    {
+        _RouterConfig.Ingeschakeld = CheckIngeschakeld;
+        var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_RouterConfig)));
+        UpdateStatus();
+    }
+
+    class RouterConfig
+    {
+        public bool Ingeschakeld { get; set; }
+    }
+
+    private string _RouterName = "Unknown";
+
+    [Parameter]
+    public string Name
+    {
+        get
+        {
+            return _RouterName;
+        }
+
+        set
+        {
+            _RouterName = value;
+        }
+    }
 }

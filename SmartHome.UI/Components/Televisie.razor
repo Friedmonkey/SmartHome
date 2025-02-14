@@ -1,11 +1,11 @@
-﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Lamp-Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
         <MudImage Width="150" Height="150" Src="Afbeeldingen/televisie.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
-        <MudText Typo="Typo.h3" Class="Lamp-Name">@LampTitel</MudText>
+        <MudText Typo="Typo.h3" Class="Lamp-Name">@_tvName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
-        <MudSwitch @bind-Value="Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
-        <MudSelect @bind-Value="WashProgramma" Label="Zender" Variant="Variant.Outlined">
+        <MudSwitch @bind-Value="@_TvConfig.Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        <MudSelect @bind-Value="@_TvConfig.Zender" Label="Zender" Variant="Variant.Outlined">
             <MudSelectItem Value="@("NPO 1")" />
             <MudSelectItem Value="@("NPO 2")" />
             <MudSelectItem Value="@("NPO 3")" />
@@ -22,8 +22,42 @@
 </MudPaper>
 
 @code {
-    public bool Ingeschakeld = false;
-    public string WashProgramma = "";
-    public int Helderheid;
-    public string LampTitel = "Lamp1";
+    private TvConfig _TvConfig;
+
+    [Parameter]
+    public string Config
+    {
+        get
+        {
+            return JsonConvert.SerializeObject(_TvConfig);
+        }
+
+        set
+        {
+            _TvConfig = JsonConvert.DeserializeObject<TvConfig>(value);
+        }
+    }
+
+    class TvConfig
+    {
+        public bool Ingeschakeld { get; set; }
+
+        public string Zender { get; set; }
+    }
+
+    private string _tvName = "Unknown";
+
+    [Parameter]
+    public string Name
+    {
+        get
+        {
+            return _tvName;
+        }
+
+        set
+        {
+            _tvName = value;
+        }
+    }
 }

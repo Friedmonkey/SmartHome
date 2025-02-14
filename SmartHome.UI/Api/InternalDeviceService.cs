@@ -18,6 +18,12 @@ namespace SmartHome.UI.Api
             return await _api.Get<DiviceListResponse>(SharedConfig.Urls.Device.GetAllDevices, request, false);
         }
 
+        public async Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request)
+        {
+            return await _api.Get<RoomListResponse>(SharedConfig.Urls.Device.GetAllRooms, request, false);
+        }
+
+
         public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
         {
             return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.UpdateDeviceConfig, request, false);
