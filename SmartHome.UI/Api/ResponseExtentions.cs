@@ -14,7 +14,7 @@ public static class ResponseExtentions
         }
     }
     public static bool EnsureSuccess<T>(this Response<T>? response, ISnackbar snackbar) where T : Response<T>
-    {
+    {   //Returns if the response was success only logs errors if any
         return CheckSuccess(response, snackbar, onError: (error) => 
         {
             snackbar.Add(error, Severity.Error, opt => opt.RequireInteraction = true);

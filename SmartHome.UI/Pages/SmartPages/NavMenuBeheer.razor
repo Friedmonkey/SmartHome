@@ -1,6 +1,5 @@
 ﻿@page "/smarthome/{SmartGuid}/beheer"
 @inherits SmartHomeGuidPage
-@attribute [Authorize]
 
 @using SmartHome.UI.Pages.Beheer;
 @inject IDeviceService deviceService;
@@ -23,6 +22,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!await ResolveSmartHomeStateSuccess())
+            return;
         await LoadDevices();
     }
 

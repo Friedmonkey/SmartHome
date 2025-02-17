@@ -1,6 +1,5 @@
 ﻿@page "/smarthome/{SmartGuid}/overview"
 @inherits SmartHomeGuidPage
-@attribute [Authorize]
 
 @inject IDeviceService deviceService;
 
@@ -48,8 +47,9 @@
     List<Device> devicesList = new List<Device>();
 
     protected override async Task OnInitializedAsync()
-    {   //Haal de Kamers en apparten op uit de DataBase met de APi
-        await base.OnInitializedAsync();
+    {
+        if (!await ResolveSmartHomeStateSuccess())
+            return;
         await LoadDevices();
     }
 

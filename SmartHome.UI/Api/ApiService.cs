@@ -90,16 +90,20 @@ public class ApiService
             {
                 if (data is SmartHomeRequest req)
                 {
-                    Guid guid = _smartHomeState.SelectedSmartHomeId 
-                        ?? throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
+                    if (_smartHomeState.SelectedSmartHomeId is null)
+                    {
+                        throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
                         "If you are making an api request on OnInitializedAsync, make sure to call\n" +
                         "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
                         "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
+                    }
+
+                    Guid guid = (Guid)_smartHomeState.SelectedSmartHomeId;
 
                     if (req.smartHome != Guid.Empty)
                         _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
 
-                    //update the smartHome guid using record syntax
+                    //update the smartHome guid using record with syntax
                     data = req with { smartHome = guid };
                 }
                 content = GetData(method, data, ref url); //can put data in url for GET requests
