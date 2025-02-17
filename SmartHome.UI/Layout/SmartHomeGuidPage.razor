@@ -31,7 +31,9 @@
 
             var request = new GuidRequest((Guid)smartHomeId);
             var smartHomeResponse = await smartHomeService.GetSmartHomeById(request);
-            smartHomeResponse.Show(snackBar, "Smarthome retrived!");
+#if DEBUG
+            smartHomeResponse.Show(snackBar, "Smarthome retrived!"); //let devs know we made api call
+#endif
             smartHomeState.SetSelectedSmartHome(smartHomeResponse.smartHome);
         }
         else

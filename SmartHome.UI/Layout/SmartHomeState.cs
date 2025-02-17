@@ -16,6 +16,6 @@ public class SmartHomeState
     }
 
     public Guid? SelectedSmartHomeId => _selectedSmartHome?.Id;
-    public string SelectedSmartHomeName => _selectedSmartHome?.Name ?? "No Home selected";
+    public string SelectedSmartHomeName => _selectedSmartHome?.Name ?? "Select or create a SmartHome.";
 }
 

@@ -52,6 +52,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        navManager.LocationChanged += SmartHomeStateLocationChanged;
+        smartHomeState.OnChange += Refresh;
         profileService.OnChange += ProfileServiceOnOnChange;
         preferences = await profileService.GetPreferences();
         isDarkMode = preferences.DarkMode;
@@ -62,10 +64,32 @@
         isDarkMode = newPreferences.DarkMode;
         StateHasChanged();
     }
+    private void Refresh()
+    { 
+        StateHasChanged();
+    }
+    private void SmartHomeStateLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        var path = navManager.ToBaseRelativePath(e.Location).ToLower();
+        var split = path.Split('/');
+        var basePath = split[0];
+
+        if (basePath == "smarthome" && split.Count() > 1) 
+        {
+            //if it begins with smarthome and has more after that
+            //then we DONT reset the selected smarthome because a guid is probally next
+            return;
+        }
+
+        //every other case we browse, we will reset the selected smarthome
+        smartHomeState.SetSelectedSmartHome(null); 
+    }
 
     public void Dispose()
     {
+        navManager.LocationChanged -= SmartHomeStateLocationChanged;
         profileService.OnChange -= ProfileServiceOnOnChange;
+        smartHomeState.OnChange -= Refresh;
     }
 
     MudTheme CustomTheme = new MudTheme()
