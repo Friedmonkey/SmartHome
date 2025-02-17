@@ -1,15 +1,17 @@
 ﻿@using SmartHome.Common.Api;
 @inject IDeviceService deviceService;
 
-<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
         @if (_LampConfig.Ingeschakeld)
         {
             <MudImage Width="150" Height="150" Src="Afbeeldingen/licht-aan.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
-        } else {
+        }
+        else
+        {
             <MudImage Width="150" Height="150" Src="Afbeeldingen/licht-uit.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
         }
-        <MudText Typo="Typo.h3" Class="Lamp-Name">@_LampName</MudText>
+        <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@_LampName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
         <MudSwitch @onclick="@(e => UpdateConfig(!_LampConfig.Ingeschakeld))" @bind-Value="@_LampConfig.Ingeschakeld" Label="@Status" Color="Color.Warning" UncheckedColor="Color.Dark" />

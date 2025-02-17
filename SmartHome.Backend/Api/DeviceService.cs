@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using static SmartHome.Common.Api.IDeviceService;
+//using static SmartHome.Common.SharedConfig.Urls;
 
 namespace SmartHome.Backend.Api
 {
@@ -14,17 +15,48 @@ namespace SmartHome.Backend.Api
             _context = context;
         }
 
-        public async Task<DiviceListResponse> GetDevicesByHomeId(DeviceListRequest request)
+        public async Task<DiviceListResponse> GetDevicesWithAcces(DeviceListRequest request)
         {
             try
             {
                 //Haal het account uit de DataBaase
-                //var smartUser = await _context.GetLoggedInSmartUser(request.HomeGuid);
+                //Guid smartUser0 = _context.GetLoggedInId();
+                //var smartUser1 = await _context.GetLoggedInSmartUser(request.HomeGuid);
                 var smartUser = await _context.GetSmartUser(Guid.Parse("08dd4d36-b85e-4f89-8568-31d7498c60ec"), Guid.Parse("d68b031b-a81c-43aa-b589-c4a0da0bb442"));
 
                 //Haal de device toegang op bij het ingelogde account
                 List<DeviceAccess> devicesAccessList = new List<DeviceAccess>();
                 devicesAccessList = await _context.DbContext.DeviceAccesses.Where(a => a.SmartUserId == smartUser.Id).ToListAsync();
+
+                //Haal de rooms uit de database die in het huis staan
+                List<Room> roomsList = new List<Room>();
+                roomsList = await _context.DbContext.Rooms.Where(r => r.SmartHomeId == request.HomeGuid).ToListAsync();
+
+                //Haal de apparaten op en filter devices met de roomids die in het huis staan
+                List<Device> deviceList = new List<SmartHome.Common.Models.Entities.Device>();
+                deviceList = await _context.DbContext.Devices.ToListAsync();
+
+                //Filter Devices op room die bij een home hoort
+                deviceList = deviceList.Where(d => roomsList.Select(r => r.Id).ToArray().Contains(d.RoomId)).ToList();
+
+                //Filer de devices waar het account toegang tot heeft
+                deviceList = deviceList.Where(d => devicesAccessList.Select(a => a.DeviceId).ToArray().Contains(d.Id)).ToList();
+
+                return new DiviceListResponse(deviceList);
+            }
+            catch (Exception ex)
+            {
+                return DiviceListResponse.Failed(ex.Message);
+            }
+        }
+
+        public async Task<DiviceListResponse> GetAllDevices(AllDeviceListRequest request)
+        {
+            try
+            {
+                //Haal het account uit de DataBaase
+                //var smartUser = await _context.GetLoggedInSmartUser(request.HomeGuid);
+                //var smartUser = await _context.GetSmartUser(Guid.Parse("08dd4d36-b85e-4f89-8568-31d7498c60ec"), Guid.Parse("d68b031b-a81c-43aa-b589-c4a0da0bb442"));
 
                 //Haal de rooms uit de database die in het huis staan
                 List<Room> roomsList = new List<Room>();
@@ -37,15 +69,108 @@ namespace SmartHome.Backend.Api
                 //Filter Devices op room die bij een home hoort
                 deviceList = deviceList.Where(d => roomsList.Select(r => r.Id).ToArray().Contains(d.RoomId)).ToList();
 
-                //Filer de devices waar het account toegang tot heeft
-                deviceList = deviceList.Where(d => devicesAccessList.Select(a => a.DeviceId).ToArray().Contains(d.Id)).ToList();
-
                 return new DiviceListResponse(deviceList);
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return DiviceListResponse.Failed(ex.Message);
             }
         }
+
+        public async Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request)
+        {
+            try
+            {
+                foreach (Device device in request.devices)
+                {
+                    //Update de device list met de propperties naar de DataBase
+
+                    await _context.DbContext.Devices
+                        .Where(d => d.Id == device.Id)
+                        .ExecuteUpdateAsync(u => u
+                            .SetProperty(p => p.Name, device.Name)
+                            .SetProperty(p => p.JsonObjectConfig, device.JsonObjectConfig)
+                            .SetProperty(p => p.RoomId, device.RoomId)
+                            .SetProperty(p => p.Type, device.Type)
+                        );
+                }
+
+                return SuccessResponse.Success();
+            }
+            catch (Exception ex)
+            {
+                return SuccessResponse.Failed(ex.Message);
+            }
+        }
+
+        public async Task<SuccessResponse> UpdateDevice(UpdateDeviceRequest request)
+        {
+            try
+            {
+                //Controleer of er al een device met dezelfde naam in de database is
+                if (!await _context.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
+                {
+                    await _context.DbContext.Devices
+                            .Where(d => d.Id == request.device.Id)
+                    .ExecuteUpdateAsync(u => u
+                                .SetProperty(p => p.Name, request.device.Name)
+                                .SetProperty(p => p.JsonObjectConfig, request.device.JsonObjectConfig)
+                                .SetProperty(p => p.RoomId, request.device.RoomId)
+                                .SetProperty(p => p.Type, request.device.Type)
+                            );
+                }
+                else
+                {
+                    return SuccessResponse.Failed("There is already a device with the same name!!");
+                }
+
+                return SuccessResponse.Success();
+            }
+            catch (Exception ex)
+            {
+                return SuccessResponse.Failed(ex.Message);
+            }
+        }
+
+        public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
+        {
+            try
+            {
+                //Verwijder device uit de database met guid
+                await _context.DbContext.Devices.Where(d => d.Id == request.DeviceGuid).ExecuteDeleteAsync();
+
+                return SuccessResponse.Success();
+            }
+            catch (Exception ex)
+            {
+                return SuccessResponse.Failed(ex.Message);
+            }
+        }
+
+        public async Task<SuccessResponse> CreateDevice(CreateDeviceRequest request)
+        {
+            try
+            {
+                //Controleer of er al een device met dezelfde naam in de database is
+                if (!await _context.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
+                {
+                    //Maak een nieuwe device in de database
+                    await _context.DbContext.Devices.AddAsync(request.device);
+                    await _context.DbContext.SaveChangesAsync();
+
+                    return SuccessResponse.Success();
+                }
+                else
+                {
+                    return SuccessResponse.Failed("There is already a device with the same name!!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return SuccessResponse.Failed(ex.Message);
+            }
+        }
+
 
         public async Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request)
         {
