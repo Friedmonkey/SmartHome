@@ -1,6 +1,7 @@
 ﻿@using SmartHome.Common.Models.Enums;
 @using SmartHome.Common.Models.Configs;
-@inject ISnackbar snackbar;
+@inject IDeviceService deviceService;
+@inject ISnackbar snackBar;
 
 <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center my-4 border-solid border-2 mud-border-primary pa-4" Style="width: 100%; background-color: white;" Elevation="0">
     <MudPaper class="d-flex flex-wrap align-center gap-1 justify-space-between" Style="width: 90%; background-color: transparent;" Elevation="0">
@@ -53,11 +54,11 @@
             <MudSpacer />
             @if (IsNewDevice)
             {
-                <MudButton @onclick="SaveNewDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+                <MudButton @onclick="CreateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
             }
             else
             {
-                <MudButton @onclick="SaveEditDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+                <MudButton @onclick="UpdateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
             }
         </MudPaper>
     </MudPaper>
@@ -71,10 +72,71 @@
     private bool Color = false;
     private bool IsNewDevice = true;
 
+    private async Task UpdateDevice()
+    {
+        if (DeviceName != _device.Name || RoomName != _device.Room.Name || _DeviceType.ToList().First() != _device.Type)
+        {
+            //Als er 1 of meer waarden verandert zijn in de UI
+            _device.Name = DeviceName;
+            _device.RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id;
+            _device.Type = _DeviceType.ToList().First();
+            _device.JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First());
+
+            //Update device naar database met de api
+            var result = await deviceService.UpdateDevice(new(_device));
+
+            if (result.WasSuccess())
+            {
+                snackBar.Add("Device is succesfully updated!", Severity.Success);
+            }
+            else
+            {
+                snackBar.Add(result._RequestMessage, Severity.Error);
+            }
+        }
+        else
+        {
+            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
+        }
+
+    }
+
+    private async Task CreateDevice()
+    {
+        if (DeviceName != string.Empty && RoomName != string.Empty)
+        {
+            //Als alle waarden zijn ingevuld in de UI
+            Device newDevice = new Device
+                {
+                    Name = DeviceName,
+                    RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id,
+                    Type = _DeviceType.ToList().First(),
+                    JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First())
+                };
+
+            //Maar een nieuwe device aan in de database met de api
+            var result = await deviceService.CreateDevice(new(newDevice));
+
+            if (result.WasSuccess())
+            {
+                snackBar.Add("Device is succesfully created!", Severity.Success);
+            }
+            else
+            {
+                snackBar.Add(result._RequestMessage, Severity.Error);
+            }
+        } else {
+            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
+        }
+    }
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
     private async void CloseMenu()
     {
         //Verzoek om shcerm te sluiten
-        Close.InvokeAsync();
+        MudDialog.Close(DialogResult.Ok(true));
     }
 
     private void RoomChanche(Room selected)
@@ -91,39 +153,9 @@
         StateHasChanged();
     }
 
-    private async void SaveNewDevice()
-    {
-        if (DeviceName != string.Empty && RoomName != string.Empty)
-        {
-            //Als alle waarden zijn ingevuld in de UI
-            Device newDevice = new Device
-                {
-                    Name = DeviceName,
-                    RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id,
-                    Type = _DeviceType.ToList().First(),
-                    JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First())
-                };
-
-            OnDiviceCreated.InvokeAsync(newDevice);
-        }
-    }
-
     private async void SaveEditDevice()
     {
-        if (DeviceName != _device.Name || RoomName != _device.Room.Name || _DeviceType.ToList().First() != _device.Type)
-        {
-            _device.Name = DeviceName;
-            _device.RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id;
-            _device.Type = _DeviceType.ToList().First();
-            _device.JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First());
-
-            //Als er 1 of meer waarden verandert zijn in de UI
-            OnDiviceEdited.InvokeAsync(_device);
-        }
-        else
-        {
-            snackbar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
-        }
+        
     }
 
     private string GetDeivceConfig(DeviceType Type)
@@ -163,15 +195,6 @@
         return Json;
     }
 
-    [Parameter]
-    public EventCallback<Device> OnDiviceEdited { get; set; }
-
-    [Parameter]
-    public EventCallback<Device> OnDiviceCreated { get; set; }
-
-    [Parameter]
-    public EventCallback Close { get; set; }
-
     private Device _device;
 
     [Parameter]
@@ -202,6 +225,11 @@
                 IsNewDevice = true;
             }
         }
+
+        get {
+
+            return _device;
+        }
     }
 
     private List<Room> _Rooms;
@@ -212,6 +240,10 @@
         set
         {
             _Rooms = value;
+        }
+
+        get {
+            return _Rooms;
         }
     }
 }

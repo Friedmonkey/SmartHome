@@ -87,7 +87,7 @@ public class DeviceService : IDeviceService
                     .ExecuteUpdateAsync(u => u
                         .SetProperty(p => p.Name, device.Name)
                         .SetProperty(p => p.JsonObjectConfig, device.JsonObjectConfig)
-                        .SetProperty(p => p.RoomId, device.RoomId)
+                        .SetProperty(p => p.RoomId, device.Room.Id)
                         .SetProperty(p => p.Type, device.Type)
                     );
             }
