@@ -2,7 +2,13 @@
 
 namespace SmartHome.Common.Api;
 
-public record SmartHomeRequest(Guid smartHome); //clearly indicate its a smarthome
+public record SmartHomeRequest
+{
+    public Guid smartHome { get; set; }
+} //clearly indicate its a smarthome
+
+public record SmartHomeGuidRequest(Guid Id) : SmartHomeRequest;
+
 public record GuidRequest(Guid Id);
 public record GuidResponse(Guid Id) : Response<GuidResponse>;
 
