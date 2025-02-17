@@ -14,8 +14,9 @@ public class DeviceService : IDeviceService
         _ctx = context;
     }
 
-    public async Task<DeviceListResponse> GetDevicesWithAccess(SmartHomeRequest request)
+    public async Task<DeviceListResponse> GetDevicesWithAccess(EmptySmartHomeRequest request)
     {
+
         var smartUser = await _ctx.GetLoggedInSmartUser(request.smartHome);
 
         // Get all necessary data in a single step
@@ -60,7 +61,7 @@ public class DeviceService : IDeviceService
     //    return new DeviceListResponse(deviceList);
     //}
 
-    public async Task<DeviceListResponse> GetAllDevices(SmartHomeRequest request)
+    public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
         await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
         //Haal de rooms uit de database die in het huis staan
@@ -136,7 +137,7 @@ public class DeviceService : IDeviceService
     }
 
 
-    public async Task<RoomListResponse> GetRoomsByHouseId(SmartHomeRequest request)
+    public async Task<RoomListResponse> GetRoomsByHouseId(EmptySmartHomeRequest request)
     {
         var result = await _ctx.DbContext.Rooms.ToListAsync();
 

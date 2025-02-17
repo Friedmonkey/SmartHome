@@ -2,8 +2,7 @@
 @using SmartHome.UI.Pages.Beheer;
 @using SmartHome.Common.Models.Entities;
 @inject IDeviceService deviceService;
-@inject SmartHomeState smartHomeState;
-@inject NavigationManager navManager;
+@inherits SmartHomeGuidPage;
 
 <MudTabs>
     <MudTabPanel Icon="@Icons.Material.Filled.Devices" Text="Devices" />
@@ -19,33 +18,16 @@
 <DeviceBeheer DevicesList="_deviceList"></DeviceBeheer>
 
 @code {
-
-    [Parameter]
-    public string? SmartGuid { get; set; }
-
-    private Guid SmartHomeId;
-
     List<Device> deviceList = new List<Device>();
 
     protected override async Task OnInitializedAsync()
     {
-        if (SmartGuid is null)
-        {
-            smartHomeState.SetSelectedSmartHome(null);
-        }
-        else
-        {
-            if (!Guid.TryParse(SmartGuid, out SmartHomeId))
-                navManager.NavigateTo("/smarthome");
-            smartHomeState.SetSelectedSmartHome(SmartHomeId);
-        }
-
-        GetDevices();
+        await LoadDevices();
     }
 
-    private async Task GetDevices()
+    private async Task LoadDevices()
     {
-        var Devices = await deviceService.GetAllDevices(new(SmartHomeId));
+        var Devices = await deviceService.GetAllDevices(new());
         if (Devices.WasSuccess())
         {
             //Zet de apparaten in een lijst

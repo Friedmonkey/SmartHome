@@ -92,10 +92,11 @@ public class ApiService
                 {
                     if (!_smartHomeState.SelectedSmartHomeId.HasValue)
                         throw new ApiError("Unable to resolve SmartHome Guid from state.", fatal:true);
-                    if (req.smartHome == Guid.Empty)
+                    if (req.smartHome != Guid.Empty)
                         _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
 
-                    req.UpdateSmartHome((Guid)_smartHomeState.SelectedSmartHomeId);
+                    //update the smartHome guid
+                    data = req with { smartHome = (Guid)_smartHomeState.SelectedSmartHomeId };
                 }
                 content = GetData(method, data, ref url); //can put data in url for GET requests
             }

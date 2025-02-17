@@ -5,7 +5,7 @@ using static SmartHome.Common.Api.IDeviceService;
 
 namespace SmartHome.Backend.FastEndpoints
 {
-    public class GetDevicesWithAccessEndpoint : BasicEndpointBase<SmartHomeRequest, DeviceListResponse>
+    public class GetDevicesWithAccessEndpoint : BasicEndpointBase<EmptySmartHomeRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -14,7 +14,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
+        public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class GetAllDevices : BasicEndpointBase<SmartHomeRequest, DeviceListResponse>
+    public class GetAllDevices : BasicEndpointBase<EmptySmartHomeRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -36,7 +36,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
+        public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
         {
             try
             {
@@ -137,7 +137,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class GetRoomEndpoint : BasicEndpointBase<SmartHomeRequest, RoomListResponse>
+    public class GetRoomEndpoint : BasicEndpointBase<EmptySmartHomeRequest, RoomListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -146,7 +146,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
+        public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
         {
             try
             {

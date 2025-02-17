@@ -13,12 +13,12 @@ public class DeviceService : IDeviceService
         this._api = api;
     }
 
-    public async Task<DeviceListResponse> GetDevicesWithAccess(SmartHomeRequest request)
+    public async Task<DeviceListResponse> GetDevicesWithAccess(EmptySmartHomeRequest request)
     {
         return await _api.Get<DeviceListResponse>(SharedConfig.Urls.Device.GetDevicesWithAccess, request);
     }
 
-    public async Task<DeviceListResponse> GetAllDevices(SmartHomeRequest request)
+    public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
         return await _api.Get<DeviceListResponse>(SharedConfig.Urls.Device.GetAllDevices, request);
     }
@@ -43,7 +43,7 @@ public class DeviceService : IDeviceService
         return await _api.Post<GuidResponse>(SharedConfig.Urls.Device.CreaateDevice, request);
     }
 
-    public async Task<RoomListResponse> GetRoomsByHouseId(SmartHomeRequest request)
+    public async Task<RoomListResponse> GetRoomsByHouseId(EmptySmartHomeRequest request)
     {
         return await _api.Get<RoomListResponse>(SharedConfig.Urls.Device.GetAllRooms, request);
     }

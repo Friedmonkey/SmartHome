@@ -1,11 +1,21 @@
 ﻿@inject SmartHomeState smartHomeState;
 @inject NavigationManager navManager;
 
+@* 
+    use "@inherits SmartHomeGuidPage" at the top of your page
+    when the page is releated to a specific smarthome (pretty much all pages)
+
+    what this does, this captures the {SmartGuid} page varible
+    it then tries to convert it and sets the state for other components to use
+
+    ApiService auto injects it into any SmartHomeRequest, so you dont have to pass it
+*@
+
 @code {
     [Parameter]
     public string? SmartGuid { get; set; } //should come from url/@page
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         if (Guid.TryParse(SmartGuid, out Guid smartHomeId))
         {

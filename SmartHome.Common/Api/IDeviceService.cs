@@ -9,8 +9,8 @@ public record DeviceRequest(Device device) : SmartHomeRequest;
 
 public interface IDeviceService
 {
-    Task<DeviceListResponse> GetDevicesWithAccess(SmartHomeRequest request);
-    Task<DeviceListResponse> GetAllDevices(SmartHomeRequest request);
+    Task<DeviceListResponse> GetDevicesWithAccess(EmptySmartHomeRequest request);
+    Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request);
 
 
     public record UpdateDevicesRangeRequest(List<Device> devices) : SmartHomeRequest;
@@ -23,7 +23,7 @@ public interface IDeviceService
 
     Task<GuidResponse> CreateDevice(DeviceRequest request);
 
-    Task<RoomListResponse> GetRoomsByHouseId(SmartHomeRequest request);
+    Task<RoomListResponse> GetRoomsByHouseId(EmptySmartHomeRequest request);
 
     public record UpdateDeviceConfigRequest(Guid DeviceId, string ConfigJson) : SmartHomeRequest;
     Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request);
