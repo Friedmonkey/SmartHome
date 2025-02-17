@@ -1,14 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using Blazored.SessionStorage;
-using Microsoft.JSInterop;
 using MudBlazor;
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models;
 using SmartHome.UI.Auth;
+using SmartHome.UI.Layout;
 using static SmartHome.Common.Api.IAccountService;
 
 namespace SmartHome.UI.Api;
@@ -18,16 +16,18 @@ public class ApiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ISnackbar _snackbarService;
     private readonly IJwtStoreService _jwtStoreService;
+    private readonly SmartHomeState _smartHomeState;
     private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
 
-    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState)
     {
         _httpClientFactory = httpClientFactory;
         _snackbarService = snackbarService;
         _config = config;
         _jwtStoreService = jwtStoreService;
         _jwtAuthStateProvider = jwtAuthStateProvider;
+        _smartHomeState = smartHomeState;
     }
 
     public async Task<TokenResponse> Login(LoginRequest request)
@@ -87,7 +87,18 @@ public class ApiService
                 authHeader = await GetAuthHeader();
 
             if (data is not null)
+            {
+                if (data is SmartHomeRequest req)
+                {
+                    if (!_smartHomeState.SelectedSmartHomeId.HasValue)
+                        throw new ApiError("Unable to resolve SmartHome Guid from state.", fatal:true);
+                    if (req.smartHome == Guid.Empty)
+                        _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
+
+                    req.UpdateSmartHome((Guid)_smartHomeState.SelectedSmartHomeId);
+                }
                 content = GetData(method, data, ref url); //can put data in url for GET requests
+            }
 
             var newUrl = GetUrl(url);
             var request = new HttpRequestMessage(method, newUrl);
@@ -99,7 +110,6 @@ public class ApiService
         }
         catch (ApiError apiError) when (apiError.IsFatal == false)
         { 
-            //_snackbarService.Add("Api error:"+apiError.Message, Severity.Error, opt => opt.RequireInteraction = true);
             return Response<T>.Failed(apiError.Message);
         }
         catch (Exception ex) when (ex is not ApiError)
@@ -107,9 +117,7 @@ public class ApiService
 #if DEBUG
             if (ex.Message.StartsWith("TypeError: Failed to fetch"))
             {
-                //_snackbarService.Add("BACKEND not enabled", Severity.Error, opt => opt.RequireInteraction = true);
                 _snackbarService.Add("TURN ON THE BACK-END, \n Solution Explorer -> SmartHome.Backend -> r-click -> debug -> start new instance", Severity.Error, opt => opt.RequireInteraction = true);
-                //throw new Exception("Backend is not enabled i think: " + ex.Message);
                 return Response<T>.Failed("BACKEND not enabled");
             }
 #endif

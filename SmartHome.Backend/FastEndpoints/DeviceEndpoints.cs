@@ -5,7 +5,7 @@ using static SmartHome.Common.Api.IDeviceService;
 
 namespace SmartHome.Backend.FastEndpoints
 {
-    public class GetDevicesWithAccessEndpoint : BasicEndpointBase<DeviceListRequest, DeviceListResponse>
+    public class GetDevicesWithAccessEndpoint : BasicEndpointBase<SmartHomeRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -14,7 +14,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(DeviceListRequest request, CancellationToken ct)
+        public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class GetAllDevices : BasicEndpointBase<AllDeviceListRequest, DeviceListResponse>
+    public class GetAllDevices : BasicEndpointBase<SmartHomeRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -36,7 +36,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(AllDeviceListRequest request, CancellationToken ct)
+        public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class UpdateDeviceEndpoint : BasicEndpointBase<UpdateDeviceRequest, SuccessResponse>
+    public class UpdateDeviceEndpoint : BasicEndpointBase<DeviceRequest, SuccessResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -80,7 +80,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(UpdateDeviceRequest request, CancellationToken ct)
+        public override async Task HandleAsync(DeviceRequest request, CancellationToken ct)
         {
             try
             {
@@ -115,7 +115,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class CreateDeviceEndpoint : BasicEndpointBase<CreateDeviceRequest, SuccessResponse>
+    public class CreateDeviceEndpoint : BasicEndpointBase<DeviceRequest, GuidResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -124,7 +124,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(CreateDeviceRequest request, CancellationToken ct)
+        public override async Task HandleAsync(DeviceRequest request, CancellationToken ct)
         {
             try
             {
@@ -132,12 +132,12 @@ namespace SmartHome.Backend.FastEndpoints
             }
             catch (Exception ex)
             {
-                await SendAsync(SuccessResponse.Error(ex));
+                await SendAsync(GuidResponse.Error(ex));
             }
         }
     }
 
-    public class GetRoomEndpoint : BasicEndpointBase<RoomListRequest, RoomListResponse>
+    public class GetRoomEndpoint : BasicEndpointBase<SmartHomeRequest, RoomListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -146,7 +146,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(RoomListRequest request, CancellationToken ct)
+        public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
         {
             try
             {

@@ -1,0 +1,20 @@
+﻿@inject SmartHomeState smartHomeState;
+@inject NavigationManager navManager;
+
+@code {
+    [Parameter]
+    public string? SmartGuid { get; set; } //should come from url/@page
+
+    protected override void OnParametersSet()
+    {
+        if (Guid.TryParse(SmartGuid, out Guid smartHomeId))
+        {
+            smartHomeState.SetSelectedSmartHome(smartHomeId);
+        }
+        else
+        {
+            smartHomeState.SetSelectedSmartHome(null);
+            navManager.NavigateTo("/smarthome");
+        }
+    }
+}

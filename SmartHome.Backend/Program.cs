@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using FastEndpoints.Swagger;
 using SmartHome.Database;
 using SmartHome.Database.Auth;
-using SmartUser.Backend.Api;
 
 namespace SmartHome.Backend;
 
@@ -50,7 +49,6 @@ public class Program
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
-        builder.Services.AddScoped<ISmartUserService, SmartUserService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
 
         builder.Services.AddFastEndpoints();
