@@ -26,12 +26,17 @@ public class SmartHomeService : ISmartHomeService
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.AcceptInviteToSmartHomeUrl, request);
     }
 
-    public async Task<SmartHomeResponse> GetJoinedSmartHomes(EmptyRequest request)
+    public async Task<SmartHomeListResponse> GetJoinedSmartHomes(EmptyRequest request)
     {
-        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.getJoinedUrl, request);
+        return await _api.Get<SmartHomeListResponse>(SharedConfig.Urls.SmartHome.GetJoinedUrl, request);
     }
-    public async Task<SmartHomeResponse> GetSmartHomeInvites(EmptyRequest request)
+    public async Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request)
     {
-        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.getInvitesUrl, request);
+        return await _api.Get<SmartHomeListResponse>(SharedConfig.Urls.SmartHome.GetInvitesUrl, request);
+    }
+
+    public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
+    {
+        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.GetByIDUrl, request);
     }
 }

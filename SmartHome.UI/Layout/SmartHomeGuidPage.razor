@@ -1,5 +1,7 @@
 ﻿@inject SmartHomeState smartHomeState;
 @inject NavigationManager navManager;
+@inject ISmartHomeService smartHomeService;
+@inject ISnackbar snackBar;
 
 @* 
     use "@inherits SmartHomeGuidPage" at the top of your page
@@ -9,17 +11,28 @@
     it then tries to convert it and sets the state for other components to use
 
     ApiService auto injects it into any SmartHomeRequest, so you dont have to pass it
+
+
+
+    if this is not working make sure to call await base.OnInitializedAsync();
+    in your own OnInitializedAsync method, meaning this runs first loading it for you!
 *@
 
 @code {
     [Parameter]
     public string? SmartGuid { get; set; } //should come from url/@page
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (Guid.TryParse(SmartGuid, out Guid smartHomeId))
         {
-            smartHomeState.SetSelectedSmartHome(smartHomeId);
+            if (smartHomeState.SelectedSmartHomeId == smartHomeId)
+                return; //we do not need to get the same one.
+
+            var request = new GuidRequest((Guid)smartHomeId);
+            var smartHomeResponse = await smartHomeService.GetSmartHomeById(request);
+            smartHomeResponse.Show(snackBar, "Smarthome retrived!");
+            smartHomeState.SetSelectedSmartHome(smartHomeResponse.smartHome);
         }
         else
         {

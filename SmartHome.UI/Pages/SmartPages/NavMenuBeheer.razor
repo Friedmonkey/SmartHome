@@ -1,8 +1,9 @@
 ﻿@page "/smarthome/{SmartGuid}/beheer"
+@inherits SmartHomeGuidPage
+@attribute [Authorize]
+
 @using SmartHome.UI.Pages.Beheer;
-@using SmartHome.Common.Models.Entities;
 @inject IDeviceService deviceService;
-@inherits SmartHomeGuidPage;
 
 <MudTabs>
     <MudTabPanel Icon="@Icons.Material.Filled.Devices" Text="Devices" />

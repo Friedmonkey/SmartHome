@@ -67,7 +67,7 @@ namespace SmartHome.Backend.Api
             await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
         }
-        public async Task<SmartHomeResponse> GetJoinedSmartHomes(EmptyRequest request)
+        public async Task<SmartHomeListResponse> GetJoinedSmartHomes(EmptyRequest request)
         {
             var smartHomeIds = GetSmartUsers()
                 .Where(su => su.Role == UserRole.Admin || su.Role == UserRole.User || su.Role == UserRole.Guest)
@@ -75,7 +75,7 @@ namespace SmartHome.Backend.Api
 
             return await GetHomesFromIds(smartHomeIds);
         }
-        public async Task<SmartHomeResponse> GetSmartHomeInvites(EmptyRequest request)
+        public async Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request)
         {
             var smartHomeIds = GetSmartUsers()
                 .Where(su => su.Role == UserRole.InvitationPending)
@@ -83,14 +83,23 @@ namespace SmartHome.Backend.Api
 
             return await GetHomesFromIds(smartHomeIds);
         }
+        public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
+        {
+            await _ctx.GetLoggedInSmartUser(request.Id); //make sure we are apart of the smarthome
 
-        public async Task<SmartHomeResponse> GetHomesFromIds(IQueryable<Guid> ids)
+            var smartHome = await _ctx.DbContext.SmartHomes.FirstOrDefaultAsync(home => home.Id == request.Id);
+            if (smartHome is null)
+                return SmartHomeResponse.Failed("Smart home not found");
+            return new SmartHomeResponse(smartHome);
+        }
+
+        public async Task<SmartHomeListResponse> GetHomesFromIds(IQueryable<Guid> ids)
         {
              var smartHomes = await _ctx.DbContext.SmartHomes
                     .Where(home => ids.Contains(home.Id))
                     .ToListAsync();
 
-            return new SmartHomeResponse(smartHomes);
+            return new SmartHomeListResponse(smartHomes);
         }
 
 

@@ -33,20 +33,19 @@
 </MudNavMenu>
 
 @code{
-    [Parameter]
-    public bool ReadyRefresh
+    protected override void OnInitialized()
     {
-        set
-        {
-            Refresh();
-            ReadyRefresh = false;
-        }
+        smartHomeState.OnChange += Refresh;
     }
-
-    public void Refresh()
+    public void Dispose()
+    { 
+        smartHomeState.OnChange -= Refresh;
+    }
+    private void Refresh()
     {
         StateHasChanged();
     }
+
 
 
     public static void Redirect(NavigationManager navManager, string? base64)

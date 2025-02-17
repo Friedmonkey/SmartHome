@@ -46,8 +46,9 @@ public class SharedConfig
             public const string CreateSmartHomeUrl = SmartHomeBase + "create";
             public const string InviteToSmartHomeUrl = SmartHomeBase + "invite";
             public const string AcceptInviteToSmartHomeUrl = SmartHomeBase + "acceptInvite";
-            public const string getJoinedUrl = SmartHomeBase + "getJoined";
-            public const string getInvitesUrl = SmartHomeBase + "getInvited";
+            public const string GetJoinedUrl = SmartHomeBase + "getJoined";
+            public const string GetInvitesUrl = SmartHomeBase + "getInvited";
+            public const string GetByIDUrl = SmartHomeBase + "getByIDUrl";
         }
 
         private const string SmartUserBase = ApiBase + "SmartUser/";

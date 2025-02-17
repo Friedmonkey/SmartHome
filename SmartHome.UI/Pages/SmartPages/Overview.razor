@@ -1,11 +1,7 @@
 ﻿@page "/smarthome/{SmartGuid}/overview"
-@attribute [Authorize]
 @inherits SmartHomeGuidPage
+@attribute [Authorize]
 
-@using SmartHome.UI.Components;
-@using SmartHome.Common.Api;
-@using SmartHome.Common.Models.Entities;
-@using SmartHome.Common.Models.Enums;
 @inject IDeviceService deviceService;
 
 @if (devicesList.Count <= 0)
@@ -53,6 +49,7 @@
 
     protected override async Task OnInitializedAsync()
     {   //Haal de Kamers en apparten op uit de DataBase met de APi
+        await base.OnInitializedAsync();
         await LoadDevices();
     }
 

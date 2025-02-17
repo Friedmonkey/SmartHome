@@ -71,12 +71,12 @@ public class AcceptSmartHomeInviteEndpoint : BasicEndpointBase<SmartHomeRequest,
     }
 }
 
-public class GetJoinedSmartHomesEndpoint : BasicEndpointBase<EmptyRequest, SmartHomeResponse>
+public class GetJoinedSmartHomesEndpoint : BasicEndpointBase<EmptyRequest, SmartHomeListResponse>
 {
     public required ISmartHomeService Service { get; set; }
     public override void Configure()
     {
-        Get(SharedConfig.Urls.SmartHome.getJoinedUrl);
+        Get(SharedConfig.Urls.SmartHome.GetJoinedUrl);
         SecureJwtEndpoint();
     }
 
@@ -88,17 +88,16 @@ public class GetJoinedSmartHomesEndpoint : BasicEndpointBase<EmptyRequest, Smart
         }
         catch (Exception ex)
         {
-            await SendAsync(SmartHomeResponse.Error(ex));
+            await SendAsync(SmartHomeListResponse.Error(ex));
         }
     }
 }
-
-public class GetSmartHomeInvitesEndpoint : BasicEndpointBase<EmptyRequest, SmartHomeResponse>
+public class GetSmartHomeInvitesEndpoint : BasicEndpointBase<EmptyRequest, SmartHomeListResponse>
 {
     public required ISmartHomeService Service { get; set; }
     public override void Configure()
     {
-        Get(SharedConfig.Urls.SmartHome.getInvitesUrl);
+        Get(SharedConfig.Urls.SmartHome.GetInvitesUrl);
         SecureJwtEndpoint();
     }
 
@@ -107,6 +106,28 @@ public class GetSmartHomeInvitesEndpoint : BasicEndpointBase<EmptyRequest, Smart
         try
         {
             await SendAsync(await Service.GetSmartHomeInvites(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SmartHomeListResponse.Error(ex));
+        }
+    }
+}
+
+public class GetSmartHomeByIdEndpoint : BasicEndpointBase<GuidRequest, SmartHomeResponse>
+{
+    public required ISmartHomeService Service { get; set; }
+    public override void Configure()
+    {
+        Get(SharedConfig.Urls.SmartHome.GetByIDUrl);
+        SecureJwtEndpoint();
+    }
+
+    public override async Task HandleAsync(GuidRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await SendAsync(await Service.GetSmartHomeById(request));
         }
         catch (Exception ex)
         {
