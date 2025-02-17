@@ -46,11 +46,13 @@ public class Program
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
-        builder.Services.AddScoped<IDeviceService, InternalDeviceService>();
+        builder.Services.AddScoped<IDeviceService, DeviceService>();
 
         //keep track of selected smarthome
+        builder.Services.AddScoped<NavMenu>();
         builder.Services.AddScoped<SmartHomeState>();
-
+        
+        
 
         var application = builder.Build();
         await application.RunAsync();

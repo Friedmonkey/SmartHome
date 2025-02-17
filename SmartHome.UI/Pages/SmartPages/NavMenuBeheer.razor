@@ -1,0 +1,56 @@
+﻿@page "/smarthome/{SmartGuid}/beheer"
+@using SmartHome.UI.Pages.Beheer;
+@using SmartHome.Common.Models.Entities;
+@inject IDeviceService deviceService;
+@inject SmartHomeState smartHomeState;
+@inject NavigationManager navManager;
+
+<MudTabs>
+    <MudTabPanel Icon="@Icons.Material.Filled.Devices" Text="Devices" />
+    <MudTabPanel Icon="@Icons.Material.Filled.SupervisedUserCircle" Text="Smart Users" BadgeData="1" BadgeColor="Color.Success" />
+    <MudTabPanel Icon="@Icons.Material.Filled.AccessTime" Text="Routine"/>
+</MudTabs>
+
+@{
+    List<Device> _deviceList = new List<Device>();
+    _deviceList = deviceList;
+}
+
+<DeviceBeheer DevicesList="_deviceList"></DeviceBeheer>
+
+@code {
+
+    [Parameter]
+    public string? SmartGuid { get; set; }
+
+    private Guid SmartHomeId;
+
+    List<Device> deviceList = new List<Device>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (SmartGuid is null)
+        {
+            smartHomeState.SetSelectedSmartHome(null);
+        }
+        else
+        {
+            if (!Guid.TryParse(SmartGuid, out SmartHomeId))
+                navManager.NavigateTo("/smarthome");
+            smartHomeState.SetSelectedSmartHome(SmartHomeId);
+        }
+
+        GetDevices();
+    }
+
+    private async Task GetDevices()
+    {
+        var Devices = await deviceService.GetAllDevices(new(SmartHomeId));
+        if (Devices.WasSuccess())
+        {
+            //Zet de apparaten in een lijst
+            deviceList = Devices.Devices;
+            StateHasChanged();
+        }
+    }
+}

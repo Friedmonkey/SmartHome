@@ -21,6 +21,10 @@
     public void OpenHome()
     { 
         smartHomeState.SetSelectedSmartHome(Home.Id);
+
+        NavigationController.RefreshMenu();
+        NavigationController.HomeName = Home.Name;
+
         navManager.NavigateTo($"/smarthome/{Home.Id}/overview");
     }
 }

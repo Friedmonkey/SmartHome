@@ -1,15 +1,16 @@
 ﻿@using SmartHome.Common.Api;
 @inject IDeviceService deviceService;
 
-<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="background-color: lightslategray; width: 45%" Elevation="0">
+<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
         <MudImage Width="150" Height="150" Src="Afbeeldingen/router.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
-        <MudText Typo="Typo.h3" Class="Lamp-Name">@_RouterName</MudText>
+        <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@_RouterName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
         <MudSwitch @onclick="@(e => UpdateConfig(!_RouterConfig.Ingeschakeld))" @bind-Value="@_RouterConfig.Ingeschakeld" Label="@Status" Color="Color.Warning" UncheckedColor="Color.Dark" />
     </MudPaper>
 </MudPaper>
+
 
 
 @code {
