@@ -2,39 +2,38 @@
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using static SmartHome.Common.Api.IDeviceService;
-using static SmartHome.Common.Api.IPersonTestingService;
 
 namespace SmartHome.Backend.FastEndpoints
 {
-    public class GetDevicesWidtAccesEndpoint : BasicEndpointBase<DeviceListRequest, DiviceListResponse>
+    public class GetDevicesWithAccessEndpoint : BasicEndpointBase<DeviceListRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
         {
-            Get(SharedConfig.Urls.Device.GetDevicesWithAcces);
-            AllowAnonymous();
+            Get(SharedConfig.Urls.Device.GetDevicesWithAccess);
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(DeviceListRequest request, CancellationToken ct)
         {
             try
             {
-                await SendAsync(await Service.GetDevicesWithAcces(request));
+                await SendAsync(await Service.GetDevicesWithAccess(request));
             }
             catch (Exception ex)
             {
-                await SendAsync(DiviceListResponse.Error(ex));
+                await SendAsync(DeviceListResponse.Error(ex));
             }
         }
     }
 
-    public class GetAllDevices : BasicEndpointBase<AllDeviceListRequest, DiviceListResponse>
+    public class GetAllDevices : BasicEndpointBase<AllDeviceListRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
         {
             Get(SharedConfig.Urls.Device.GetAllDevices);
-            AllowAnonymous();
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(AllDeviceListRequest request, CancellationToken ct)
@@ -45,7 +44,7 @@ namespace SmartHome.Backend.FastEndpoints
             }
             catch (Exception ex)
             {
-                await SendAsync(DiviceListResponse.Error(ex));
+                await SendAsync(DeviceListResponse.Error(ex));
             }
         }
     }
@@ -56,7 +55,7 @@ namespace SmartHome.Backend.FastEndpoints
         public override void Configure()
         {
             Post(SharedConfig.Urls.Device.UpdateDevicesRange);
-            AllowAnonymous();
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(UpdateDevicesRangeRequest request, CancellationToken ct)
@@ -78,7 +77,7 @@ namespace SmartHome.Backend.FastEndpoints
         public override void Configure()
         {
             Post(SharedConfig.Urls.Device.UpdateDevice);
-            AllowAnonymous();
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(UpdateDeviceRequest request, CancellationToken ct)
@@ -100,7 +99,7 @@ namespace SmartHome.Backend.FastEndpoints
         public override void Configure()
         {
             Delete(SharedConfig.Urls.Device.DeleteDevice);
-            AllowAnonymous();
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(DeleteDeviceRequest request, CancellationToken ct)
@@ -122,7 +121,7 @@ namespace SmartHome.Backend.FastEndpoints
         public override void Configure()
         {
             Post(SharedConfig.Urls.Device.CreaateDevice);
-            AllowAnonymous();
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(CreateDeviceRequest request, CancellationToken ct)
@@ -144,7 +143,7 @@ namespace SmartHome.Backend.FastEndpoints
         public override void Configure()
         {
             Post(SharedConfig.Urls.Device.GetAllRooms);
-            AllowAnonymous();
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(RoomListRequest request, CancellationToken ct)
@@ -166,7 +165,7 @@ namespace SmartHome.Backend.FastEndpoints
         public override void Configure()
         {
             Post(SharedConfig.Urls.Device.UpdateDeviceConfig);
-            AllowAnonymous();
+            SecureJwtEndpoint();
         }
 
         public override async Task HandleAsync(UpdateDeviceConfigRequest request, CancellationToken ct)

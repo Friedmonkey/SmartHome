@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SmartHome.Common.Api
 {
-    public record DiviceListResponse(List<Device> Devices) : Response<DiviceListResponse>;
+    public record DeviceListResponse(List<Device> Devices) : Response<DeviceListResponse>;
 
     public record RoomListResponse(List<Room> Rooms) : Response<RoomListResponse>;
 
@@ -16,10 +16,10 @@ namespace SmartHome.Common.Api
     {
         ///Maak een Response aan
         public record DeviceListRequest(Guid HomeGuid);
-        Task<DiviceListResponse> GetDevicesWithAcces(DeviceListRequest request);
+        Task<DeviceListResponse> GetDevicesWithAccess(DeviceListRequest request);
 
         public record AllDeviceListRequest(Guid HomeGuid);
-        Task<DiviceListResponse> GetAllDevices(AllDeviceListRequest request);
+        Task<DeviceListResponse> GetAllDevices(AllDeviceListRequest request);
 
         public record UpdateDevicesRangeRequest(List<Device> devices);
         Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request);

@@ -9,19 +9,18 @@
 @inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
 
-@{
-    List<Device> devicesList = new List<Device>();
-    devicesList = deviceList;
+@if (devicesList.Count <= 0)
+{
+    <MudText>You have no devices</MudText>
 }
 
 @foreach (Room room in devicesList.Select(r => r.Room).DistinctBy(r => r.Id).ToList())
 {
-    List<Device> roomDeviceslist = deviceList.Where(d => d.RoomId == room.Id).ToList();
+    List<Device> roomDeviceslist = devicesList.Where(d => d.RoomId == room.Id).ToList();
     //Ga door all rooms in de roomLists
     @if (roomDeviceslist.Count > 0)
     {
         //Zet room name op het scherm
-        <div>
         <MudText Typo="Typo.h3" Align="Align.Center">@room.Name</MudText>
         <MudDivider DividerType='DividerType.Middle' Class='my-6' />
         <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4" Style="width: 100%; background-color: transparent;" Elevation="0">
@@ -47,22 +46,17 @@
                 }
             </MudPaper>
         </MudPaper>
-        </div>
     }
 }
 
 @code {
-
     [Parameter]
     public string? SmartGuid { get; set; }
-
     private Guid SmartHomeId;
 
-    bool DataLoaded = false;
+    List<Device> devicesList = new List<Device>();
 
-    List<Device> deviceList = new List<Device>();
-    List<Room> roomList = new List<Room>();
-    HttpClient httpClient = new HttpClient();
+    bool DataLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,16 +72,16 @@
         }
 
         //Haal de Kamers en apparten op uit de DataBase met de APi
-        GetDevices();
+        await LoadDevices();
     }
 
-    private async Task GetDevices()
+    private async Task LoadDevices()
     {
-        var Devices = await deviceService.GetDevicesWithAcces(new(SmartHomeId));
+        var Devices = await deviceService.GetDevicesWithAccess(new(SmartHomeId));
         if (Devices.WasSuccess())
         {
             //Zet de apparaten in een lijst
-            deviceList = Devices.Devices;
+            devicesList = Devices.Devices;
             StateHasChanged();
         }
     }
