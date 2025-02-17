@@ -40,6 +40,14 @@ public class ApiContext
         if (!(await IsSmartHomeAdmin(smarthomeId)))
             throw new ApiError("You do not have access to control this SmartHome");
     }
+    public async Task EnforceIsPartOfSmartHome(Guid smarthomeId)
+    {
+        var account = GetLoggedInId();
+        var isPartOfSmartHome = await DbContext.SmartUsers.AnyAsync(sm => sm.AccountId == account && sm.SmartHomeId == smarthomeId);
+
+        if (!isPartOfSmartHome)
+            throw new ApiError("You are not part of this SmartHome");
+    }
     public async Task<bool> IsSmartHomeAdmin(Guid smarthomeId)
     {
         var smartUser = await GetLoggedInSmartUser(smarthomeId);

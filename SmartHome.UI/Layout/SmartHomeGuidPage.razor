@@ -1,7 +1,5 @@
 ﻿@inject SmartHomeState smartHomeState;
-@inject NavigationManager navManager;
-@inject ISmartHomeService smartHomeService;
-@inject ISnackbar snackBar;
+@inject SmartHomeStateLoader smartHomeStateLoader;
 @attribute [Authorize]
 
 @* 
@@ -30,29 +28,12 @@
     [Parameter]
     public string? SmartGuid { get; set; } //should come from url/@page
 
-    public async Task<bool> ResolveSmartHomeStateSuccess()
+    protected override void OnInitialized()
     {
-        if (Guid.TryParse(SmartGuid, out Guid smartHomeId))
-        {
-            if (smartHomeState.SelectedSmartHomeId.HasValue &&
-                smartHomeState.SelectedSmartHomeId == smartHomeId)
-                return true; //we do not need to get the same one.
-
-            var request = new GuidRequest((Guid)smartHomeId);
-            var smartHomeResponse = await smartHomeService.GetSmartHomeById(request);
-
-            if (smartHomeResponse.EnsureSuccess(snackBar)) //only logs errors
-            { 
-#if DEBUG
-                snackBar.Add("Smarthome retrived!", Severity.Info); //let devs know we made api call
-#endif
-                smartHomeState.SetSelectedSmartHome(smartHomeResponse.smartHome);
-                return true;
-            }
-        }
-
-        smartHomeState.SetSelectedSmartHome(null);
-        navManager.NavigateTo("/smarthome");
-        return false;
+        smartHomeState._SetPreloadSelectedSmartHome(SmartGuid);
+    }
+    public Task<bool> ResolveSmartHomeStateSuccess()
+    {
+        return smartHomeStateLoader.ResolveSmartHomeState(SmartGuid);
     }
 }

@@ -30,7 +30,6 @@ public class SharedConfig
         private const string DeviceBase = ApiBase + "device/";
         public static class Device
         {
-            public const string GetDevicesWithAccess = DeviceBase + "GetDevicesWithAcces";
             public const string GetAllDevices = DeviceBase + "GetAllDevices";
             public const string UpdateDevicesRange = DeviceBase + "UpdateDevicesRange";
             public const string UpdateDevice = DeviceBase + "UpdateDevice";

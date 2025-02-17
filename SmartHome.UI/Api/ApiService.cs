@@ -17,10 +17,11 @@ public class ApiService
     private readonly ISnackbar _snackbarService;
     private readonly IJwtStoreService _jwtStoreService;
     private readonly SmartHomeState _smartHomeState;
+    //private readonly SmartHomeStateLoader _smartHomeStateLoader;
     private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
 
-    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState)//, SmartHomeStateLoader smartHomeStateLoader)
     {
         _httpClientFactory = httpClientFactory;
         _snackbarService = snackbarService;
@@ -28,6 +29,7 @@ public class ApiService
         _jwtStoreService = jwtStoreService;
         _jwtAuthStateProvider = jwtAuthStateProvider;
         _smartHomeState = smartHomeState;
+        //_smartHomeStateLoader = smartHomeStateLoader;
     }
 
     public async Task<TokenResponse> Login(LoginRequest request)
@@ -92,10 +94,17 @@ public class ApiService
                 {
                     if (_smartHomeState.SelectedSmartHomeId is null)
                     {
-                        throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
-                        "If you are making an api request on OnInitializedAsync, make sure to call\n" +
-                        "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
-                        "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
+                        //bool loaded = false;
+                        //if (_smartHomeState._GetPreloadGuid() is not null)
+                        //    loaded = await _smartHomeStateLoader.ResolveSmartHomeState(_smartHomeState._GetPreloadGuid());
+
+                        //if (!loaded || _smartHomeState.SelectedSmartHomeId is null)
+                        //{ 
+                            throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
+                            "If you are making an api request on OnInitializedAsync, make sure to call\n" +
+                            "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
+                            "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
+                        //}
                     }
 
                     Guid guid = (Guid)_smartHomeState.SelectedSmartHomeId;
@@ -133,6 +142,7 @@ public class ApiService
             throw new ApiError("Unexpected Api error: " + ex.Message, fatal:true);
         }
     }
+
     private JsonContent? GetData(HttpMethod method, object data, ref string url)
     {
         if (method == HttpMethod.Post)

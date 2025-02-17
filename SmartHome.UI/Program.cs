@@ -50,6 +50,7 @@ public class Program
 
         //keep track of selected smarthome
         builder.Services.AddScoped<NavMenu>();
+        builder.Services.AddScoped<SmartHomeStateLoader>();
         builder.Services.AddScoped<SmartHomeState>();
         
         

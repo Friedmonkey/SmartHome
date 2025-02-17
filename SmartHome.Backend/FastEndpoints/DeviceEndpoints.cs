@@ -5,29 +5,7 @@ using static SmartHome.Common.Api.IDeviceService;
 
 namespace SmartHome.Backend.FastEndpoints
 {
-    public class GetDevicesWithAccessEndpoint : BasicEndpointBase<EmptySmartHomeRequest, DeviceListResponse>
-    {
-        public required IDeviceService Service { get; set; }
-        public override void Configure()
-        {
-            Get(SharedConfig.Urls.Device.GetDevicesWithAccess);
-            SecureJwtEndpoint();
-        }
-
-        public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
-        {
-            try
-            {
-                await SendAsync(await Service.GetDevicesWithAccess(request));
-            }
-            catch (Exception ex)
-            {
-                await SendAsync(DeviceListResponse.Error(ex));
-            }
-        }
-    }
-
-    public class GetAllDevices : BasicEndpointBase<EmptySmartHomeRequest, DeviceListResponse>
+    public class GetAllDevicesEndpoint : BasicEndpointBase<EmptySmartHomeRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -137,7 +115,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class GetRoomEndpoint : BasicEndpointBase<EmptySmartHomeRequest, RoomListResponse>
+    public class GetAllRoomsEndpoint : BasicEndpointBase<EmptySmartHomeRequest, RoomListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -150,7 +128,7 @@ namespace SmartHome.Backend.FastEndpoints
         {
             try
             {
-                await SendAsync(await Service.GetRoomsByHouseId(request));
+                await SendAsync(await Service.GetAllRooms(request));
             }
             catch (Exception ex)
             {
