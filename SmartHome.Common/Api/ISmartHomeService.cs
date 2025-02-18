@@ -13,7 +13,7 @@ public interface ISmartHomeService
     public record InviteRequest(string email) : SmartHomeRequest;
     public Task<SuccessResponse> InviteToSmartHome(InviteRequest request);
 
-    public Task<SuccessResponse> AcceptSmartHomeInvite(SmartHomeRequest request);
+    public Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request);
 
     public Task<SmartHomeListResponse> GetJoinedSmartHomes(EmptyRequest request);
     public Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request);

@@ -13,6 +13,10 @@
         <MudButton OnClick="RefreshJoined">Refresh</MudButton>
     </TitleContent>
     <ChildContent>
+        @if (joinedSmartHomes.Count == 0)
+        {
+            <MudText>You are not part of any SmartHome, Create one or accept any invites</MudText>
+        }
         <MudGrid>
             @foreach (var smartHome in joinedSmartHomes)
             {
@@ -30,6 +34,10 @@
         <MudButton OnClick="RefreshInvited">Refresh</MudButton>
     </TitleContent>
     <ChildContent>
+        @if (joinedSmartHomes.Count == 0)
+        {
+            <MudText>You have no pending invites.</MudText>
+        }
         <MudGrid>
             @foreach (var smartHome in invitedSmartHomes)
             {
@@ -83,6 +91,7 @@
     }
     private async Task RefreshJoined()
     {
+        joinedSmartHomes = new();
         cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetJoinedUrl);
         var joined = await smartHomeService.GetJoinedSmartHomes(new());
         if (joined.EnsureSuccess(snackBar))
@@ -91,6 +100,7 @@
     }
     private async Task RefreshInvited()
     { 
+        invitedSmartHomes = new();
         cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetInvitesUrl);
         var invited = await smartHomeService.GetSmartHomeInvites(new());
         if (invited.EnsureSuccess(snackBar))

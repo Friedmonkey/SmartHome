@@ -55,9 +55,9 @@ namespace SmartHome.Backend.Api
                 return SuccessResponse.Failed("Failed to send invitation");
             return SuccessResponse.Success();
         }
-        public async Task<SuccessResponse> AcceptSmartHomeInvite(SmartHomeRequest request)
+        public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
         {
-            var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
+            var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.Id);
 
             if (smartUser.Role != UserRole.InvitationPending)
                 return SuccessResponse.Failed("You dont have an invitation.");

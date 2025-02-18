@@ -21,7 +21,7 @@ public class SmartHomeService : ISmartHomeService
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.InviteToSmartHomeUrl, request);
     }
-    public async Task<SuccessResponse> AcceptSmartHomeInvite(SmartHomeRequest request)
+    public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.AcceptInviteToSmartHomeUrl, request);
     }

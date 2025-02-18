@@ -45,6 +45,7 @@ public class AuthContext
         bool isAdmin = smartUser.Role == UserRole.Admin;
         return isAdmin;
     }
+#warning TODO: make sure GetLoggedInSmartUser is user or admin and make separate one for invites
     public async Task<SmartUserModel> GetLoggedInSmartUser(Guid smarthomeId)
     {
         var id = GetLoggedInId();
