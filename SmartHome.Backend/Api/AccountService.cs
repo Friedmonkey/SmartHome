@@ -108,7 +108,7 @@ public class AccountService : IAccountService
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")));
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")));
             o.User.Roles.Add(AuthRoles.AuthUser);
-            o.ExpireAt = DateTime.Now.AddMinutes(1);
+            o.ExpireAt = DateTime.Now.AddMinutes(15);
         });
 
         return jwtToken;

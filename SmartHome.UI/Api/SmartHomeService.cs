@@ -37,6 +37,6 @@ public class SmartHomeService : ISmartHomeService
 
     public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
     {
-        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.GetByIDUrl, request);
+        return await _api.GetSmartHomeById(request);
     }
 }

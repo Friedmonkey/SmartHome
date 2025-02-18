@@ -1,28 +1,36 @@
-﻿using SmartHome.Common.Models.Entities;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace SmartHome.UI.Layout;
 
 public class SmartHomeState
 {
-    private SmartHomeModel? _selectedSmartHome;
-    private string? preloadGuid;
-    //if you want this to load make sure to call await base.OnInitializedAsync(); in your own OnInitializedAsync
-
-    public event Action? OnChange;
-
-    public void _SetPreloadSelectedSmartHome(string? smartHomeId)
-    { 
-        preloadGuid = smartHomeId;
-    }
-    public string? _GetPreloadGuid() => preloadGuid;
-
-    public void SetSelectedSmartHome(SmartHomeModel? smartHome)
+    private readonly NavigationManager _navigationManager;
+    public SmartHomeState(NavigationManager navigationManager)
     {
-        _selectedSmartHome = smartHome;
-        OnChange?.Invoke();
+        this._navigationManager = navigationManager;
+    }
+    public Guid? GetCurrentSmartHomeGuid()
+    {
+        var guidStr = GetCurrentSmartHomeGuidStr();
+        if (guidStr is null)
+            return null;
+        if (Guid.TryParse(guidStr, out Guid guid))
+            return guid;
+        else
+            return null;
     }
 
-    public Guid? SelectedSmartHomeId => _selectedSmartHome?.Id;
-    public string SelectedSmartHomeName => _selectedSmartHome?.Name ?? "Select or create a SmartHome.";
+    public string? GetCurrentSmartHomeGuidStr()
+    {
+        var uri = new Uri(_navigationManager.Uri);
+        if (uri.Segments.Count() < 3) // smarthome/{guid}/page
+            return null;
+
+        if (!uri.Segments[^3].ToLower().EndsWith("smarthome/"))
+            return null;
+
+        var guidString = uri.Segments[^2].Replace("/", "");
+        return guidString;
+    }
 }
 

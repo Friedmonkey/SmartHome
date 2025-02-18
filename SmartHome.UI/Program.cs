@@ -49,11 +49,7 @@ public class Program
         builder.Services.AddScoped<IDeviceService, DeviceService>();
 
         //keep track of selected smarthome
-        builder.Services.AddScoped<NavMenu>();
-        builder.Services.AddScoped<SmartHomeStateLoader>();
         builder.Services.AddScoped<SmartHomeState>();
-        
-        
 
         var application = builder.Build();
         await application.RunAsync();

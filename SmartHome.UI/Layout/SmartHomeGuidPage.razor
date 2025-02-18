@@ -1,6 +1,4 @@
-﻿@inject SmartHomeState smartHomeState;
-@inject SmartHomeStateLoader smartHomeStateLoader;
-@attribute [Authorize]
+﻿@attribute [Authorize]
 
 @* 
     use "@inherits SmartHomeGuidPage" at the top of your page
@@ -13,27 +11,9 @@
 
 
     to use this use "@inherits SmartHomeGuidPage" at the top of your page
-    and in OnInitializedAsync do this
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (!await ResolveSmartHomeStateSuccess())
-            return;
-
-        ... your code can go here
-    }
 *@
 
 @code {
     [Parameter]
     public string? SmartGuid { get; set; } //should come from url/@page
-
-    protected override void OnInitialized()
-    {
-        smartHomeState._SetPreloadSelectedSmartHome(SmartGuid);
-    }
-    public Task<bool> ResolveSmartHomeStateSuccess()
-    {
-        return smartHomeStateLoader.ResolveSmartHomeState(SmartGuid);
-    }
 }

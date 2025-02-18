@@ -120,7 +120,7 @@ namespace SmartHome.Backend.FastEndpoints
         public required IDeviceService Service { get; set; }
         public override void Configure()
         {
-            Post(SharedConfig.Urls.Device.GetAllRooms);
+            Get(SharedConfig.Urls.Device.GetAllRooms);
             SecureJwtEndpoint();
         }
 

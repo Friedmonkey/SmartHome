@@ -1,51 +1,55 @@
-﻿@inject SmartHomeState smartHomeState
+﻿@inject SmartHomeState smartHomeState;
+@inject ApiService apiService;
+@inject ISnackbar snackBar;
 
 <MudNavMenu>
     <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
         Smart Homes
     </MudNavLink>
-    @if (smartHomeState.SelectedSmartHomeId is not null)
+    @if (CurrentSmartHome is not null)
     {
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/overview")" Icon="@Icons.Material.Filled.Dashboard">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/overview")" Icon="@Icons.Material.Filled.Dashboard">
             Overview
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/devices")" Icon="@Icons.Material.Filled.Devices">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/devices")" Icon="@Icons.Material.Filled.Devices">
             Devices
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/logs")" Icon="@Icons.Material.Filled.List">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/logs")" Icon="@Icons.Material.Filled.List">
             Logs
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/routines")" Icon="@Icons.Material.Filled.Autorenew">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/routines")" Icon="@Icons.Material.Filled.Autorenew">
             Routines
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/beheer")" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/beheer")" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">
             Beheer
         </MudNavLink>
     }
     else
-    {     
+    {
         <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
     }  
 </MudNavMenu>
 
 @code{
-    protected override void OnInitialized()
+    public SmartHomeModel? CurrentSmartHome { get; private set; } = null;
+    protected override async Task OnParametersSetAsync()
     {
-        smartHomeState.OnChange += Refresh;
+        Guid? guid = smartHomeState.GetCurrentSmartHomeGuid();
+        if (guid is not null)
+        {
+            var smartHome = await apiService.GetSmartHomeById(new((Guid)guid!));
+            if (smartHome.EnsureSuccess(snackBar))
+            {
+                CurrentSmartHome = smartHome.smartHome;
+                return;
+            }
+        }
+        CurrentSmartHome = null;
     }
-    public void Dispose()
-    { 
-        smartHomeState.OnChange -= Refresh;
-    }
-    private void Refresh()
-    {
-        StateHasChanged();
-    }
-
 
 
     public static void Redirect(NavigationManager navManager, string? base64)

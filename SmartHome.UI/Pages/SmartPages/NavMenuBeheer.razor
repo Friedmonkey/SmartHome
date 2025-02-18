@@ -22,8 +22,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!await ResolveSmartHomeStateSuccess())
-            return;
         await LoadDevices();
     }
 

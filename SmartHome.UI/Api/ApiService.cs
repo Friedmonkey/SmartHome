@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SmartHome.Common;
 using SmartHome.Common.Api;
@@ -8,6 +9,7 @@ using SmartHome.Common.Models;
 using SmartHome.UI.Auth;
 using SmartHome.UI.Layout;
 using static SmartHome.Common.Api.IAccountService;
+using static SmartHome.Common.Api.ISmartHomeService;
 
 namespace SmartHome.UI.Api;
 
@@ -17,11 +19,10 @@ public class ApiService
     private readonly ISnackbar _snackbarService;
     private readonly IJwtStoreService _jwtStoreService;
     private readonly SmartHomeState _smartHomeState;
-    //private readonly SmartHomeStateLoader _smartHomeStateLoader;
     private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
 
-    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState)//, SmartHomeStateLoader smartHomeStateLoader)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState)
     {
         _httpClientFactory = httpClientFactory;
         _snackbarService = snackbarService;
@@ -29,7 +30,6 @@ public class ApiService
         _jwtStoreService = jwtStoreService;
         _jwtAuthStateProvider = jwtAuthStateProvider;
         _smartHomeState = smartHomeState;
-        //_smartHomeStateLoader = smartHomeStateLoader;
     }
 
     public async Task<TokenResponse> Login(LoginRequest request)
@@ -92,28 +92,26 @@ public class ApiService
             {
                 if (data is SmartHomeRequest req)
                 {
-                    if (_smartHomeState.SelectedSmartHomeId is null)
+                    //var location = _navigationManager.Uri; //e.Location;
+                    //var path = _navigationManager.ToBaseRelativePath(location).ToLower();
+                    //bool success = _smartHomeState.UpdateSelectedSmartHomeId(path);
+                    //bool success = await _smartHomeState.LoadSelectedSmartHome(_navigationManager, this);
+                    bool success = true;
+                    Guid? smartHomeGuid = _smartHomeState.GetCurrentSmartHomeGuid();
+                    if (!success || smartHomeGuid is null)
                     {
-                        //bool loaded = false;
-                        //if (_smartHomeState._GetPreloadGuid() is not null)
-                        //    loaded = await _smartHomeStateLoader.ResolveSmartHomeState(_smartHomeState._GetPreloadGuid());
-
-                        //if (!loaded || _smartHomeState.SelectedSmartHomeId is null)
-                        //{ 
-                            throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
-                            "If you are making an api request on OnInitializedAsync, make sure to call\n" +
-                            "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
-                            "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
-                        //}
+                        throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
+                        "If you are making an api request on OnInitializedAsync, make sure to call\n" +
+                        "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
+                        "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
                     }
 
-                    Guid guid = (Guid)_smartHomeState.SelectedSmartHomeId;
 
                     if (req.smartHome != Guid.Empty)
                         _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
 
                     //update the smartHome guid using record with syntax
-                    data = req with { smartHome = guid };
+                    data = req with { smartHome = (Guid)smartHomeGuid };
                 }
                 content = GetData(method, data, ref url); //can put data in url for GET requests
             }
@@ -143,6 +141,40 @@ public class ApiService
         }
     }
 
+    public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
+    {
+        return await Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.GetByIDUrl, request);
+    }
+//    public async Task<bool> LoadCurrentSmartHomeSuccess(string? smartHomeGuidStr = null)
+//    {
+//        smartHomeGuidStr ??= NavMenu.GetCurrentSmartHome(_navigationManager);
+//        if (Guid.TryParse(smartHomeGuidStr, out Guid smartHomeId))
+//        {
+//            if (_smartHomeState.SelectedSmartHomeId.HasValue &&
+//                _smartHomeState.SelectedSmartHomeId == smartHomeId)
+//                return true; //we do not need to get the same one.
+//            while (_smartHomeState.IsBusy())
+//                await Task.Delay(10);
+
+//            _smartHomeState.StartProccessing();
+//            var request = new GuidRequest((Guid)smartHomeId);
+//            var smartHomeResponse = await GetSmartHomeById(request);
+
+//            if (smartHomeResponse.EnsureSuccess(_snackbarService)) //only logs errors
+//            {
+//#if DEBUG
+//                _snackbarService.Add("Smarthome retrived!", Severity.Info); //let devs know we made api call
+//#endif
+//                _smartHomeState.SetSelectedSmartHome(smartHomeResponse.smartHome);
+//                return true;
+//            }
+//            _smartHomeState.StopProccessing();
+//        }
+
+//        _smartHomeState.SetSelectedSmartHome(null);
+//        _navigationManager.NavigateTo("/smarthome");
+//        return false;
+//    }
     private JsonContent? GetData(HttpMethod method, object data, ref string url)
     {
         if (method == HttpMethod.Post)
