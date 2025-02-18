@@ -1,6 +1,7 @@
 ﻿using SmartHome.Backend.FastEndpoints.Base;
 using SmartHome.Common;
 using SmartHome.Common.Api;
+using SmartHome.Common.Api.Common;
 using static SmartHome.Common.Api.IPersonTestingService;
 
 namespace SmartHome.Backend.FastEndpoints;

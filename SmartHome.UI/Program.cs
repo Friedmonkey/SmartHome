@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SmartHome.UI.Api;
 using MudBlazor.Services;
 using MudExtensions.Services;
-using SmartHome.Common.Api;
 using Blazored.SessionStorage;
 using SmartHome.UI.Auth;
 using Blazored.LocalStorage;
 using SmartHome.UI.Profile;
 using SmartHome.UI.Layout;
+using SmartHome.Common.Api;
+using SmartHome.UI.Api.Common;
 
 namespace SmartHome.UI;
 

@@ -8,6 +8,8 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using SmartHome.Database.Auth;
+using SmartHome.Backend.Api.Common;
+using SmartHome.Common.Api.Common;
 
 namespace SmartHome.Backend.Api;
 
@@ -48,7 +50,7 @@ public class AccountService : IAccountService
     }
     public async Task<SuccessResponse> Logout(EmptyRequest request)
     {
-        var user = await _ctx.GetLoggedInAccount();
+        var user = await _ctx.Auth.GetLoggedInAccount();
         var result = await _ctx.UserManager.UpdateSecurityStampAsync(user);
         return GetSuccessResponse(result);
     }
@@ -81,9 +83,9 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
             return TokenResponse.Failed("User Refresh failed.");
 
-        return new TokenResponse(JWT: CreateJWT(user), Refresh:user.SecurityStamp);
+        return new TokenResponse(JWT: CreateJWT(user), Refresh: user.SecurityStamp);
     }
-    private SuccessResponse GetSuccessResponse(IdentityResult? result) 
+    private SuccessResponse GetSuccessResponse(IdentityResult? result)
     {
         if (result is null)
             return SuccessResponse.Failed("IdentityResult was null");

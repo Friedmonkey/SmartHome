@@ -4,13 +4,14 @@ using System.Text;
 using MudBlazor;
 using SmartHome.Common;
 using SmartHome.Common.Api;
+using SmartHome.Common.Api.Common;
 using SmartHome.Common.Models;
 using SmartHome.UI.Auth;
 using SmartHome.UI.Layout;
 using static SmartHome.Common.Api.IAccountService;
 using static SmartHome.Common.Api.ISmartHomeService;
 
-namespace SmartHome.UI.Api;
+namespace SmartHome.UI.Api.Common;
 
 public class ApiService
 {
@@ -68,11 +69,11 @@ public class ApiService
         TimeSpan expire = cacheTime ?? TimeSpan.FromMinutes(5);
         string key = _memoryCacheService.HashKey(url, new { cacheKey, authenticated });
 
-        if (_memoryCacheService.TryGet<T>(key, expire, out T result))
+        if (_memoryCacheService.TryGet(key, expire, out T result))
             return result;
 
         result = await Send<T>(authenticated, HttpMethod.Get, url, data);
-        _memoryCacheService.Set<T>(key, result);
+        _memoryCacheService.Set(key, result);
 
         return result;
     }
@@ -88,7 +89,7 @@ public class ApiService
     {
         return await Send<T>(authenticated, HttpMethod.Put, url, data);
     }
-    public async Task<T> Delete<T>(string url, object? data = null,  bool authenticated = true) where T : Response<T>
+    public async Task<T> Delete<T>(string url, object? data = null, bool authenticated = true) where T : Response<T>
     {
         return await Send<T>(authenticated, HttpMethod.Delete, url, data);
     }
@@ -135,7 +136,7 @@ public class ApiService
             return response;
         }
         catch (ApiError apiError) when (apiError.IsFatal == false)
-        { 
+        {
             return Response<T>.Failed(apiError.Message);
         }
         catch (Exception ex) when (ex is not ApiError)
@@ -147,16 +148,16 @@ public class ApiService
                 return Response<T>.Failed("BACKEND not enabled");
             }
 #endif
-            throw new ApiError("Unexpected Api error: " + ex.Message, fatal:true);
+            throw new ApiError("Unexpected Api error: " + ex.Message, fatal: true);
         }
     }
 
     public void RemoveSmartHomeCache(GuidRequest request)
-    { 
-        string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl, 
-            new 
+    {
+        string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
+            new
             {
-                cacheKey = new { id = request.Id }, 
+                cacheKey = new { id = request.Id },
                 authenticated = true
             }
         );
@@ -164,7 +165,7 @@ public class ApiService
     }
     public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
     {
-        object cacheKey = new { id=request.Id };
+        object cacheKey = new { id = request.Id };
         TimeSpan cacheTime = TimeSpan.FromMinutes(2);
         return await GetWithCache<SmartHomeResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetByIDUrl, request, cacheTime);
     }

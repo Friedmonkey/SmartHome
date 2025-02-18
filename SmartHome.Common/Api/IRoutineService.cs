@@ -1,4 +1,5 @@
-﻿using SmartHome.Common.Models;
+﻿using SmartHome.Common.Api.Common;
+using SmartHome.Common.Models;
 using SmartHome.Common.Models.Entities;
 using static SmartHome.Common.Api.IRoutineService;
 

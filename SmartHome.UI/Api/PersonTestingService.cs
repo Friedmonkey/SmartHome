@@ -1,5 +1,7 @@
 ﻿using SmartHome.Common;
 using SmartHome.Common.Api;
+using SmartHome.Common.Api.Common;
+using SmartHome.UI.Api.Common;
 using static SmartHome.Common.Api.IPersonTestingService;
 
 namespace SmartHome.UI.Api;

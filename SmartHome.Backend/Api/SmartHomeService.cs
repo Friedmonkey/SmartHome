@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartHome.Backend.Api.Common;
 using SmartHome.Common.Api;
+using SmartHome.Common.Api.Common;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
 using static SmartHome.Common.Api.ISmartHomeService;
@@ -26,8 +28,8 @@ namespace SmartHome.Backend.Api
             };
             var homeResult = await _ctx.DbContext.SmartHomes.AddAsync(home);
             var smartUser = new SmartUserModel()
-            { 
-                AccountId = _ctx.GetLoggedInId(),
+            {
+                AccountId = _ctx.Auth.GetLoggedInId(),
                 SmartHomeId = homeResult.Entity.Id,
                 Role = UserRole.Admin,
             };
@@ -39,11 +41,11 @@ namespace SmartHome.Backend.Api
         }
         public async Task<SuccessResponse> InviteToSmartHome(InviteRequest request)
         {
-            await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
+            await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
-            var acc = await _ctx.GetAccountByEmail(request.email);
+            var acc = await _ctx.Auth.GetAccountByEmail(request.email);
 
-            var smartUser = new SmartUserModel() 
+            var smartUser = new SmartUserModel()
             {
                 AccountId = acc.Id,
                 SmartHomeId = request.smartHome,
@@ -57,7 +59,7 @@ namespace SmartHome.Backend.Api
         }
         public async Task<SuccessResponse> AcceptSmartHomeInvite(SmartHomeRequest request)
         {
-            var smartUser = await _ctx.GetLoggedInSmartUser(request.smartHome);
+            var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
             if (smartUser.Role != UserRole.InvitationPending)
                 return SuccessResponse.Failed("You dont have an invitation.");
@@ -85,7 +87,7 @@ namespace SmartHome.Backend.Api
         }
         public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
         {
-            await _ctx.GetLoggedInSmartUser(request.Id); //make sure we are apart of the smarthome
+            await _ctx.Auth.EnforceIsPartOfSmartHome(request.Id); //make sure we are apart of the smarthome
 
             var smartHome = await _ctx.DbContext.SmartHomes.FirstOrDefaultAsync(home => home.Id == request.Id);
             if (smartHome is null)
@@ -95,17 +97,16 @@ namespace SmartHome.Backend.Api
 
         public async Task<SmartHomeListResponse> GetHomesFromIds(IQueryable<Guid> ids)
         {
-             var smartHomes = await _ctx.DbContext.SmartHomes
-                    .Where(home => ids.Contains(home.Id))
-                    .ToListAsync();
+            var smartHomes = await _ctx.DbContext.SmartHomes
+                   .Where(home => ids.Contains(home.Id))
+                   .ToListAsync();
 
             return new SmartHomeListResponse(smartHomes);
         }
 
-
         private IQueryable<SmartUserModel> GetSmartUsers()
         {
-            var userId = _ctx.GetLoggedInId();
+            var userId = _ctx.Auth.GetLoggedInId();
             var smartUsers = _ctx.DbContext.SmartUsers.Where(su => su.AccountId == userId);
             return smartUsers;
         }

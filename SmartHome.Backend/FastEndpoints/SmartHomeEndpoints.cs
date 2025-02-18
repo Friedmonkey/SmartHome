@@ -2,6 +2,7 @@
 using SmartHome.Common.Api;
 using SmartHome.Common;
 using static SmartHome.Common.Api.ISmartHomeService;
+using SmartHome.Common.Api.Common;
 
 namespace SmartHome.Backend.FastEndpoints;
 

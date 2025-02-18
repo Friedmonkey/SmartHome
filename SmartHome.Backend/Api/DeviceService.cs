@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using SmartHome.Backend.Api.Common;
 using SmartHome.Common.Api;
+using SmartHome.Common.Api.Common;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
 using static SmartHome.Common.Api.IDeviceService;
@@ -17,7 +19,7 @@ public class DeviceService : IDeviceService
 
     public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
-        var smartUser = await _ctx.GetLoggedInSmartUser(request.smartHome);
+        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
         List<Device>? deviceList = null;
         if (smartUser.Role == UserRole.Admin)
@@ -51,18 +53,21 @@ public class DeviceService : IDeviceService
 
     public async Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request)
     {
+        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
         foreach (Device device in request.devices)
         {
-            //Update de device list met de propperties naar de DataBase
+            await UpdateDeviceSafe(smartUser, device);
 
-            await _ctx.DbContext.Devices
-                .Where(d => d.Id == device.Id)
-                .ExecuteUpdateAsync(u => u
-                    .SetProperty(p => p.Name, device.Name)
-                    .SetProperty(p => p.JsonObjectConfig, device.JsonObjectConfig)
-                    .SetProperty(p => p.RoomId, device.RoomId)
-                    .SetProperty(p => p.Type, device.Type)
-                );
+            ////Update de device list met de propperties naar de DataBase
+
+            //await _ctx.DbContext.Devices
+            //    .Where(d => d.Id == device.Id)
+            //    .ExecuteUpdateAsync(u => u
+            //        .SetProperty(p => p.Name, device.Name)
+            //        .SetProperty(p => p.JsonObjectConfig, device.JsonObjectConfig)
+            //        .SetProperty(p => p.RoomId, device.RoomId)
+            //        .SetProperty(p => p.Type, device.Type)
+            //    );
         }
 
         return SuccessResponse.Success();
@@ -70,20 +75,48 @@ public class DeviceService : IDeviceService
 
     public async Task<SuccessResponse> UpdateDevice(DeviceRequest request)
     {
-        //Controleer of er al een device met dezelfde naam in de database is
-        if (await _ctx.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
-            return SuccessResponse.Failed("There is already a device with the same name!!");
+        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-        await _ctx.DbContext.Devices
-            .Where(d => d.Id == request.device.Id)
-                .ExecuteUpdateAsync(u => u
-                .SetProperty(p => p.Name, request.device.Name)
-                .SetProperty(p => p.JsonObjectConfig, request.device.JsonObjectConfig)
-                .SetProperty(p => p.RoomId, request.device.RoomId)
-                .SetProperty(p => p.Type, request.device.Type)
-            );
+        await UpdateDeviceSafe(smartUser, request.device);
+        ////Controleer of er al een device met dezelfde naam in de database is
+        //if (await _ctx.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
+        //    return SuccessResponse.Failed("There is already a device with the same name!!");
+
+        //await _ctx.DbContext.Devices
+        //    .Where(d => d.Id == request.device.Id)
+        //        .ExecuteUpdateAsync(u => u
+        //        .SetProperty(p => p.Name, request.device.Name)
+        //        .SetProperty(p => p.JsonObjectConfig, request.device.JsonObjectConfig)
+        //        .SetProperty(p => p.RoomId, request.device.RoomId)
+        //        .SetProperty(p => p.Type, request.device.Type)
+        //    );
 
         return SuccessResponse.Success();
+    }
+    private async Task<SuccessResponse> UpdateDeviceSafe(SmartUserModel smartUser, Device updateDevice)
+    {
+
+
+
+            //get device from database using device.Id because the other data the user has sent cannot be trusted
+
+            //use the new device and check the room id and stuff
+
+            //from device to room to smart home
+            return SuccessResponse.Failed("Not implemented yet");
+        //
+        ////Controleer of er al een device met dezelfde naam in de database is
+        //if (await _ctx.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
+        //    return SuccessResponse.Failed("There is already a device with the same name!!");
+
+        //await _ctx.DbContext.Devices
+        //    .Where(d => d.Id == request.device.Id)
+        //        .ExecuteUpdateAsync(u => u
+        //        .SetProperty(p => p.Name, request.device.Name)
+        //        .SetProperty(p => p.JsonObjectConfig, request.device.JsonObjectConfig)
+        //        .SetProperty(p => p.RoomId, request.device.RoomId)
+        //        .SetProperty(p => p.Type, request.device.Type)
+        //    );
     }
 
     public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
@@ -110,7 +143,7 @@ public class DeviceService : IDeviceService
 
     public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
     {
-        await _ctx.EnforceIsPartOfSmartHome(request.smartHome);
+        await _ctx.Auth.EnforceIsPartOfSmartHome(request.smartHome);
         var result = await _ctx.DbContext.Rooms.Where(r => r.SmartHomeId == request.smartHome).ToListAsync();
 
         if (result == null)
