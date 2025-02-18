@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase;
 @inject ProfileService profileService;
-@inject SmartHomeState smartHomeState;
+@inject SelectedSmartHomeService smartHomeState;
 @inject ApiService apiService;
 @inject ISnackbar snackBar;
 @inject NavigationManager navManager;
@@ -10,6 +10,12 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+
+<style>
+    .menu-wrapper {
+        white-space: nowrap;
+    }
+</style>
 <CascadingValue Name="pref" Value="preferences">
 <CascadingValue Name="CurrentSmartHome" Value="CurrentSmartHome">
     <MudLayout>

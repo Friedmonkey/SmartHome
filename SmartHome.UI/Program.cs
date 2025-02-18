@@ -32,9 +32,9 @@ public class Program
 
 
         builder.Services.AddBlazoredSessionStorage();
-        builder.Services.AddScoped<IJwtStoreService, JwtSessionStorageService>();
-        
         builder.Services.AddBlazoredLocalStorage();
+
+        builder.Services.AddScoped<IJwtStoreService, JwtSessionStorageService>();
         builder.Services.AddScoped<ProfileService>();
 
         builder.Services.AddScoped<JwtAuthStateProvider>(); //we need it directly for the apiservice
@@ -50,7 +50,7 @@ public class Program
         builder.Services.AddScoped<IDeviceService, DeviceService>();
 
         //keep track of selected smarthome
-        builder.Services.AddScoped<SmartHomeState>();
+        builder.Services.AddScoped<SelectedSmartHomeService>();
 
         var application = builder.Build();
         await application.RunAsync();

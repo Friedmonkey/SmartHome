@@ -88,13 +88,3 @@ public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCor
            .OnDelete(DeleteBehavior.Cascade);
     }
 }
-public class YourDbContextFactiory : IDesignTimeDbContextFactory<SmartHomeContext>
-{
-    public SmartHomeContext CreateDbContext(string[] args)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<SmartHomeContext>();
-        var ConnectionString = "server=localhost;database=SmartHome;uid=root";
-        optionsBuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString));
-        return new SmartHomeContext(optionsBuilder.Options);
-    }
-}

@@ -43,6 +43,4 @@ public class PersonTestingService : IPersonTestingService
 
         return new PersonResponse(person);
     }
-
-
 }

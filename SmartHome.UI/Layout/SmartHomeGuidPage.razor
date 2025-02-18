@@ -5,12 +5,11 @@
     when the page is releated to a specific smarthome (pretty much all pages)
 
     what this does, this captures the {SmartGuid} page varible
-    it then tries to convert it and sets the state for other components to use
+    because it needs to have it or it will crash
+    the actual handeling of this value is done separately in SelectedSmartHomeService
+    SelectedSmartHomeService gets the most acurate and up to date GUID from the url
 
     ApiService auto injects it into any SmartHomeRequest, so you dont have to pass it
-
-
-    to use this use "@inherits SmartHomeGuidPage" at the top of your page
 *@
 
 @code {

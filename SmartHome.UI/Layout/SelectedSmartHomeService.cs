@@ -2,10 +2,10 @@
 
 namespace SmartHome.UI.Layout;
 
-public class SmartHomeState
+public class SelectedSmartHomeService
 {
     private readonly NavigationManager _navigationManager;
-    public SmartHomeState(NavigationManager navigationManager)
+    public SelectedSmartHomeService(NavigationManager navigationManager)
     {
         this._navigationManager = navigationManager;
     }

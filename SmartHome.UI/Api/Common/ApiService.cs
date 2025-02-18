@@ -17,12 +17,12 @@ public class ApiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ISnackbar _snackbarService;
     private readonly IJwtStoreService _jwtStoreService;
-    private readonly SmartHomeState _smartHomeState;
+    private readonly SelectedSmartHomeService _smartHomeState;
     private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
     private readonly MemoryCacheService _memoryCacheService;
 
-    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState, MemoryCacheService memoryCacheService)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SelectedSmartHomeService smartHomeState, MemoryCacheService memoryCacheService)
     {
         _httpClientFactory = httpClientFactory;
         _snackbarService = snackbarService;
@@ -40,6 +40,8 @@ public class ApiService
         if (response.WasSuccess())
         {
             await _jwtStoreService.SetTokens(response.JWT, response.Refresh);
+            //_memoryCacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetByIDUrl);
+            _memoryCacheService.FullyClearCache();
             _jwtAuthStateProvider.UpdateAuthState();
         }
         return response;
@@ -49,6 +51,8 @@ public class ApiService
         var response = await Delete<SuccessResponse>(SharedConfig.Urls.Account.LogoutUrl);
         response.Show(_snackbarService, "Logout success!");
         await _jwtStoreService.RemoveTokens();
+        //_memoryCacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetByIDUrl);
+        _memoryCacheService.FullyClearCache();
         _jwtAuthStateProvider.UpdateAuthState();
     }
     public async Task<TokenResponse> Refresh()
@@ -232,7 +236,6 @@ public class ApiService
     {
         return $"{_config.ApiBaseUrl}/{url}";
     }
-
 
     private static async Task<T> HandleResponse<T>(HttpResponseMessage response) where T : Response<T>
     {

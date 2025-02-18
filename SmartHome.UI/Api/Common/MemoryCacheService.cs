@@ -19,9 +19,26 @@ public class MemoryCacheService
         Console.WriteLine(cacheKey + " was added to cache");
     }
     public void RemoveCache(string cacheKey)
-    {
+    {   //specifically remove an single cache entry that must exactly match
         if (innerCache.Remove(cacheKey))
             Console.WriteLine(cacheKey + " was removed from cache");
+    }
+    public void RemoveCacheWithPrimary(string primaryKey)
+    {   //clear a specific type of cache
+        var baseKey = Tobase64(primaryKey);
+        foreach (var cacheKey in innerCache.Keys) 
+        {
+            if (cacheKey.StartsWith(baseKey + '.'))
+            {
+                if (innerCache.Remove(cacheKey))
+                    Console.WriteLine(cacheKey + " was removed from cache");
+            }
+        }
+    }
+    public void FullyClearCache()
+    {
+        innerCache.Clear();
+        Console.WriteLine("cache was fully cleared");
     }
 
     public bool TryGet<T>(string cacheKey, TimeSpan maxAge, out T value)
@@ -48,9 +65,13 @@ public class MemoryCacheService
 
     public string HashKey(string primary, object? secondary)
     {
-        var combined = primary + (secondary != null ? JsonSerializer.Serialize(secondary) : "");
+        var combined = (secondary != null ? JsonSerializer.Serialize(secondary) : "");
         using var sha256 = SHA256.Create();
         var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(combined));
-        return Convert.ToBase64String(bytes);
+        return Tobase64(primary) +'.'+ Convert.ToBase64String(bytes);
+    }
+    public string Tobase64(string text)
+    {
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(text));
     }
 }

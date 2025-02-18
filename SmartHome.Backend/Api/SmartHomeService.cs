@@ -101,7 +101,6 @@ namespace SmartHome.Backend.Api
 
             return new SmartHomeListResponse(smartHomes);
         }
-
         private IQueryable<SmartUserModel> GetSmartUsers()
         {
             var userId = _ctx.Auth.GetLoggedInId();

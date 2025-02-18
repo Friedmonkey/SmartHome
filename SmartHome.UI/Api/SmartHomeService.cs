@@ -28,11 +28,15 @@ public class SmartHomeService : ISmartHomeService
 
     public async Task<SmartHomeListResponse> GetJoinedSmartHomes(EmptyRequest request)
     {
-        return await _api.Get<SmartHomeListResponse>(SharedConfig.Urls.SmartHome.GetJoinedUrl, request);
+        TimeSpan cacheTime = TimeSpan.FromMinutes(2);
+        object cacheKey = new { };
+        return await _api.GetWithCache<SmartHomeListResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetJoinedUrl, request, cacheTime);
     }
     public async Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request)
     {
-        return await _api.Get<SmartHomeListResponse>(SharedConfig.Urls.SmartHome.GetInvitesUrl, request);
+        TimeSpan cacheTime = TimeSpan.FromMinutes(1);
+        object cacheKey = new { };
+        return await _api.GetWithCache<SmartHomeListResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetInvitesUrl, request, cacheTime);
     }
 
     public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)

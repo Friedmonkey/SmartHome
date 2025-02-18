@@ -1,36 +1,38 @@
-﻿@inject SmartHomeState smartHomeState;
+﻿@inject SelectedSmartHomeService smartHomeState;
 @inject ApiService apiService;
 @inject ISnackbar snackBar;
 
 <MudNavMenu>
     <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
-        Smart Homes
+        <p class="menu-wrapper">Smart Homes</p>
     </MudNavLink>
     @if (CurrentSmartHome is not null)
     {
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/overview")" Icon="@Icons.Material.Filled.Dashboard">
-            Overview
+            <p class="menu-wrapper">Overview</p>
         </MudNavLink>
 
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/devices")" Icon="@Icons.Material.Filled.Devices">
-            Devices
+            <p class="menu-wrapper">Devices</p>
         </MudNavLink>
 
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/logs")" Icon="@Icons.Material.Filled.List">
-            Logs
+            <p class="menu-wrapper">Logs</p>
         </MudNavLink>
 
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/routines")" Icon="@Icons.Material.Filled.Autorenew">
-            Routines
+            <p class="menu-wrapper">Routines</p>
         </MudNavLink>
 
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/beheer")" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">
-            Beheer
+            <p class="menu-wrapper">Beheer</p>
         </MudNavLink>
     }
     else
     {
-        <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
+        <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">
+            <p class="menu-wrapper">Person</p>
+         </MudNavLink>
     }  
 </MudNavMenu>
 
