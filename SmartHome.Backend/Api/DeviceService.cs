@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SmartHome.Backend.Api.Common;
 using SmartHome.Common.Api;
-using SmartHome.Common.Api.Common;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
 using static SmartHome.Common.Api.IDeviceService;

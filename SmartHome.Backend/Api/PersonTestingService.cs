@@ -1,6 +1,4 @@
-﻿using SmartHome.Backend.Api.Common;
-using SmartHome.Common.Api;
-using SmartHome.Common.Api.Common;
+﻿using SmartHome.Common.Api;
 using SmartHome.Common.Models;
 using static SmartHome.Common.Api.IPersonTestingService;
 

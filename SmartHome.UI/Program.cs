@@ -10,7 +10,6 @@ using Blazored.LocalStorage;
 using SmartHome.UI.Profile;
 using SmartHome.UI.Layout;
 using SmartHome.Common.Api;
-using SmartHome.UI.Api.Common;
 
 namespace SmartHome.UI;
 

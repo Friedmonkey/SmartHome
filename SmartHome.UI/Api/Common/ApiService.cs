@@ -4,14 +4,13 @@ using System.Text;
 using MudBlazor;
 using SmartHome.Common;
 using SmartHome.Common.Api;
-using SmartHome.Common.Api.Common;
 using SmartHome.Common.Models;
 using SmartHome.UI.Auth;
 using SmartHome.UI.Layout;
 using static SmartHome.Common.Api.IAccountService;
 using static SmartHome.Common.Api.ISmartHomeService;
 
-namespace SmartHome.UI.Api.Common;
+namespace SmartHome.UI.Api;
 
 public class ApiService
 {

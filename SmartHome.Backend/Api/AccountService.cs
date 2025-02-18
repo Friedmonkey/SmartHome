@@ -8,8 +8,6 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using SmartHome.Database.Auth;
-using SmartHome.Backend.Api.Common;
-using SmartHome.Common.Api.Common;
 
 namespace SmartHome.Backend.Api;
 

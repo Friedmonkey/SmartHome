@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using CacheObject = (System.DateTime cacheTime, System.Type type, object? value);
 
-namespace SmartHome.UI.Api.Common;
+namespace SmartHome.UI.Api;
 
 public class MemoryCacheService
 {

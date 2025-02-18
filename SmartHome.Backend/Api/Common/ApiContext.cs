@@ -3,7 +3,7 @@ using SmartHome.Database;
 using SmartHome.Database.Auth;
 using SmartHome.Database.ApiContext;
 
-namespace SmartHome.Backend.Api.Common;
+namespace SmartHome.Backend.Api;
 
 public class ApiContext
 {

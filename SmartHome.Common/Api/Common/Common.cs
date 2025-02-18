@@ -1,6 +1,6 @@
 ﻿using SmartHome.Common.Models;
 
-namespace SmartHome.Common.Api.Common;
+namespace SmartHome.Common.Api;
 
 
 public record SmartHomeGuidRequest(Guid Id) : SmartHomeRequest;

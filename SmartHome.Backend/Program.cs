@@ -7,7 +7,6 @@ using FastEndpoints.Swagger;
 using SmartHome.Database;
 using SmartHome.Database.Auth;
 using SmartHome.Common.Api;
-using SmartHome.Backend.Api.Common;
 using SmartHome.Database.ApiContext;
 
 namespace SmartHome.Backend;
