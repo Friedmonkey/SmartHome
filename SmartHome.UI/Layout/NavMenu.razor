@@ -35,22 +35,8 @@
 </MudNavMenu>
 
 @code{
-    public SmartHomeModel? CurrentSmartHome { get; private set; } = null;
-    protected override async Task OnParametersSetAsync()
-    {
-        Guid? guid = smartHomeState.GetCurrentSmartHomeGuid();
-        if (guid is not null)
-        {
-            var smartHome = await apiService.GetSmartHomeById(new((Guid)guid!));
-            if (smartHome.EnsureSuccess(snackBar))
-            {
-                CurrentSmartHome = smartHome.smartHome;
-                return;
-            }
-        }
-        CurrentSmartHome = null;
-    }
-
+    [CascadingParameter(Name = "CurrentSmartHome")]
+    public SmartHomeModel? CurrentSmartHome { get; set; }
 
     public static void Redirect(NavigationManager navManager, string? base64)
     { 

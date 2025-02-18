@@ -12,6 +12,7 @@
 <MudSnackbarProvider />
 
 <CascadingValue Name="pref" Value="preferences">
+<CascadingValue Name="CurrentSmartHome" Value="CurrentSmartHome">
     <MudLayout>
         <MudAppBar Elevation="0">
             @if (CurrentSmartHome is not null)
@@ -49,6 +50,7 @@
             </div>
         </MudMainContent>
     </MudLayout>
+</CascadingValue>
 </CascadingValue>
 
 @code{
