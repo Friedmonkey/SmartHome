@@ -56,7 +56,8 @@ public class DeviceService : IDeviceService
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
         foreach (Device device in request.devices)
         {
-            await UpdateDeviceSafe(smartUser, device);
+            await _ctx.Device.UpdateDeviceSafe(device, smartUser.Id);
+
 
             ////Update de device list met de propperties naar de DataBase
 
@@ -77,7 +78,7 @@ public class DeviceService : IDeviceService
     {
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-        await UpdateDeviceSafe(smartUser, request.device);
+        await _ctx.Device.UpdateDeviceSafe(request.device, smartUser.Id);
         ////Controleer of er al een device met dezelfde naam in de database is
         //if (await _ctx.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
         //    return SuccessResponse.Failed("There is already a device with the same name!!");
@@ -93,31 +94,31 @@ public class DeviceService : IDeviceService
 
         return SuccessResponse.Success();
     }
-    private async Task<SuccessResponse> UpdateDeviceSafe(SmartUserModel smartUser, Device updateDevice)
-    {
+    //private async Task<SuccessResponse> UpdateDeviceSafe(SmartUserModel smartUser, Device updateDevice)
+    //{
 
 
 
-            //get device from database using device.Id because the other data the user has sent cannot be trusted
+    //        //get device from database using device.Id because the other data the user has sent cannot be trusted
 
-            //use the new device and check the room id and stuff
+    //        //use the new device and check the room id and stuff
 
-            //from device to room to smart home
-            return SuccessResponse.Failed("Not implemented yet");
-        //
-        ////Controleer of er al een device met dezelfde naam in de database is
-        //if (await _ctx.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
-        //    return SuccessResponse.Failed("There is already a device with the same name!!");
+    //        //from device to room to smart home
+    //        return SuccessResponse.Failed("Not implemented yet");
+    //    //
+    //    ////Controleer of er al een device met dezelfde naam in de database is
+    //    //if (await _ctx.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
+    //    //    return SuccessResponse.Failed("There is already a device with the same name!!");
 
-        //await _ctx.DbContext.Devices
-        //    .Where(d => d.Id == request.device.Id)
-        //        .ExecuteUpdateAsync(u => u
-        //        .SetProperty(p => p.Name, request.device.Name)
-        //        .SetProperty(p => p.JsonObjectConfig, request.device.JsonObjectConfig)
-        //        .SetProperty(p => p.RoomId, request.device.RoomId)
-        //        .SetProperty(p => p.Type, request.device.Type)
-        //    );
-    }
+    //    //await _ctx.DbContext.Devices
+    //    //    .Where(d => d.Id == request.device.Id)
+    //    //        .ExecuteUpdateAsync(u => u
+    //    //        .SetProperty(p => p.Name, request.device.Name)
+    //    //        .SetProperty(p => p.JsonObjectConfig, request.device.JsonObjectConfig)
+    //    //        .SetProperty(p => p.RoomId, request.device.RoomId)
+    //    //        .SetProperty(p => p.Type, request.device.Type)
+    //    //    );
+    //}
 
     public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
     {

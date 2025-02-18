@@ -1,27 +1,30 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common;
 using Device = SmartHome.Common.Models.Entities.Device;
-using SmartHome.Common.Models.Entities;
-using SmartHome.Database.Auth;
-using static SmartHome.Common.SharedConfig.Urls;
-using SmartHome.Common.Api.Common;
 
 namespace SmartHome.Database.ApiContext;
 
 public class DeviceContext
 {
-    private readonly SmartHomeContext DbContext;
+    private readonly SmartHomeContext _dbContext;
 
     public DeviceContext(SmartHomeContext dbContext)
     {
-        DbContext = dbContext;
+        _dbContext = dbContext;
     }
 
     public async Task UpdateDeviceSafe(Device updateDevice, Guid smartUserId)
     { 
         Device device = await GetDeviceWithAccess(updateDevice.Id, smartUserId);
+        //we know this is the correct device and we know we have access to it
+
+        //check if device with name excists
+        //check room
+        //check smarthome
+        //name only needs to be unique between smarthome itself i thnik
+        bool nameIsUsed = true;// await _dbContext.Devices.AnyAsync(d => (d.) && d.Name == );
+        if (nameIsUsed)
+            throw new ApiError($"Device with name {updateDevice.Name} already exists!");
         //DbContext.Devices.ExecuteUpdateAsync(idk => updateDevice);
     }
     public async Task<Device> GetDeviceWithAccess(Guid deviceid, Guid smartUserId)
@@ -32,7 +35,7 @@ public class DeviceContext
     }
     public async Task<Device> GetDevice(Guid deviceid)
     {
-        Device? device = await DbContext.Devices.FirstOrDefaultAsync(d => d.Id == deviceid);
+        Device? device = await _dbContext.Devices.FirstOrDefaultAsync(d => d.Id == deviceid);
         if (device is null)
             throw new ApiError("Device not found");
 
@@ -40,7 +43,7 @@ public class DeviceContext
     }
     public async Task<bool> HasAccessToDevice(Guid smartUserId, Guid deviceid)
     {
-        var result = await DbContext.DeviceAccesses.AnyAsync(da => da.SmartUserId == smartUserId && da.DeviceId == deviceid);
+        var result = await _dbContext.DeviceAccesses.AnyAsync(da => da.SmartUserId == smartUserId && da.DeviceId == deviceid);
         return result;
     }
 }
