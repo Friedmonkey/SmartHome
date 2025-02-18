@@ -14,7 +14,8 @@ public class DeviceContext
     }
 
     public async Task UpdateDeviceSafe(Device updateDevice, Guid smartUserId)
-    { 
+    {
+        throw new NotImplementedException(nameof(UpdateDeviceSafe));
         Device device = await GetDeviceWithAccess(updateDevice.Id, smartUserId);
         //we know this is the correct device and we know we have access to it
 
