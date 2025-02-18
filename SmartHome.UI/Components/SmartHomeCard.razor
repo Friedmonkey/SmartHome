@@ -1,5 +1,7 @@
 ﻿@inject SelectedSmartHomeService smartHomeState;
 @inject NavigationManager navManager;
+@inject MemoryCacheService cacheService;
+@inject ISnackbar snackBar;
 
 <MudCard Elevation="11">
     <MudCardHeader>
@@ -19,8 +21,24 @@
     public SmartHomeModel Home { get; set; }
 
     public void OpenHome()
-    { 
+    {
         //smartHomeState.SetSelectedSmartHome(Home);
+        if (Home is null)
+        {
+            snackBar.Add("Home was null", Severity.Error);
+            return;
+        }
+
+        //inject the currect home into the cache so we basicly preload it since we already know what it will get
+        //its just optimization for here, normally do not do this lol
+        string cacheKey = cacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
+            new
+            {
+                cacheKey = new { id = Home.Id },
+                authenticated = true
+            }
+        );
+        cacheService.Set(cacheKey, new SmartHomeResponse(Home));
         navManager.NavigateTo($"/smarthome/{Home.Id}/overview");
     }
 }

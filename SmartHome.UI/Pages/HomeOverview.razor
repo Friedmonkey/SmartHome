@@ -4,11 +4,13 @@
 @inject ISnackbar snackBar;
 @inject ISmartHomeService smartHomeService;
 @inject NavigationManager navManager;
+@inject MemoryCacheService cacheService;
 
 <MudButton OnClick="() => createDialogVisible = true">Create</MudButton>
 <MudExpansionPanel Expanded="true" Class="mt-2">
     <TitleContent>
         <MudText>Joined homes</MudText>
+        <MudButton OnClick="RefreshJoined">Refresh</MudButton>
     </TitleContent>
     <ChildContent>
         <MudGrid>
@@ -25,6 +27,7 @@
 <MudExpansionPanel Expanded="true" Class="mt-2">
     <TitleContent>
         <MudText>Invited homes</MudText>
+        <MudButton OnClick="RefreshInvited">Refresh</MudButton>
     </TitleContent>
     <ChildContent>
         <MudGrid>
@@ -78,12 +81,30 @@
             invitedSmartHomes = invited.homes;
         }
     }
+    private async Task RefreshJoined()
+    {
+        cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetJoinedUrl);
+        var joined = await smartHomeService.GetJoinedSmartHomes(new());
+        if (joined.EnsureSuccess(snackBar))
+            joinedSmartHomes = joined.homes;
+        StateHasChanged();
+    }
+    private async Task RefreshInvited()
+    { 
+        cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetInvitesUrl);
+        var invited = await smartHomeService.GetSmartHomeInvites(new());
+        if (invited.EnsureSuccess(snackBar))
+            invitedSmartHomes = invited.homes;
+        StateHasChanged();
+    }
 
     private async Task CreateSmartHome()
     {
         var request = new CreateSmartHomeRequest(createName, wifiName, wifiPassword);
         var result = await smartHomeService.CreateSmartHome(request);
         result.Show(snackBar, "Smart home created!");
+        if (result.WasSuccess())
+            cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetJoinedUrl);
         navManager.NavigateTo($"/smarthome/{result.Id}/overview");
     }
 }

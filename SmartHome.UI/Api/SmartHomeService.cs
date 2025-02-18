@@ -34,7 +34,7 @@ public class SmartHomeService : ISmartHomeService
     }
     public async Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request)
     {
-        TimeSpan cacheTime = TimeSpan.FromMinutes(1);
+        TimeSpan cacheTime = TimeSpan.FromMinutes(5);
         object cacheKey = new { };
         return await _api.GetWithCache<SmartHomeListResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetInvitesUrl, request, cacheTime);
     }

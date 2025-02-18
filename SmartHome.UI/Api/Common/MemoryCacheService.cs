@@ -15,8 +15,8 @@ public class MemoryCacheService
 
     public void Set<T>(string cacheKey, T value)
     {
-        innerCache.Add(cacheKey, (DateTime.UtcNow, typeof(T), value));
-        Console.WriteLine(cacheKey + " was added to cache");
+        innerCache[cacheKey] = (DateTime.UtcNow, typeof(T), value);
+        Console.WriteLine(cacheKey + " was added/updated to cache");
     }
     public void RemoveCache(string cacheKey)
     {   //specifically remove an single cache entry that must exactly match
