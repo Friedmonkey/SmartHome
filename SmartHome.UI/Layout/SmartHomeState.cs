@@ -19,7 +19,6 @@ public class SmartHomeState
         else
             return null;
     }
-
     public string? GetCurrentSmartHomeGuidStr()
     {
         var uri = new Uri(_navigationManager.Uri);

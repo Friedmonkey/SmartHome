@@ -1,7 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SmartHome.Common;
 using SmartHome.Common.Api;
@@ -21,8 +20,9 @@ public class ApiService
     private readonly SmartHomeState _smartHomeState;
     private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
+    private readonly MemoryCacheService _memoryCacheService;
 
-    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SmartHomeState smartHomeState, MemoryCacheService memoryCacheService)
     {
         _httpClientFactory = httpClientFactory;
         _snackbarService = snackbarService;
@@ -30,6 +30,7 @@ public class ApiService
         _jwtStoreService = jwtStoreService;
         _jwtAuthStateProvider = jwtAuthStateProvider;
         _smartHomeState = smartHomeState;
+        _memoryCacheService = memoryCacheService;
     }
 
     public async Task<TokenResponse> Login(LoginRequest request)
@@ -62,6 +63,19 @@ public class ApiService
 
         return response;
     }
+    public async ValueTask<T> GetWithCache<T>(object cacheKey, string url, object? data = null, TimeSpan? cacheTime = null, bool authenticated = true) where T : Response<T>
+    {
+        TimeSpan expire = cacheTime ?? TimeSpan.FromMinutes(5);
+        string key = _memoryCacheService.HashKey(url, new { cacheKey, authenticated });
+
+        if (_memoryCacheService.TryGet<T>(key, expire, out T result))
+            return result;
+
+        result = await Send<T>(authenticated, HttpMethod.Get, url, data);
+        _memoryCacheService.Set<T>(key, result);
+
+        return result;
+    }
     public async Task<T> Get<T>(string url, object? data = null, bool authenticated = true) where T : Response<T>
     {
         return await Send<T>(authenticated, HttpMethod.Get, url, data);
@@ -92,10 +106,6 @@ public class ApiService
             {
                 if (data is SmartHomeRequest req)
                 {
-                    //var location = _navigationManager.Uri; //e.Location;
-                    //var path = _navigationManager.ToBaseRelativePath(location).ToLower();
-                    //bool success = _smartHomeState.UpdateSelectedSmartHomeId(path);
-                    //bool success = await _smartHomeState.LoadSelectedSmartHome(_navigationManager, this);
                     bool success = true;
                     Guid? smartHomeGuid = _smartHomeState.GetCurrentSmartHomeGuid();
                     if (!success || smartHomeGuid is null)
@@ -141,40 +151,23 @@ public class ApiService
         }
     }
 
+    public void RemoveSmartHomeCache(GuidRequest request)
+    { 
+        string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl, 
+            new 
+            {
+                cacheKey = new { id = request.Id }, 
+                authenticated = true
+            }
+        );
+        _memoryCacheService.RemoveCache(cacheKey);
+    }
     public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
     {
-        return await Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.GetByIDUrl, request);
+        object cacheKey = new { id=request.Id };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(2);
+        return await GetWithCache<SmartHomeResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetByIDUrl, request, cacheTime);
     }
-//    public async Task<bool> LoadCurrentSmartHomeSuccess(string? smartHomeGuidStr = null)
-//    {
-//        smartHomeGuidStr ??= NavMenu.GetCurrentSmartHome(_navigationManager);
-//        if (Guid.TryParse(smartHomeGuidStr, out Guid smartHomeId))
-//        {
-//            if (_smartHomeState.SelectedSmartHomeId.HasValue &&
-//                _smartHomeState.SelectedSmartHomeId == smartHomeId)
-//                return true; //we do not need to get the same one.
-//            while (_smartHomeState.IsBusy())
-//                await Task.Delay(10);
-
-//            _smartHomeState.StartProccessing();
-//            var request = new GuidRequest((Guid)smartHomeId);
-//            var smartHomeResponse = await GetSmartHomeById(request);
-
-//            if (smartHomeResponse.EnsureSuccess(_snackbarService)) //only logs errors
-//            {
-//#if DEBUG
-//                _snackbarService.Add("Smarthome retrived!", Severity.Info); //let devs know we made api call
-//#endif
-//                _smartHomeState.SetSelectedSmartHome(smartHomeResponse.smartHome);
-//                return true;
-//            }
-//            _smartHomeState.StopProccessing();
-//        }
-
-//        _smartHomeState.SetSelectedSmartHome(null);
-//        _navigationManager.NavigateTo("/smarthome");
-//        return false;
-//    }
     private JsonContent? GetData(HttpMethod method, object data, ref string url)
     {
         if (method == HttpMethod.Post)

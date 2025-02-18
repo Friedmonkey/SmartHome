@@ -41,6 +41,7 @@ public class Program
         builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthStateProvider>()); //very fucking important otherwise auth will desync
         builder.Services.AddAuthorizationCore();
 
+        builder.Services.AddSingleton<MemoryCacheService>();
         builder.Services.AddScoped<ApiService>();
 
         builder.Services.AddScoped<IAccountService, AccountService>();
