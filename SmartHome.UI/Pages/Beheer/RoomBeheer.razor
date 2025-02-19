@@ -20,7 +20,7 @@
 </MudDataGrid>
 <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4 mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
     <MudSpacer />
-    <MudButton @onclick="@(e => OpenRoomEditDialog(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New Device</MudButton>
+    <MudButton @onclick="@(e => OpenRoomEditDialog(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New Room</MudButton>
 </MudPaper>
 
 @code {
@@ -47,19 +47,37 @@
 
     private async void OpenRoomEditDialog(Room _roomToEditOrCreate)
     {
+        bool IsNewRoom = true;
+
         //zet de room en type aanpassing van de room in variable en refresh html om room edit menu zichtbaar te maken
         var dialogParameter = new DialogParameters<RoomEditorBeheer>();
         dialogParameter.Add(p => p.room, _roomToEditOrCreate);
+        dialogParameter.Add(p => p.smartHomeId, _SmartHomeId);
 
         string Title = "New Room";
         if (_roomToEditOrCreate is not null)
         {
             Title = "Edit Room";
+            IsNewRoom = false;
         }
 
         //Open de dialog popup voor het invoeren van room gegevens
         var dialog = await DialogService.ShowAsync<RoomEditorBeheer>(Title, dialogParameter);
         var result = await dialog.Result;
+
+        if (result.Data != "Close")
+        {
+            //Update de roomlist nadat er een room is bewerkt of toegevoegd
+            if (IsNewRoom)
+            {
+                roomList.Add(result.Data as Room);
+            }
+            else
+            {
+                roomList.Where(r => r.Id == (result.Data as Room).Id).ToList().First().Name = (result.Data as Room).Name;
+            }
+            StateHasChanged();
+        }
     }
 
     private async Task DeleteRoom(Guid roomGuid)

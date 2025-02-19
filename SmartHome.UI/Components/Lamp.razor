@@ -1,5 +1,7 @@
 ﻿@using SmartHome.Common.Api;
+@using SmartHome.Common.Models.Configs
 @inject IDeviceService deviceService;
+@inject IJSRuntime JsRuntime;
 
 <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
@@ -15,14 +17,39 @@
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
         <MudSwitch @onclick="@(e => UpdateConfig(!_LampConfig.Ingeschakeld))" @bind-Value="@_LampConfig.Ingeschakeld" Label="@Status" Color="Color.Warning" UncheckedColor="Color.Dark" />
-        @if (_LampConfig.Helderheid != null) {<MudSlider Style="width: 90%" Size="Size.Large" Value="@_LampConfig.Helderheid">Helderheid</MudSlider>}
-        @if (_LampConfig != null) {<MudColorPicker Label="Kleur" ColorPickerView="ColorPickerView.Palette" />}
+        @if (_LampConfig.Helderheid != -1)
+        {
+            <MudSlider Style="width: 90%" Size="Size.Large" @onchange="@(e => UpdateConfig(_LampConfig.Ingeschakeld))" @bind-Value="_LampConfig.Helderheid"></MudSlider>
+        }
+        @if (_LampConfig.Kleur != "")
+        {
+            <MudColorPicker Label="Kleur" ValueChanged="@(e => UpdateConfig(_LampConfig.Ingeschakeld))" @bind-Text="_LampConfig.Kleur" ColorPickerView="ColorPickerView.Palette" />
+        }
     </MudPaper>
 </MudPaper>
 
 @code {
     string Status = "Uitgeschakeld";
     private LampConfig _LampConfig;
+
+    private void UpdateStatus()
+    {
+        if (_LampConfig.Ingeschakeld)
+        {
+            Status = "Ingeschakeld";
+        }
+        else
+        {
+            Status = "Uitgeschakeld";
+        }
+    }
+
+    private async Task UpdateConfig(bool CheckIngeschakeld)
+    {
+        _LampConfig.Ingeschakeld = CheckIngeschakeld;
+        var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_LampConfig)));
+        UpdateStatus();
+    }
 
     [Parameter]
     public string Config
@@ -40,27 +67,6 @@
         }
     }
 
-    class LampConfig
-    {
-        public bool Ingeschakeld { get; set; }
-
-        public int Helderheid { get; set; }
-
-        public string Kleur { get; set; }
-    }
-
-    private void UpdateStatus()
-    {
-        if (_LampConfig.Ingeschakeld)
-        {
-            Status = "Ingeschakeld";
-        }
-        else
-        {
-            Status = "Uitgeschakeld";
-        }
-    }
-
     private Guid _Id = Guid.Empty;
 
     [Parameter]
@@ -70,13 +76,6 @@
         {
             _Id = value;
         }
-    }
-
-    private async Task UpdateConfig(bool CheckIngeschakeld)
-    {
-        _LampConfig.Ingeschakeld = CheckIngeschakeld;
-        var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_LampConfig)));
-        UpdateStatus();
     }
 
     private string _LampName = "Unkown";

@@ -32,7 +32,7 @@ namespace SmartHome.Backend.FastEndpoints
         public required IRoomService Service { get; set; }
         public override void Configure()
         {
-            Post(SharedConfig.Urls.Room.UpdateRoom);
+            Post(SharedConfig.Urls.Room.UpdateRoomName);
             SecureJwtEndpoint();
         }
 
@@ -49,27 +49,27 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    //public class CreateRoomEndpoint : BasicEndpointBase<CreateRoomRequest, SuccessResponse>
-    //{
-    //    public required IRoomService Service { get; set; }
-    //    public override void Configure()
-    //    {
-    //        Post(SharedConfig.Urls.Room.CreateRoom);
-    //        SecureJwtEndpoint();
-    //    }
+    public class CreateRoomEndpoint : BasicEndpointBase<CreateRoomRequest, SuccessResponse>
+    {
+        public required IRoomService Service { get; set; }
+        public override void Configure()
+        {
+            Post(SharedConfig.Urls.Room.CreateRoom);
+            SecureJwtEndpoint();
+        }
 
-    //    public override async Task HandleAsync(CreateRoomRequest request, CancellationToken ct)
-    //    {
-    //        try
-    //        {
-    //            await SendAsync(await Service.CreateRoom(request));
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            await SendAsync(SuccessResponse.Error(ex));
-    //        }
-    //    }
-    //}
+        public override async Task HandleAsync(CreateRoomRequest request, CancellationToken ct)
+        {
+            try
+            {
+                await SendAsync(await Service.CreateRoom(request));
+            }
+            catch (Exception ex)
+            {
+                await SendAsync(SuccessResponse.Error(ex));
+            }
+        }
+    }
 
     public class DeleteRoomEndpoint : BasicEndpointBase<DeleteRoomRequest, SuccessResponse>
     {
@@ -77,7 +77,7 @@ namespace SmartHome.Backend.FastEndpoints
         public override void Configure()
         {
             Delete(SharedConfig.Urls.Room.DeleteRoom);
-            SecureJwtEndpoint();
+            AllowAnonymous();
         }
 
         public override async Task HandleAsync(DeleteRoomRequest request, CancellationToken ct)

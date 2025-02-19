@@ -44,21 +44,21 @@
         <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
             <MudText Class="mb-4" Typo="Typo.h4">ConfigType</MudText>
             <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Style="background-color: transparent;" Elevation="0">
-                <MudCheckBox @bind-Value="@Brightness" Label="Enable Brightness"></MudCheckBox>
-                <MudCheckBox @bind-Value="@Color" Label="Enable Color"></MudCheckBox>
+                <MudCheckBox @bind-Value="@BrightnessEnable" Label="Enable Brightness"></MudCheckBox>
+                <MudCheckBox @bind-Value="@ColorEnabled" Label="Enable Color"></MudCheckBox>
             </MudPaper>
         </MudPaper>
     }
     <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
-        <MudButton @onclick="CloseMenu" Class="mx-5 my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
+        <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
         <MudSpacer />
         @if (IsNewDevice)
         {
-            <MudButton @onclick="CreateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+            <MudButton @onclick="CreateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
         }
         else
         {
-            <MudButton @onclick="UpdateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+            <MudButton @onclick="UpdateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
         }
     </MudPaper>
 </MudPaper>
@@ -67,8 +67,8 @@
     private string DeviceName = "";
     private string RoomName = "";
     private IEnumerable<DeviceType> _DeviceType;
-    private bool Brightness = false;
-    private bool Color = false;
+    private bool BrightnessEnable = false;
+    private bool ColorEnabled = false;
     private bool IsNewDevice = true;
     private Guid SmartHomeId;
 
@@ -76,23 +76,31 @@
     {
         if (DeviceName != _device.Name || RoomName != _device.Room.Name || _DeviceType.ToList().First() != _device.Type)
         {
-            //Als er 1 of meer waarden verandert zijn in de UI
-            _device.Name = DeviceName;
-            _device.RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id;
-            _device.Type = _DeviceType.ToList().First();
-            _device.JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First());
-
-            //Update device naar database met de api
-            var result = await deviceService.UpdateDevice(new(_device));
-
-            if (result.WasSuccess())
+            if (DeviceName != string.Empty && RoomName != string.Empty)
             {
-                snackBar.Add("Device is succesfully updated!", Severity.Success);
-            }
-            else
+                //Als er 1 of meer waarden verandert zijn in de UI
+                _device.Name = DeviceName;
+                _device.RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id;
+                _device.Type = _DeviceType.ToList().First();
+                _device.JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First());
+
+                //Update device naar database met de api
+                var result = await deviceService.UpdateDevice(new(_device));
+
+                if (result.WasSuccess())
+                {
+                    snackBar.Add("Device is succesfully updated!", Severity.Success);
+                    MudDialog.Close(DialogResult.Ok(_device));
+                }
+                else
+                {
+                    snackBar.Add(result._RequestMessage, Severity.Error);
+                }
+            } else
             {
-                snackBar.Add(result._RequestMessage, Severity.Error);
+                snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
             }
+
         }
         else
         {
@@ -111,6 +119,7 @@
                     RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id,
                     Type = _DeviceType.ToList().First(),
                     JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First())
+                    //Room = _Rooms.Where(r => r.Name == RoomName).ToList().First()
                 };
 
             //Maar een nieuwe device aan in de database met de api
@@ -119,6 +128,7 @@
             if (result.WasSuccess())
             {
                 snackBar.Add("Device is succesfully created!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(newDevice));
             }
             else
             {
@@ -135,7 +145,7 @@
     private async void CloseMenu()
     {
         //Verzoek om shcerm te sluiten
-        MudDialog.Close(DialogResult.Ok(""));
+        MudDialog.Close(DialogResult.Ok("Close"));
     }
 
     private void RoomChanche(Room selected)
@@ -162,18 +172,18 @@
             case DeviceType.Lamp:
                 string Color = string.Empty;
 
-                if (Brightness)
+                if (ColorEnabled)
                 {
-                    Color = "ff9800";
+                    Color = "#ff9800";
                 }
 
                 int Helderhied = -1;
 
-                if (Brightness)
+                if (BrightnessEnable)
                 {
                     Helderhied = 0;
                 }
-                Json = JsonConvert.SerializeObject(new LampConfig { Ingeschakeld = false, Helderheid = Helderhied, Kleur = "ff9800" });
+                Json = JsonConvert.SerializeObject(new LampConfig { Ingeschakeld = false, Helderheid = Helderhied, Kleur = Color });
                 break;
             case DeviceType.Televisie:
                 Json = JsonConvert.SerializeObject(new TelevisieConfig { Ingeschakeld = false, Zender = "" });

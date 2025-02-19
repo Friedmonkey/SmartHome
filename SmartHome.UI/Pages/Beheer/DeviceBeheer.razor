@@ -1,4 +1,5 @@
 ﻿@using SmartHome.UI.Components.Beheer;
+@using SmartHome.Common.Models.Entities;
 @inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
 @inject IDialogService DialogService;
@@ -28,7 +29,10 @@
 <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4 mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
     <MudSpacer />
     <MudButton @onclick="@(e => OpenDeviceEditDialog(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New Device</MudButton>
-    <MudButton @onclick="UpdateRooms" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary">Save Rooms</MudButton>
+    @if (roomList.Count > 0)
+    {
+        <MudButton @onclick="UpdateRooms" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary">Save Rooms</MudButton>
+    }
 </MudPaper>
 
 @code {
@@ -56,6 +60,8 @@
 
     private async void OpenDeviceEditDialog(Device _deviceToEditOrCreate)
     {
+        bool IsNewDevice = true;
+
         //zet de device en type aanpassing van het device in variable en refresh html om Device aanpassing menu zichtbaar te maken
         var dialogParameter = new DialogParameters<DeviceEditorBeheer>();
         dialogParameter.Add(p => p.device, _deviceToEditOrCreate);
@@ -65,11 +71,32 @@
         if (_deviceToEditOrCreate is not null)
         {
             Title = "Edit Device";
+            IsNewDevice = false;
         }
 
         //Open de dialog popup voor het invoeren van device gegevens
         var dialog = await DialogService.ShowAsync<DeviceEditorBeheer>(Title, dialogParameter);
         var result = await dialog.Result;
+
+        if (result.Data != "Close")
+        {
+            //Update de roomlist nadat er een room is bewerkt of toegevoegd
+            if (IsNewDevice)
+            {
+                Device newImplementDeivce = result.Data as Device;
+                newImplementDeivce.Room = roomList.Where(r => r.Id == newImplementDeivce.RoomId).ToList().First();
+                deviceList.Add(newImplementDeivce);
+            }
+            else
+            {
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().Name = (result.Data as Device).Name;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().RoomId = (result.Data as Device).RoomId;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().Type = (result.Data as Device).Type;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().Room = (result.Data as Device).Room;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().JsonObjectConfig = (result.Data as Device).JsonObjectConfig;
+            }
+            StateHasChanged();
+        }
     }
 
     private async Task UpdateRooms()

@@ -44,9 +44,10 @@ public class SharedConfig
         public static class Room
         {
             public const string GetAllRooms = RoomBase + "GetAllRooms";
-            public const string UpdateRoom = RoomBase + "UpdateRoom";
-            public const string CreateRoom = RoomBase + "UpdateRoom";
+            public const string UpdateRoomName = RoomBase + "UpdateRoomName";
+            public const string CreateRoom = RoomBase + "CreateRoom";
             public const string DeleteRoom = RoomBase + "DeleteRoom";
+            public const string DeleteRoom2 = RoomBase + "DeleteRoom2";
         }
 
         private const string SmartHomeBase = ApiBase + "SmartHome/";

@@ -11,15 +11,15 @@
     </MudPaper>
 
     <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
-        <MudButton @onclick="CloseMenu" Class="mx-5 my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
+        <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
         <MudSpacer />
         @if (IsNewRoom)
         {
-            <MudButton @onclick="CreateRoom" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+            <MudButton @onclick="CreateRoom" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
         }
         else
         {
-            <MudButton @onclick="UpdateRoom" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+            <MudButton @onclick="UpdateRoom" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
         }
     </MudPaper>
 </MudPaper>
@@ -28,6 +28,7 @@
     bool IsNewRoom = false;
     string roomName = "";
     private Room _room;
+    private Guid _smartHomeId;
 
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
@@ -35,7 +36,7 @@
     private async void CloseMenu()
     {
         //Verzoek om shcerm te sluiten
-        MudDialog.Close(DialogResult.Ok(""));
+        MudDialog.Close(DialogResult.Ok("Close"));
     }
 
     private async Task CreateRoom()
@@ -45,6 +46,7 @@
             //Als alle waarden zijn ingevuld in de UI
             Room newRoom = new Room();
             newRoom.Name = roomName;
+            newRoom.SmartHomeId = _smartHomeId;
 
             //Maar een nieuwe room aan in de database met de api
             var result = await roomService.CreateRoom(new(newRoom));
@@ -52,6 +54,7 @@
             if (result.WasSuccess())
             {
                 snackBar.Add("Device is succesfully created!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(newRoom));
             }
             else
             {
@@ -69,20 +72,27 @@
     {
         if (roomName != _room.Name)
         {
-            //Als er 1 of meer waarden verandert zijn in de UI
-            Room newroom = _room;
-            newroom.Name = roomName;
-
-            //Update room naar database met de api
-            var result = await roomService.UpdateRoomName(new(newroom));
-
-            if (result.WasSuccess())
+            if (roomName != string.Empty)
             {
-                snackBar.Add("Device is succesfully updated!", Severity.Success);
-            }
-            else
+                //Als er 1 of meer waarden verandert zijn in de UI
+                Room newroom = _room;
+                newroom.Name = roomName;
+
+                //Update room naar database met de api
+                var result = await roomService.UpdateRoomName(new(newroom));
+
+                if (result.WasSuccess())
+                {
+                    snackBar.Add("Device is succesfully updated!", Severity.Success);
+                    MudDialog.Close(DialogResult.Ok(newroom));
+                }
+                else
+                {
+                    snackBar.Add(result._RequestMessage, Severity.Error);
+                }
+            } else
             {
-                snackBar.Add(result._RequestMessage, Severity.Error);
+                snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
             }
         }
         else
@@ -111,6 +121,20 @@
         get
         {
             return _room;
+        }
+    }
+
+    [Parameter]
+    public Guid smartHomeId
+    {
+        set
+        {
+            _smartHomeId = value;
+        }
+
+        get
+        {
+            return _smartHomeId;
         }
     }
 }

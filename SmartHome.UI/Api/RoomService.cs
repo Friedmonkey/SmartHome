@@ -20,17 +20,17 @@ namespace SmartHome.UI.Api
 
         public async Task<SuccessResponse> UpdateRoomName(UpdateRoomRequest request)
         {
-            return await _api.Get<SuccessResponse>(SharedConfig.Urls.Room.UpdateRoom, request);
+            return await _api.Post<SuccessResponse>(SharedConfig.Urls.Room.UpdateRoomName, request);
         }
 
         public async Task<SuccessResponse> CreateRoom(CreateRoomRequest request)
         {
-            return await _api.Get<SuccessResponse>(SharedConfig.Urls.Room.CreateRoom, request);
+            return await _api.Post<SuccessResponse>(SharedConfig.Urls.Room.CreateRoom, request);
         }
 
         public async Task<SuccessResponse> DeleteRoom(DeleteRoomRequest request)
         {
-            return await _api.Get<SuccessResponse>(SharedConfig.Urls.Room.DeleteRoom, request);
+            return await _api.Delete<SuccessResponse>(SharedConfig.Urls.Room.DeleteRoom, request);
         }
     }
 }

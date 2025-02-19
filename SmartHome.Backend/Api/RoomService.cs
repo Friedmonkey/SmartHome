@@ -15,7 +15,8 @@ namespace SmartHome.Backend.Api
 
         public async Task<RoomListResponse> GetAllRooms(RoomListRequest request)
         {
-            var result = await _context.DbContext.Rooms.ToListAsync();
+            //Haal de rooms op uit de database met smarthome guid
+            var result = await _context.DbContext.Rooms.Where(r => r.SmartHomeId == request.HomeGuid).ToListAsync();
 
             if (result == null)
                 return RoomListResponse.Failed("No Rooms found in DataBase");
@@ -77,8 +78,10 @@ namespace SmartHome.Backend.Api
         {
             try
             {
+                bool test = await _context.DbContext.Devices.AnyAsync(x => x.RoomId == request.RoomGuid);
+
                 //Controleer of er geen apparaten in de room bevinden
-                if (!await _context.DbContext.Devices.AnyAsync(x => x.RoomId == request.RoomGuid))
+                if (!test)
                 {
                     //Verwijder room uit de database met guid
                     await _context.DbContext.Rooms.Where(d => d.Id == request.RoomGuid).ExecuteDeleteAsync();
