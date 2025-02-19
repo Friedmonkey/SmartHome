@@ -75,7 +75,7 @@
             var smartHome = await apiService.GetSmartHomeById(new((Guid)guid!));
             if (smartHome.EnsureSuccess(snackBar))
             {
-                var oldGuid = CurrentSmartHome.Id
+                var oldGuid = CurrentSmartHome.Id;
                 CurrentSmartHome = smartHome.smartHome;
                 return;
             }
