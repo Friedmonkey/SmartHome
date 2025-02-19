@@ -8,14 +8,14 @@ public static class ResponseExtentions
     public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string? successMessage = null, Severity severity = Severity.Info) where T : Response<T>
     {
         if (response.EnsureSuccess(snackbar))
-        { 
+        {
             if (successMessage is not null)
                 snackbar.Add(successMessage, severity);
         }
     }
     public static bool EnsureSuccess<T>(this Response<T>? response, ISnackbar snackbar) where T : Response<T>
-    {
-        return CheckSuccess(response, snackbar, onError: (error) => 
+    {   //Returns if the response was success only logs errors if any
+        return response.CheckSuccess(snackbar, onError: (error) =>
         {
             snackbar.Add(error, Severity.Error, opt => opt.RequireInteraction = true);
         });
@@ -23,7 +23,7 @@ public static class ResponseExtentions
     public static bool CheckSuccess<T>(this Response<T>? response, ISnackbar snackbar, Action<string>? onError = null) where T : Response<T>
     {
         if (response?._RequestSuccess is null)
-        { 
+        {
             snackbar.Add("Response was empty!", Severity.Error, opt => opt.RequireInteraction = true);
             return false;
         }

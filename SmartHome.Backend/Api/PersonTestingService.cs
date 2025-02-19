@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using SmartHome.Common.Api;
+﻿using SmartHome.Common.Api;
 using SmartHome.Common.Models;
-using SmartHome.Database;
 using static SmartHome.Common.Api.IPersonTestingService;
 
 namespace SmartHome.Backend.Api;
@@ -46,6 +43,4 @@ public class PersonTestingService : IPersonTestingService
 
         return new PersonResponse(person);
     }
-
-   
 }

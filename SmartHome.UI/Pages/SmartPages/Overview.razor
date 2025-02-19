@@ -1,22 +1,17 @@
 ﻿@page "/smarthome/{SmartGuid}/overview"
-@attribute [Authorize]
-@inject SmartHomeState smartHomeState;
-@inject NavigationManager navManager;
-@using SmartHome.UI.Components;
-@using SmartHome.Common.Api;
-@using SmartHome.Common.Models.Entities;
-@using SmartHome.Common.Models.Enums;
+@inherits SmartHomeGuidPage
+
 @inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
 
-@if (devicesList.Count <= 0)
+@if (deviceList.Count <= 0)
 {
     <MudText>You have no devices</MudText>
 }
 
-@foreach (Room room in devicesList.Select(r => r.Room).DistinctBy(r => r.Id).ToList())
+@foreach (Room room in roomList)
 {
-    List<Device> roomDeviceslist = devicesList.Where(d => d.RoomId == room.Id).ToList();
+    List<Device> roomDeviceslist = deviceList.Where(d => d.RoomId == room.Id).ToList();
     //Ga door all rooms in de roomLists
     @if (roomDeviceslist.Count > 0)
     {
@@ -50,39 +45,17 @@
 }
 
 @code {
-    [Parameter]
-    public string? SmartGuid { get; set; }
-    private Guid SmartHomeId;
-
-    List<Device> devicesList = new List<Device>();
-
-    bool DataLoaded = false;
+    List<Device> deviceList = new List<Device>();
+    List<Room> roomList = new List<Room>();
 
     protected override async Task OnInitializedAsync()
     {
-        if (SmartGuid is null)
-        {
-            smartHomeState.SetSelectedSmartHome(null);
-        }
-        else
-        {
-            if (!Guid.TryParse(SmartGuid, out SmartHomeId))
-                navManager.NavigateTo("/smarthome");
-            smartHomeState.SetSelectedSmartHome(SmartHomeId);
-        }
+        var devices = await deviceService.GetAllDevices(new());
+        if (devices.EnsureSuccess(snackBar))
+            deviceList = devices.Devices;
 
-        //Haal de Kamers en apparten op uit de DataBase met de APi
-        await LoadDevices();
-    }
-
-    private async Task LoadDevices()
-    {
-        var Devices = await deviceService.GetDevicesWithAccess(new(SmartHomeId));
-        if (Devices.WasSuccess())
-        {
-            //Zet de apparaten in een lijst
-            devicesList = Devices.Devices;
-            StateHasChanged();
-        }
+        var rooms = await deviceService.GetAllRooms(new());
+        if (rooms.EnsureSuccess(snackBar))
+            roomList = rooms.Rooms;
     }
 }

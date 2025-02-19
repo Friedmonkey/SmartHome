@@ -2,8 +2,6 @@
 using Microsoft.JSInterop;
 
 namespace SmartHome.UI.Profile;
-
-
 public class ProfileService
 {
     private readonly ILocalStorageService _localStorageService;

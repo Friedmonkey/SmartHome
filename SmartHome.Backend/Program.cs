@@ -1,13 +1,13 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using SmartHome.Backend.Api;
-using SmartHome.Common.Api;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 using FastEndpoints.Swagger;
 using SmartHome.Database;
 using SmartHome.Database.Auth;
-using SmartUser.Backend.Api;
+using SmartHome.Common.Api;
+using SmartHome.Database.ApiContext;
 
 namespace SmartHome.Backend;
 
@@ -46,11 +46,12 @@ public class Program
 
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+        builder.Services.AddScoped<DeviceContext>();
+        builder.Services.AddScoped<AuthContext>();
         builder.Services.AddScoped<ApiContext>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
-        builder.Services.AddScoped<ISmartUserService, SmartUserService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
 
         builder.Services.AddFastEndpoints();

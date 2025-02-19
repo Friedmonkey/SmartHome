@@ -1,7 +1,6 @@
 ﻿<MudDrawer Breakpoint="Breakpoint.Md"
-Class="side-menu"
 Elevation="2"
-Open="_open"
+@bind-Open="@_open"
 Style="overflow:hidden"
 Variant="@DrawerVariant.Mini">
 
@@ -13,7 +12,7 @@ Variant="@DrawerVariant.Mini">
 
     </MudDrawerHeader>
 
-    <NavMenu @ref="navMenu"/>
+    <NavMenu/>
 
     <MudSpacer />
     @if (_open)
@@ -26,7 +25,7 @@ Variant="@DrawerVariant.Mini">
     }
     else
     {
-        <MudText Typo="Typo.overline" Align="Align.Center">BB</MudText>
+        <MudText Typo="Typo.overline" Align="Align.Center">SH</MudText>
     }
 </MudDrawer>
 
@@ -37,13 +36,4 @@ Variant="@DrawerVariant.Mini">
     {
         _open = !_open;
     }
-
-    NavMenu navMenu;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        //Zet de NavMenu in de static NavigaationController Zodat later classen in de navigatie kunnen worden aangeroepen
-        NavigationController.navigationMenu = navMenu;
-    }
-
 }

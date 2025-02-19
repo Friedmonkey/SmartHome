@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Nodes;
 using SmartHome.Common.Models.Enums;
 
 namespace SmartHome.Common.Models.Entities;
