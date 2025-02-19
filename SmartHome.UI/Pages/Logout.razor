@@ -1,0 +1,15 @@
+﻿@page "/logout"
+@page "/logout/{base64}"
+@inject ApiService apiService;
+@inject NavigationManager navManager;
+
+@code {
+    [Parameter]
+    public string? base64 { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstrender)
+    {
+        await apiService.Logout();
+        NavMenu.Redirect(navManager, base64);
+    }
+}

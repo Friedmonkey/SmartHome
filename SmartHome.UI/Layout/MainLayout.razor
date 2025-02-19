@@ -1,52 +1,124 @@
-﻿@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase;
+@inject ProfileService profileService;
+@inject SelectedSmartHomeService smartHomeState;
+@inject ApiService apiService;
+@inject ISnackbar snackBar;
+@inject NavigationManager navManager;
+@inject MemoryCacheService cacheService;
 
-<MudThemeProvider />
+<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme="CustomTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 
-<MudLayout>
-    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/"/>
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/MudBlazor/MudBlazor/"/>
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">MudBlazorTemplates1</MudText>
-        </MudDrawerHeader>
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
-
-@* <div class="page"> *@
-@*     <div class="sidebar"> *@
-@*         <NavMenu /> *@
-@*     </div> *@
-
-@*     <main> *@
-@*         <div class="top-row px-4"> *@
-@*             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
-@*         </div> *@
-
-@*         <article class="content px-4"> *@
-@*             @Body *@
-@*         </article> *@
-@*     </main> *@
-@* </div> *@
-
-@code {
-    bool _drawerOpen = true;
-
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
+<style>
+    .menu-wrapper {
+    white-space: nowrap;
     }
+</style>
+<CascadingValue Name="pref" Value="preferences">
+    <CascadingValue Name="CurrentSmartHome" Value="CurrentSmartHome">
+        <MudLayout>
+            <MudAppBar Elevation="0">
+                @if (CurrentSmartHome is not null)
+                {
+                    <MudText>@CurrentSmartHome.Name</MudText>
+                }
+                <MudSpacer />
+                <ThemeToggle />
+                <AuthorizeView>
+                    <Authorized>
+                        <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                            <ActivatorContent>
+                                <Avatar Username="@context.User.GetUserName()" ProfilePicture="@context.User.GetProfilePicture()" />
+                                <MudButton>@context.User.GetUserName()</MudButton>
+                            </ActivatorContent>
+                            <ChildContent>
+                                <MudMenuItem Label="Profile" />
+                                <MudMenuItem Label="About" />
+                                <MudMenuItem Label="Clear cache" OnClick="ClearCache"/>
+                                <MudMenuItem Label="Logout" OnClick="() => NavMenu.Logout(navManager)" />
+                            </ChildContent>
+                        </MudMenu>
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudAvatar>?</MudAvatar>
+                        <MudButton Style="width:7%;" OnClick="() => NavMenu.Login(navManager)">LOGIN</MudButton>
+                    </NotAuthorized>
+                </AuthorizeView>
+                <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/"/>
+                <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/MudBlazor/MudBlazor/"/>
+            </MudAppBar>
+            <SideMenu />
+            <MudMainContent>
+                <div class="pa-4">
+                    @Body
+                </div>
+            </MudMainContent>
+        </MudLayout>
+    </CascadingValue>
+</CascadingValue>
+
+@code{
+    private bool isDarkMode;
+    private Preferences preferences = new();
+    public SmartHomeModel? CurrentSmartHome { get; private set; } = null;
+    protected override async Task OnParametersSetAsync()
+    {
+        Guid? guid = smartHomeState.GetCurrentSmartHomeGuid();
+        if (guid is not null)
+        {
+            var smartHome = await apiService.GetSmartHomeById(new((Guid)guid!));
+            if (smartHome.EnsureSuccess(snackBar))
+            {
+                CurrentSmartHome = smartHome.smartHome;
+                return;
+            }
+        }
+        CurrentSmartHome = null;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        profileService.OnChange += ProfileServiceOnOnChange;
+        preferences = await profileService.GetPreferences();
+        isDarkMode = preferences.DarkMode;
+    }
+    private void ProfileServiceOnOnChange(Preferences newPreferences)
+    {
+        preferences = newPreferences;
+        isDarkMode = newPreferences.DarkMode;
+        StateHasChanged();
+    }
+    private void ClearCache()
+    {
+        cacheService.FullyClearCache();
+        snackBar.Add("Cache was cleared.");
+    }
+
+    public void Dispose()
+    {
+        profileService.OnChange -= ProfileServiceOnOnChange;
+    }
+
+    MudTheme CustomTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            AppbarBackground = new MudBlazor.Utilities.MudColor("#f8f9faff"),
+            DrawerBackground = new MudBlazor.Utilities.MudColor("#ebebebff"),
+            Background = new MudBlazor.Utilities.MudColor("#f8f9fa"),
+            Primary = new MudBlazor.Utilities.MudColor(Colors.Blue.Default),
+            AppbarText = new MudBlazor.Utilities.MudColor("#424242ff"),
+            Divider = new MudBlazor.Utilities.MudColor("#424242ff"),
+        },
+        PaletteDark = new PaletteDark()
+        {
+            AppbarBackground = new MudBlazor.Utilities.MudColor("#27272fcc"),
+            Primary = new MudBlazor.Utilities.MudColor(Colors.Blue.Darken2),
+            Divider = new MudBlazor.Utilities.MudColor("#bebec0"),
+        }
+    };
+
 }

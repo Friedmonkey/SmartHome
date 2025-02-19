@@ -1,25 +1,119 @@
 ﻿@page "/login"
-@inject ApiService api;
+@page "/login/{base64}"
+
+@inject ISnackbar snackBar;
+@inject IAccountService accountService;
+@inject NavigationManager navManager;
 
 <h3>Login</h3>
 
-<MudTextField @bind-Value="Email">Email</MudTextField>
-<MudTextField @bind-Value="Password">Password</MudTextField>
-<MudButton OnClick="OnClick">Login</MudButton>
+@if (loginMode)
+{
+    <MudCard Style="max-width:25rem;">
+        <MudCardHeader><MudText Typo="Typo.h3">Login</MudText></MudCardHeader>
+        <MudCardContent>
+            <MudTextField @bind-Value="@email" Label="Email" />
+            <MudExtensions.MudPasswordField @bind-Value="@password" Label="Password" />
+            <MudLink Typo="Typo.caption" Style="opacity:.7;" OnClick="() => forgotPasswordVisible = true">Forgot password?</MudLink>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton @onclick="Authenticate" Variant="Variant.Filled" Color="Color.Primary">Login</MudButton>
+            <MudSpacer />
+            <MudLink OnClick="() => loginMode = !loginMode">Register instead.</MudLink>
+        </MudCardActions>
+    </MudCard>
+}
+else
+{
+    <MudCard Style="max-width:25rem;">
+        <MudCardHeader><MudText Typo="Typo.h3">Register</MudText></MudCardHeader>
+        <MudCardContent>
+            <MudTextField @bind-Value="@username" Label="Username" Counter="20" MaxLength="20" />
+            <MudTextField @bind-Value="@email" Label="Email" />
+            <MudExtensions.MudPasswordField @bind-Value="@password" Label="Password" />
+            <MudExtensions.MudPasswordField @bind-Value="@passwordConfirm" Label="Confirm Password" />
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton @onclick="Register" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
+            <MudSpacer />
+            <MudLink OnClick="() => loginMode = !loginMode">Login instead.</MudLink>
+        </MudCardActions>
+    </MudCard>
+}
+<MudDialog @bind-IsVisible="forgotPasswordVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.QuestionMark" Class="mr-3" /> Password reset
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <p>Enter in the email of the account</p>
+        <MudTextField T="string" @bind-Value="forgotEmailAddress" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="async () => {await ForgotPassword();}" Class="px-10">Send email request</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => forgotPasswordVisible = false" Class="px-10">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
 
 @code {
-    public string Email = "";
-    public string Password = "";
-    public async Task OnClick()
+    [Parameter]
+    public string? base64 { get; set; }
+
+    private bool loginMode = true;
+    #if DEBUG 
+        public string email = "hello@World12";
+        public string password = "hello@World12";
+        public string username = "hello@World12";
+        public string passwordConfirm = "hello@World12";
+    #else
+        public string email = "";
+        public string password = "";
+        public string username = "";
+        public string passwordConfirm = "";
+    #endif
+
+    private bool forgotPasswordVisible = false;
+    public string forgotEmailAddress = "";
+
+    private void UserManagerErrorHandeler(string error)
     {
-        var loginRequest = new LoginRequest(this.Email, this.Password);
-
-        var loginResponse = await api.Post<LoginResponse>(SharedConfig.LoginUrl, loginRequest);
-
-        if (loginResponse.WasSuccess())
-        {
-            // Use loginResponse object
-            Console.WriteLine(loginResponse!.JWT);
+        try
+        { 
+            var errors = JsonConvert.DeserializeObject<string[]>(error);
+            foreach (var err in errors ?? ["Error deserializing errors"])
+            {
+                snackBar.Add(err, Severity.Error, opt => opt.RequireInteraction = true);
+            }
         }
+        catch
+        {   //it probally wasnt json
+            snackBar.Add(error, Severity.Error, opt => opt.RequireInteraction = true);
+        }
+    }
+    private async Task Register()
+    {
+        var result = await accountService.Register(new (email, username, password, passwordConfirm));
+        if (result.CheckSuccess(snackBar, onError:UserManagerErrorHandeler))
+        {
+            snackBar.Add("Account created", Severity.Success);
+            email = string.Empty;
+            password = string.Empty;
+            loginMode = true; //allow user to login
+        }
+    }
+    private async Task Authenticate()
+    { 
+        var result = await accountService.Login(new (email, password));
+        if (result.CheckSuccess(snackBar, onError: UserManagerErrorHandeler))
+        {
+            snackBar.Add("Login success!", Severity.Success);
+            NavMenu.Redirect(navManager, base64);
+        }
+    }
+    private async Task ForgotPassword()
+    {
+        await accountService.ForgotPassword(new(forgotEmailAddress));
     }
 }

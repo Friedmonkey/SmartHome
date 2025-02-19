@@ -1,47 +1,37 @@
-﻿using System.Net.Http.Json;
-using Microsoft.JSInterop;
-using SmartHome.Common.Models;
-using SmartHome.Common.Models.Auth;
-
+﻿using SmartHome.Common;
+using SmartHome.Common.Api;
+using static SmartHome.Common.Api.IAccountService;
 namespace SmartHome.UI.Api;
 
-public class AccountService
+public class AccountService : IAccountService
 {
-    private readonly ApiService _apiService;
-    private readonly IJSRuntime _jsRuntime;
+    private readonly ApiService _api;
 
-    private const string JWT_STORAGE_KEY = "jwt_token";
-    private const string REFRESH_STORAGE_KEY = "refresh_token";
-
-    public AccountService(ApiService apiService, IJSRuntime jsRuntime)
+    public AccountService(ApiService api)
     {
-        _apiService = apiService;
-        _jsRuntime = jsRuntime;
+        this._api = api;
     }
 
-    public async Task<bool> Login(string email, string password)
+    public async Task<SuccessResponse> Register(RegisterRequest request)
     {
-        var response = await _apiService.Post<LoginResponse>("/auth/login", new { email, password });
-
-        if (response.WasSuccess())
-        {
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", JWT_STORAGE_KEY, response!.JWT);
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", REFRESH_STORAGE_KEY, response.RefreshToken);
-            return true;
-        }
-
-        return false;
+        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Account.RegisterUrl, request, authenticated:false);
     }
-
-    public async Task Logout()
+    public async Task<TokenResponse> Login(LoginRequest request)
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", JWT_STORAGE_KEY);
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", REFRESH_STORAGE_KEY);
+        return await _api.Login(request);
     }
-
-    public async Task<bool> IsLoggedIn()
+    public Task<TokenResponse> Refresh(RefreshRequest request)
     {
-        var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", JWT_STORAGE_KEY);
-        return !string.IsNullOrEmpty(token);
+        throw new Exception("dont manually call this!");
+        //return await _api.Refresh();
+    }
+    public async Task<SuccessResponse> Logout(EmptyRequest request)
+    {
+        await _api.Logout();
+        return SuccessResponse.Success();
+    }
+    public async Task<SuccessResponse> ForgotPassword(ForgotPasswordRequest request)
+    {
+        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Account.ForgotPasswordUrl, request, authenticated:false);
     }
 }

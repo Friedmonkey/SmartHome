@@ -1,19 +1,20 @@
-﻿namespace SmartHome.UI;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-public record FrontendConfig
+namespace SmartHome.UI;
+
+public class FrontendConfig
 {
-    public required string ApiBaseUrl { get; init; }
-    public required string HttpClientName { get; init; }
-    public static FrontendConfig GetDefaultConfig() 
+    private WebAssemblyHostConfiguration _configurationManager;
+
+    public FrontendConfig(WebAssemblyHostConfiguration _configurationManager)
     {
-        return new FrontendConfig()
-        {
-            HttpClientName = "MyApp.ServerAPI",
-#if DEBUG
-            ApiBaseUrl = "https://localhost:7216",
-#else
-            ApiBaseUrl = "https://smart-api.friedmonkey.nl",
-#endif
-        };
+        this._configurationManager = _configurationManager;
     }
+
+    public string GetOption(string name, string? overrideKey = null)
+    {
+        return _configurationManager[overrideKey ?? name] ?? throw new NullReferenceException(name);
+    }
+    public string ApiBaseUrl => GetOption("ApiBaseUrl");
+    public string HttpClientName => GetOption("HttpClientName");
 }

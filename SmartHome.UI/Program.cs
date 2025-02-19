@@ -2,8 +2,14 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SmartHome.UI.Api;
-using SmartHome.UI.Auth;
 using MudBlazor.Services;
+using MudExtensions.Services;
+using Blazored.SessionStorage;
+using SmartHome.UI.Auth;
+using Blazored.LocalStorage;
+using SmartHome.UI.Profile;
+using SmartHome.UI.Layout;
+using SmartHome.Common.Api;
 
 namespace SmartHome.UI;
 
@@ -16,39 +22,37 @@ public class Program
         builder.RootComponents.Add<HeadOutlet>("head::after");
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
         builder.Services.AddMudServices();
+        builder.Services.AddMudExtensions();
 
-        var config = FrontendConfig.GetDefaultConfig();
+        var config = new FrontendConfig(builder.Configuration);
+        builder.Services.AddSingleton<FrontendConfig>(config);
 
-        builder.Services.AddSingleton(config);
-
-        builder.Services.AddSingleton<JwtAuthenticationStateProvider>();
-        builder.Services.AddSingleton<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthenticationStateProvider>());
-
-        var appUri = new Uri(config.ApiBaseUrl);// builder.HostEnvironment.BaseAddress);
-        builder.Services.AddScoped(provider => new JwtTokenMessageHandler(appUri, provider.GetRequiredService<JwtAuthenticationStateProvider>()));
-        
-        
-        builder.Services.AddHttpClient(config.HttpClientName, client => client.BaseAddress = appUri)
-            .AddHttpMessageHandler<JwtTokenMessageHandler>();
+        builder.Services.AddHttpClient();
         builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(config.HttpClientName));
 
+
+        builder.Services.AddBlazoredSessionStorage();
+        builder.Services.AddBlazoredLocalStorage();
+
+        builder.Services.AddScoped<IJwtStoreService, JwtSessionStorageService>();
+        builder.Services.AddScoped<ProfileService>();
+
+        builder.Services.AddScoped<JwtAuthStateProvider>(); //we need it directly for the apiservice
+        builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<JwtAuthStateProvider>()); //very fucking important otherwise auth will desync
+        builder.Services.AddAuthorizationCore();
+
+        builder.Services.AddSingleton<MemoryCacheService>();
         builder.Services.AddScoped<ApiService>();
 
-        var application = builder.Build();
-        //await RefreshJwtToken(application);
+        builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
+        builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
+        builder.Services.AddScoped<IDeviceService, DeviceService>();
 
+        //keep track of selected smarthome
+        builder.Services.AddScoped<SelectedSmartHomeService>();
+
+        var application = builder.Build();
         await application.RunAsync();
     }
-    //private static async Task RefreshJwtToken(WebAssemblyHost application)
-    //{
-    //    using var boostrapScope = application.Services.CreateScope();
-    //    var api = boostrapScope.ServiceProvider.GetRequiredService<ApiService>();
-
-    //    var refreshTokenResponse = await api.RefreshToken();
-    //    if (refreshTokenResponse.IsSuccess)
-    //    {
-    //        var loginStateService = boostrapScope.ServiceProvider.GetRequiredService<JwtAuthenticationStateProvider>();
-    //        loginStateService.Login(refreshTokenResponse.Token);
-    //    }
-    //}
 }

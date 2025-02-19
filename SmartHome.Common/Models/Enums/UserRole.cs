@@ -1,11 +1,9 @@
-﻿namespace SmartHome.Shared.Models.Enums;
-
+﻿namespace SmartHome.Common.Models.Enums;
 public enum UserRole
 {
-    None,
-    User,
-    LocationManager,
-    CustomerManager,
-    Admin,
-    SuperUser
+    None = 0,
+    User = 1,
+    Admin = 2,
+    Guest = 4,
+    InvitationPending = 8,
 }
