@@ -19,7 +19,6 @@
     <ItemRenderer>
         <MudPaper Class="d-flex flex-wrap flex-grow-1 gap-4 border-solid border-2 mud-border-primary ml-2 mr-2" Style="" Elevation="0">
             <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Name : </strong>@context.Name</MudText>
-            <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Room : </strong>@context.Room.Name</MudText>
             <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Type : </strong>@context.Type</MudText>
             <MudSpacer />
             <MudButton @onclick="@(e => OpenDeviceEdit(context))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Primary">Edit</MudButton>
