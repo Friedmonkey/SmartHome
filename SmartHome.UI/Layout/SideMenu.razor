@@ -10,6 +10,13 @@ Variant="@DrawerVariant.Mini">
         Icon="@Icons.Material.Rounded.Menu"
         Size="Size.Large"
         OnClick="@OpenSideMenu" />
+        @if (_open && CurrentSmartHome is not null)
+        {
+            <div class="d-flex flex-row">
+                <MudIcon Icon="@Icons.Material.Rounded.Home"/>
+                <MudText>@CurrentSmartHome.Name</MudText>
+            </div>
+        }
 
     </MudDrawerHeader>
 
@@ -20,7 +27,7 @@ Variant="@DrawerVariant.Mini">
     {
         <div class="d-flex">
             <MudSpacer />
-            <MudImage Alt="Logo" Src="logo.png" Width="100" Class="mb-4"></MudImage>
+            <MudImage Alt="Logo" Src="logo.png" Width="100" Class="mb-4" />
             <MudSpacer />
         </div>
     }
@@ -31,6 +38,9 @@ Variant="@DrawerVariant.Mini">
 </MudDrawer>
 
 @code {
+    [CascadingParameter(Name = "CurrentSmartHome")]
+    public SmartHomeModel? CurrentSmartHome { get; set; }
+
     bool _open = false;
 
     void OpenSideMenu()

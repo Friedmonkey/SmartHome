@@ -1,53 +1,44 @@
-﻿@inject SmartHomeState smartHomeState
+﻿@inject SelectedSmartHomeService smartHomeState;
+@inject ApiService apiService;
+@inject ISnackbar snackBar;
 
 <MudNavMenu>
-    <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
-        Smart Homes
-    </MudNavLink>
-    @if (smartHomeState.SelectedSmartHomeId is not null)
+    @if (CurrentSmartHome is not null)
     {
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/overview")" Icon="@Icons.Material.Filled.Dashboard">
-            Overview
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/overview")" Icon="@Icons.Material.Filled.Dashboard">
+            <p class="menu-wrapper">Overview</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/devices")" Icon="@Icons.Material.Filled.Devices">
-            Devices
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/devices")" Icon="@Icons.Material.Filled.Devices">
+            <p class="menu-wrapper">Devices</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/logs")" Icon="@Icons.Material.Filled.List">
-            Logs
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/logs")" Icon="@Icons.Material.Filled.List">
+            <p class="menu-wrapper">Logs</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/routines")" Icon="@Icons.Material.Filled.Autorenew">
-            Routines
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/routines")" Icon="@Icons.Material.Filled.Autorenew">
+            <p class="menu-wrapper">Routines</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{smartHomeState.SelectedSmartHomeId}/beheer")" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">
-            Beheer
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/beheer")" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">
+            <p class="menu-wrapper">Beheer</p>
         </MudNavLink>
     }
     else
-    {     
-        <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">person</MudNavLink>
+    {
+        <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+            <p class="menu-wrapper">Smart Homes</p>
+        </MudNavLink>
+        <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">
+            <p class="menu-wrapper">Person</p>
+         </MudNavLink>
     }  
 </MudNavMenu>
 
 @code{
-    [Parameter]
-    public bool ReadyRefresh
-    {
-        set
-        {
-            Refresh();
-            ReadyRefresh = false;
-        }
-    }
-
-    public void Refresh()
-    {
-        StateHasChanged();
-    }
-
+    [CascadingParameter(Name = "CurrentSmartHome")]
+    public SmartHomeModel? CurrentSmartHome { get; set; }
 
     public static void Redirect(NavigationManager navManager, string? base64)
     { 
