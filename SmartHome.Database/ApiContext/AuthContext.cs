@@ -1,62 +1,70 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SmartHome.Common;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
-using SmartHome.Database;
+using SmartHome.Common;
 using SmartHome.Database.Auth;
 using System.Security.Claims;
 
-namespace SmartHome.Backend.Api;
+namespace SmartHome.Database.ApiContext;
 
-public class ApiContext
+public class AuthContext
 {
     private readonly IHttpContextAccessor _contextAccessor;
     private readonly SmartHomeContext _dbContext;
     private readonly UserManager<AuthAccount> _userManager;
-    private readonly SignInManager<AuthAccount> _signInManager;
-    private readonly BackendConfig _backendConfig;
 
-    public ApiContext(
-        IHttpContextAccessor contextAccessor, SmartHomeContext dbContext, 
-        UserManager<AuthAccount> userManager, SignInManager<AuthAccount> signInManager, 
-        BackendConfig backendConfig)
-    { 
+    public AuthContext(
+    IHttpContextAccessor contextAccessor, SmartHomeContext dbContext,
+    UserManager<AuthAccount> userManager)
+    {
         _contextAccessor = contextAccessor;
         _dbContext = dbContext;
         _userManager = userManager;
-        _signInManager = signInManager;
-        _backendConfig = backendConfig;
     }
 
     public ClaimsPrincipal? JWT => _contextAccessor?.HttpContext?.User;
-    public SmartHomeContext DbContext => _dbContext;
-    public UserManager<AuthAccount> UserManager => _userManager;
-    public SignInManager<AuthAccount> SignInManager => _signInManager;
-    public BackendConfig BackendConfig => _backendConfig;
 
     public async Task EnforceIsSmartHomeAdmin(Guid smarthomeId)
     {
-        if (!(await IsSmartHomeAdmin(smarthomeId)))
+        if (!await IsSmartHomeAdmin(smarthomeId))
             throw new ApiError("You do not have access to control this SmartHome");
+    }
+    public async Task EnforceIsPartOfSmartHome(Guid smarthomeId)
+    {
+        var account = GetLoggedInId();
+        var isPartOfSmartHome = await _dbContext.SmartUsers.AnyAsync(sm => sm.AccountId == account && sm.SmartHomeId == smarthomeId);
+
+        if (!isPartOfSmartHome)
+            throw new ApiError("You are not part of this SmartHome");
     }
     public async Task<bool> IsSmartHomeAdmin(Guid smarthomeId)
     {
         var smartUser = await GetLoggedInSmartUser(smarthomeId);
-        bool isAdmin = (smartUser.Role == UserRole.Admin);
+        bool isAdmin = smartUser.Role == UserRole.Admin;
         return isAdmin;
+    }
+
+    public async Task<SmartUserModel> GetPendingInvite(Guid smarthomeId)
+    {
+        var id = GetLoggedInId();
+        var smartUser = await GetSmartUser(id, smarthomeId);
+        if (smartUser is null || smartUser.Role != UserRole.InvitationPending)
+            throw new ApiError("You do not have an invite for this SmartHome!");
+        return smartUser;
     }
     public async Task<SmartUserModel> GetLoggedInSmartUser(Guid smarthomeId)
     {
         var id = GetLoggedInId();
         var smartUser = await GetSmartUser(id, smarthomeId);
-        if (smartUser is null)
+        if (smartUser is null || (smartUser.Role != UserRole.User && smartUser.Role != UserRole.Admin))
             throw new ApiError("You are not part of this SmartHome!");
         return smartUser;
     }
     public async Task<SmartUserModel?> GetSmartUser(Guid accountId, Guid smarthomeId)
     {
-        var smartUser = await DbContext.SmartUsers.FirstOrDefaultAsync(sm => sm.AccountId == accountId && sm.SmartHomeId == smarthomeId);
+        var smartUser = await _dbContext.SmartUsers.FirstOrDefaultAsync(sm => sm.AccountId == accountId && sm.SmartHomeId == smarthomeId);
         return smartUser;
     }
     public Task<AuthAccount> GetLoggedInAccount()

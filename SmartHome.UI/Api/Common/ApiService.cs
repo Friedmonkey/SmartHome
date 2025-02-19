@@ -1,15 +1,14 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using Blazored.SessionStorage;
-using Microsoft.JSInterop;
 using MudBlazor;
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models;
 using SmartHome.UI.Auth;
+using SmartHome.UI.Layout;
 using static SmartHome.Common.Api.IAccountService;
+using static SmartHome.Common.Api.ISmartHomeService;
 
 namespace SmartHome.UI.Api;
 
@@ -18,16 +17,20 @@ public class ApiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ISnackbar _snackbarService;
     private readonly IJwtStoreService _jwtStoreService;
+    private readonly SelectedSmartHomeService _smartHomeState;
     private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
+    private readonly MemoryCacheService _memoryCacheService;
 
-    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SelectedSmartHomeService smartHomeState, MemoryCacheService memoryCacheService)
     {
         _httpClientFactory = httpClientFactory;
         _snackbarService = snackbarService;
         _config = config;
         _jwtStoreService = jwtStoreService;
         _jwtAuthStateProvider = jwtAuthStateProvider;
+        _smartHomeState = smartHomeState;
+        _memoryCacheService = memoryCacheService;
     }
 
     public async Task<TokenResponse> Login(LoginRequest request)
@@ -37,6 +40,8 @@ public class ApiService
         if (response.WasSuccess())
         {
             await _jwtStoreService.SetTokens(response.JWT, response.Refresh);
+            //_memoryCacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetByIDUrl);
+            _memoryCacheService.FullyClearCache();
             _jwtAuthStateProvider.UpdateAuthState();
         }
         return response;
@@ -46,6 +51,8 @@ public class ApiService
         var response = await Delete<SuccessResponse>(SharedConfig.Urls.Account.LogoutUrl);
         response.Show(_snackbarService, "Logout success!");
         await _jwtStoreService.RemoveTokens();
+        //_memoryCacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetByIDUrl);
+        _memoryCacheService.FullyClearCache();
         _jwtAuthStateProvider.UpdateAuthState();
     }
     public async Task<TokenResponse> Refresh()
@@ -60,6 +67,19 @@ public class ApiService
 
         return response;
     }
+    public async ValueTask<T> GetWithCache<T>(object cacheKey, string url, object? data = null, TimeSpan? cacheTime = null, bool authenticated = true) where T : Response<T>
+    {
+        TimeSpan expire = cacheTime ?? TimeSpan.FromMinutes(5);
+        string key = _memoryCacheService.HashKey(url, new { cacheKey, authenticated });
+
+        if (_memoryCacheService.TryGet(key, expire, out T result))
+            return result;
+
+        result = await Send<T>(authenticated, HttpMethod.Get, url, data);
+        _memoryCacheService.Set(key, result);
+
+        return result;
+    }
     public async Task<T> Get<T>(string url, object? data = null, bool authenticated = true) where T : Response<T>
     {
         return await Send<T>(authenticated, HttpMethod.Get, url, data);
@@ -72,7 +92,7 @@ public class ApiService
     {
         return await Send<T>(authenticated, HttpMethod.Put, url, data);
     }
-    public async Task<T> Delete<T>(string url, object? data = null,  bool authenticated = true) where T : Response<T>
+    public async Task<T> Delete<T>(string url, object? data = null, bool authenticated = true) where T : Response<T>
     {
         return await Send<T>(authenticated, HttpMethod.Delete, url, data);
     }
@@ -87,7 +107,28 @@ public class ApiService
                 authHeader = await GetAuthHeader();
 
             if (data is not null)
+            {
+                if (data is SmartHomeRequest req)
+                {
+                    bool success = true;
+                    Guid? smartHomeGuid = _smartHomeState.GetCurrentSmartHomeGuid();
+                    if (!success || smartHomeGuid is null)
+                    {
+                        throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
+                        "If you are making an api request on OnInitializedAsync, make sure to call\n" +
+                        "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
+                        "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
+                    }
+
+
+                    if (req.smartHome != Guid.Empty)
+                        _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
+
+                    //update the smartHome guid using record with syntax
+                    data = req with { smartHome = (Guid)smartHomeGuid };
+                }
                 content = GetData(method, data, ref url); //can put data in url for GET requests
+            }
 
             var newUrl = GetUrl(url);
             var request = new HttpRequestMessage(method, newUrl);
@@ -98,8 +139,7 @@ public class ApiService
             return response;
         }
         catch (ApiError apiError) when (apiError.IsFatal == false)
-        { 
-            //_snackbarService.Add("Api error:"+apiError.Message, Severity.Error, opt => opt.RequireInteraction = true);
+        {
             return Response<T>.Failed(apiError.Message);
         }
         catch (Exception ex) when (ex is not ApiError)
@@ -107,14 +147,30 @@ public class ApiService
 #if DEBUG
             if (ex.Message.StartsWith("TypeError: Failed to fetch"))
             {
-                //_snackbarService.Add("BACKEND not enabled", Severity.Error, opt => opt.RequireInteraction = true);
                 _snackbarService.Add("TURN ON THE BACK-END, \n Solution Explorer -> SmartHome.Backend -> r-click -> debug -> start new instance", Severity.Error, opt => opt.RequireInteraction = true);
-                //throw new Exception("Backend is not enabled i think: " + ex.Message);
                 return Response<T>.Failed("BACKEND not enabled");
             }
 #endif
-            throw new ApiError("Unexpected Api error: " + ex.Message, fatal:true);
+            throw new ApiError("Unexpected Api error: " + ex.Message, fatal: true);
         }
+    }
+
+    public void RemoveSmartHomeCache(GuidRequest request)
+    {
+        string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
+            new
+            {
+                cacheKey = new { id = request.Id },
+                authenticated = true
+            }
+        );
+        _memoryCacheService.RemoveCache(cacheKey);
+    }
+    public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
+    {
+        object cacheKey = new { id = request.Id };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(2);
+        return await GetWithCache<SmartHomeResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetByIDUrl, request, cacheTime);
     }
     private JsonContent? GetData(HttpMethod method, object data, ref string url)
     {
@@ -180,7 +236,6 @@ public class ApiService
     {
         return $"{_config.ApiBaseUrl}/{url}";
     }
-
 
     private static async Task<T> HandleResponse<T>(HttpResponseMessage response) where T : Response<T>
     {

@@ -21,17 +21,26 @@ public class SmartHomeService : ISmartHomeService
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.InviteToSmartHomeUrl, request);
     }
-    public async Task<SuccessResponse> AcceptSmartHomeInvite(SmartHomeRequest request)
+    public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.AcceptInviteToSmartHomeUrl, request);
     }
 
-    public async Task<SmartHomeResponse> GetJoinedSmartHomes(EmptyRequest request)
+    public async Task<SmartHomeListResponse> GetJoinedSmartHomes(EmptyRequest request)
     {
-        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.getJoinedUrl, request);
+        TimeSpan cacheTime = TimeSpan.FromMinutes(2);
+        object cacheKey = new { };
+        return await _api.GetWithCache<SmartHomeListResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetJoinedUrl, request, cacheTime);
     }
-    public async Task<SmartHomeResponse> GetSmartHomeInvites(EmptyRequest request)
+    public async Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request)
     {
-        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.getInvitesUrl, request);
+        TimeSpan cacheTime = TimeSpan.FromMinutes(5);
+        object cacheKey = new { };
+        return await _api.GetWithCache<SmartHomeListResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetInvitesUrl, request, cacheTime);
+    }
+
+    public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
+    {
+        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.GetByIDUrl, request);
     }
 }

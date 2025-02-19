@@ -5,29 +5,7 @@ using static SmartHome.Common.Api.IDeviceService;
 
 namespace SmartHome.Backend.FastEndpoints
 {
-    public class GetDevicesWithAccessEndpoint : BasicEndpointBase<DeviceListRequest, DeviceListResponse>
-    {
-        public required IDeviceService Service { get; set; }
-        public override void Configure()
-        {
-            Get(SharedConfig.Urls.Device.GetDevicesWithAccess);
-            SecureJwtEndpoint();
-        }
-
-        public override async Task HandleAsync(DeviceListRequest request, CancellationToken ct)
-        {
-            try
-            {
-                await SendAsync(await Service.GetDevicesWithAccess(request));
-            }
-            catch (Exception ex)
-            {
-                await SendAsync(DeviceListResponse.Error(ex));
-            }
-        }
-    }
-
-    public class GetAllDevices : BasicEndpointBase<AllDeviceListRequest, DeviceListResponse>
+    public class GetAllDevicesEndpoint : BasicEndpointBase<EmptySmartHomeRequest, DeviceListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -36,7 +14,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(AllDeviceListRequest request, CancellationToken ct)
+        public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
         {
             try
             {
@@ -71,7 +49,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class UpdateDeviceEndpoint : BasicEndpointBase<UpdateDeviceRequest, SuccessResponse>
+    public class UpdateDeviceEndpoint : BasicEndpointBase<DeviceRequest, SuccessResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -80,7 +58,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(UpdateDeviceRequest request, CancellationToken ct)
+        public override async Task HandleAsync(DeviceRequest request, CancellationToken ct)
         {
             try
             {
@@ -115,7 +93,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class CreateDeviceEndpoint : BasicEndpointBase<CreateDeviceRequest, SuccessResponse>
+    public class CreateDeviceEndpoint : BasicEndpointBase<DeviceRequest, GuidResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -124,7 +102,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(CreateDeviceRequest request, CancellationToken ct)
+        public override async Task HandleAsync(DeviceRequest request, CancellationToken ct)
         {
             try
             {
@@ -132,25 +110,25 @@ namespace SmartHome.Backend.FastEndpoints
             }
             catch (Exception ex)
             {
-                await SendAsync(SuccessResponse.Error(ex));
+                await SendAsync(GuidResponse.Error(ex));
             }
         }
     }
 
-    public class GetRoomEndpoint : BasicEndpointBase<RoomListRequest, RoomListResponse>
+    public class GetAllRoomsEndpoint : BasicEndpointBase<EmptySmartHomeRequest, RoomListResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
         {
-            Post(SharedConfig.Urls.Device.GetAllRooms);
+            Get(SharedConfig.Urls.Device.GetAllRooms);
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(RoomListRequest request, CancellationToken ct)
+        public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
         {
             try
             {
-                await SendAsync(await Service.GetRoomsByHouseId(request));
+                await SendAsync(await Service.GetAllRooms(request));
             }
             catch (Exception ex)
             {

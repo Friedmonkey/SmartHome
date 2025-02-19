@@ -1,187 +1,118 @@
 using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
+using SmartHome.Common.Models.Enums;
 using static SmartHome.Common.Api.IDeviceService;
 
 namespace SmartHome.Backend.Api;
 
 public class DeviceService : IDeviceService
 {
-    private readonly ApiContext _context;
+    private readonly ApiContext _ctx;
 
     public DeviceService(ApiContext context)
     {
-        _context = context;
+        _ctx = context;
     }
 
-    public async Task<DeviceListResponse> GetDevicesWithAccess(DeviceListRequest request)
+    public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
-        try
-        {
-            //Haal het account uit de DataBaase
-            var smartUser = await _context.GetLoggedInSmartUser(request.HomeGuid);
+        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-            //Haal de device toegang op bij het ingelogde account
-            List<DeviceAccess> devicesAccessList = new List<DeviceAccess>();
-            devicesAccessList = await _context.DbContext.DeviceAccesses.Where(a => a.SmartUserId == smartUser.Id).ToListAsync();
-
-            //Haal de rooms uit de database die in het huis staan
-            List<Room> roomsList = new List<Room>();
-            roomsList = await _context.DbContext.Rooms.Where(r => r.SmartHomeId == request.HomeGuid).ToListAsync();
-
-            //Haal de apparaten op en filter devices met de roomids die in het huis staan
-            List<Device> deviceList = new List<SmartHome.Common.Models.Entities.Device>();
-            deviceList = await _context.DbContext.Devices.ToListAsync();
-
-            //Filter Devices op room die bij een home hoort
-            deviceList = deviceList.Where(d => roomsList.Select(r => r.Id).ToArray().Contains(d.RoomId)).ToList();
-
-            //Filer de devices waar het account toegang tot heeft
-            deviceList = deviceList.Where(d => devicesAccessList.Select(a => a.DeviceId).ToArray().Contains(d.Id)).ToList();
-
-            return new DeviceListResponse(deviceList);
+        List<Device>? deviceList = null;
+        if (smartUser.Role == UserRole.Admin)
+        {   //get all no checking exept for smarthome
+            deviceList = await _ctx.DbContext.Devices
+                .Where(d =>
+                    _ctx.DbContext.Rooms
+                        .Where(r => r.SmartHomeId == request.smartHome)
+                        .Select(r => r.Id)
+                        .Contains(d.RoomId)
+                ).ToListAsync();
         }
-        catch (Exception ex)
-        {
-            return DeviceListResponse.Failed(ex.Message);
+        else
+        {   // Get all devices with access and stuff
+            deviceList = await _ctx.DbContext.Devices
+                .Where(d =>
+                    _ctx.DbContext.Rooms
+                        .Where(r => r.SmartHomeId == request.smartHome)
+                        .Select(r => r.Id)
+                        .Contains(d.RoomId) && // Device belongs to the Smart Home
+                    _ctx.DbContext.DeviceAccesses
+                        .Where(a => a.SmartUserId == smartUser.Id)
+                        .Select(a => a.DeviceId)
+                        .Contains(d.Id) // User has access to the device
+                ).ToListAsync();
         }
-    }
-
-    public async Task<DeviceListResponse> GetAllDevices(AllDeviceListRequest request)
-    {
-        try
-        {
-            //Haal het account uit de DataBaase
-            //var smartUser = await _context.GetLoggedInSmartUser(request.HomeGuid);
-            //var smartUser = await _context.GetSmartUser(Guid.Parse("08dd4d36-b85e-4f89-8568-31d7498c60ec"), Guid.Parse("d68b031b-a81c-43aa-b589-c4a0da0bb442"));
-
-            //Haal de rooms uit de database die in het huis staan
-            List<Room> roomsList = new List<Room>();
-            roomsList = await _context.DbContext.Rooms.Where(r => r.SmartHomeId == request.HomeGuid).ToListAsync();
-
-            //Haal de apparaten op en filter devices met de roomids die in het huis staan
-            List<Device> deviceList = new List<Device>();
-            deviceList = await _context.DbContext.Devices.ToListAsync();
-
-            //Filter Devices op room die bij een home hoort
-            deviceList = deviceList.Where(d => roomsList.Select(r => r.Id).ToArray().Contains(d.RoomId)).ToList();
-
-            return new DeviceListResponse(deviceList);
-        }
-        catch (Exception ex)
-        {
-            return DeviceListResponse.Failed(ex.Message);
-        }
+        if (deviceList is null)
+            return DeviceListResponse.Failed("deviceList was null, unhandled role?");
+        return new DeviceListResponse(deviceList);
     }
 
     public async Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request)
     {
-        try
+        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
+        foreach (Device device in request.devices)
         {
-            foreach (Device device in request.devices)
-            {
-                //Update de device list met de propperties naar de DataBase
-
-                await _context.DbContext.Devices
-                    .Where(d => d.Id == device.Id)
-                    .ExecuteUpdateAsync(u => u
-                        .SetProperty(p => p.Name, device.Name)
-                        .SetProperty(p => p.JsonObjectConfig, device.JsonObjectConfig)
-                        .SetProperty(p => p.RoomId, device.RoomId)
-                        .SetProperty(p => p.Type, device.Type)
-                    );
-            }
-
-            return SuccessResponse.Success();
+            await _ctx.Device.UpdateDeviceSafe(request.smartHome, device, smartUser.Id);
         }
-        catch (Exception ex)
-        {
-            return SuccessResponse.Failed(ex.Message);
-        }
+
+        return SuccessResponse.Success();
     }
 
-    public async Task<SuccessResponse> UpdateDevice(UpdateDeviceRequest request)
+    public async Task<SuccessResponse> UpdateDevice(DeviceRequest request)
     {
-        try
-        {
-            //Controleer of er al een device met dezelfde naam in de database is
-            if (!await _context.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
-            {
-                await _context.DbContext.Devices
-                        .Where(d => d.Id == request.device.Id)
-                .ExecuteUpdateAsync(u => u
-                            .SetProperty(p => p.Name, request.device.Name)
-                            .SetProperty(p => p.JsonObjectConfig, request.device.JsonObjectConfig)
-                            .SetProperty(p => p.RoomId, request.device.RoomId)
-                            .SetProperty(p => p.Type, request.device.Type)
-                        );
-            }
-            else
-            {
-                return SuccessResponse.Failed("There is already a device with the same name!!");
-            }
+        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-            return SuccessResponse.Success();
-        }
-        catch (Exception ex)
-        {
-            return SuccessResponse.Failed(ex.Message);
-        }
+        await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser.Id);
+
+        return SuccessResponse.Success();
     }
-
     public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
     {
-        try
-        {
-            //Verwijder device uit de database met guid
-            await _context.DbContext.Devices.Where(d => d.Id == request.DeviceGuid).ExecuteDeleteAsync();
+        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        await _ctx.Device.EnforceDeviceInSmartHome(request.smartHome, request.DeviceGuid);
 
-            return SuccessResponse.Success();
-        }
-        catch (Exception ex)
-        {
-            return SuccessResponse.Failed(ex.Message);
-        }
+        await _ctx.DbContext.Devices.Where(d => d.Id == request.DeviceGuid).ExecuteDeleteAsync();
+        return SuccessResponse.Success();
     }
-
-    public async Task<SuccessResponse> CreateDevice(CreateDeviceRequest request)
+    public async Task<GuidResponse> CreateDevice(DeviceRequest request)
     {
-        try
-        {
-            //Controleer of er al een device met dezelfde naam in de database is
-            if (!await _context.DbContext.Devices.AnyAsync(x => x.Name == request.device.Name))
-            {
-                //Maak een nieuwe device in de database
-                await _context.DbContext.Devices.AddAsync(request.device);
-                await _context.DbContext.SaveChangesAsync();
+        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
-                return SuccessResponse.Success();
-            }
-            else
-            {
-                return SuccessResponse.Failed("There is already a device with the same name!!");
-            }
-        }
-        catch (Exception ex)
+        if (request.device.RoomId == Guid.Empty)
+            return GuidResponse.Failed("Invalid room ID!");
+
+        if (!await _ctx.Device.IsRoomInSmartHome(request.smartHome, request.device.RoomId))
+            return GuidResponse.Failed("The room is not part of smart home!");
+
+        await _ctx.Device.EnforceDeviceNameUnique(request.smartHome, request.device.Name);
+
+
+        Device newDevice = new Device() 
         {
-            return SuccessResponse.Failed(ex.Message);
-        }
+            Name = request.device.Name,
+            RoomId = request.device.RoomId,
+            Type = request.device.Type,
+            JsonObjectConfig = request.device.JsonObjectConfig,
+        };
+        var result = await _ctx.DbContext.Devices.AddAsync(newDevice);
+        await _ctx.DbContext.SaveChangesAsync();
+
+        return new GuidResponse(result.Entity.Id);
     }
-
-
-    public async Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request)
+    public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
     {
-        var result = await _context.DbContext.Rooms.ToListAsync();
+        await _ctx.Auth.EnforceIsPartOfSmartHome(request.smartHome);
+        var result = await _ctx.DbContext.Rooms.Where(r => r.SmartHomeId == request.smartHome).ToListAsync();
 
-        if (result == null)
-            return RoomListResponse.Failed("Not Devices found in DataBase");
-        else
-            return new RoomListResponse(result);
+        return new RoomListResponse(result);
     }
-
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
-        var result = await _context.DbContext.Devices
+        await _ctx.Device.EnforceHasAccessToDevice(request.smartHome, request.DeviceId);
+
+        var result = await _ctx.DbContext.Devices
             .Where(d => d.Id == request.DeviceId)
             .ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JsonObjectConfig, request.ConfigJson));
 

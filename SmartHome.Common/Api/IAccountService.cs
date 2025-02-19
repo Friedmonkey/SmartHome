@@ -2,7 +2,6 @@
 
 namespace SmartHome.Common.Api;
 
-
 public record TokenResponse(string JWT, string Refresh) : Response<TokenResponse>;
 public interface IAccountService
 {

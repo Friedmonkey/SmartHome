@@ -1,5 +1,7 @@
-﻿@inject SmartHomeState smartHomeState;
+﻿@inject ISmartHomeService smartHomeService;
 @inject NavigationManager navManager;
+@inject MemoryCacheService cacheService;
+@inject ISnackbar snackBar;
 
 <MudCard Elevation="11">
     <MudCardHeader>
@@ -7,7 +9,14 @@
     </MudCardHeader>
     <MudCardContent>
         <MudText>@Home.Name</MudText>
-        <MudButton OnClick="OpenHome">Open home</MudButton>
+        @if (IsInvite)
+        {
+            <MudButton OnClick="AcceptInvite" Color="Color.Success">Accept invite</MudButton>
+        }
+        else
+        { 
+            <MudButton OnClick="OpenHome">Open home</MudButton>
+        }
     </MudCardContent>
 </MudCard>
 
@@ -18,13 +27,28 @@
     [Parameter]
     public SmartHomeModel Home { get; set; }
 
+    public async Task AcceptInvite()
+    {
+        await smartHomeService.AcceptSmartHomeInvite(new(Home.Id));
+    }
     public void OpenHome()
-    { 
-        smartHomeState.SetSelectedSmartHome(Home.Id);
+    {
+        if (Home is null)
+        {
+            snackBar.Add("Home was null", Severity.Error);
+            return;
+        }
 
-        NavigationController.RefreshMenu();
-        NavigationController.HomeName = Home.Name;
-
+        //inject the currect home into the cache so we basicly preload it since we already know what it will get
+        //its just optimization for here, normally do not do this lol
+        string cacheKey = cacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
+            new
+            {
+                cacheKey = new { id = Home.Id },
+                authenticated = true
+            }
+        );
+        cacheService.Set(cacheKey, new SmartHomeResponse(Home));
         navManager.NavigateTo($"/smarthome/{Home.Id}/overview");
     }
 }
