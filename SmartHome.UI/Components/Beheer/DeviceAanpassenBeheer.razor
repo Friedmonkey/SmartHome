@@ -1,0 +1,215 @@
+﻿@inject ISnackbar snackbar;
+
+<MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center my-4 border-solid border-2 mud-border-primary pa-4" Style="width: 100%; background-color: white;" Elevation="0">
+    <MudPaper class="d-flex flex-wrap align-center gap-1 justify-space-between" Style="width: 90%; background-color: transparent;" Elevation="0">
+        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+            <MudText Typo="Typo.h4">Device Name</MudText>
+            <MudTextField @bind-Value="@DeviceName" Label="Name" Variant="Variant.Outlined"></MudTextField>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+            <MudText Class="mb-4" Typo="Typo.h4">Room</MudText>
+            <MudSelect @bind-Value="@RoomName" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
+                @foreach (Room room in _Rooms)
+                {
+                    //Zet alle rooms in het dropdown menu
+                    <MudSelectItem Value="@room.Name"></MudSelectItem>
+                }
+            </MudSelect>
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+            <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
+            <MudSelect Class="mb-4" T="DeviceType" ValueChanged="DeviceTypeChanche" SelectedValues="@_DeviceType" Label="Select Type" Variant="Variant.Outlined">
+                <MudSelectItem Value="@DeviceType.Lamp">
+                    <img src="/Afbeeldingen/licht-aan.png" height="14" class="mr-1" /> Lamp
+                </MudSelectItem>
+                <MudSelectItem Value="@DeviceType.Televisie">
+                    <img src="/Afbeeldingen/televisie.png" height="14" class="mr-1" /> Televisie
+                </MudSelectItem>
+                <MudSelectItem Value="@DeviceType.Wasmachine">
+                    <img src="/Afbeeldingen/wasmachine.png" height="14" class="mr-1" /> Wasmachine
+                </MudSelectItem>
+                <MudSelectItem Value="@DeviceType.Router">
+                    <img src="/Afbeeldingen/router.png" height="14" class="mr-1" /> Router
+                </MudSelectItem>
+            </MudSelect>
+        </MudPaper>
+        @if (_DeviceType.ToList().ToList().First() == DeviceType.Lamp)
+        {
+            //Extra UI opties voor het type Lamp
+            <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+                <MudText Class="mb-4" Typo="Typo.h4">ConfigType</MudText>
+                <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Style="background-color: transparent;" Elevation="0">
+                    <MudCheckBox @bind-Value="@Brightness" Label="Enable Brightness"></MudCheckBox>
+                    <MudCheckBox @bind-Value="@Color" Label="Enable Color"></MudCheckBox>
+                </MudPaper>
+            </MudPaper>
+        }
+        <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
+            <MudButton @onclick="CloseMenu" Class="mx-5 my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
+            <MudSpacer />
+            @if (IsNewDevice)
+            {
+                <MudButton @onclick="SaveNewDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+            }
+            else
+            {
+                <MudButton @onclick="SaveEditDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+            }
+        </MudPaper>
+    </MudPaper>
+</MudPaper>
+
+@code {
+    private string DeviceName = "";
+    private string RoomName = "";
+    private IEnumerable<DeviceType> _DeviceType;
+    private bool Brightness = false;
+    private bool Color = false;
+    private bool IsNewDevice = true;
+
+    private async void CloseMenu()
+    {
+        //Verzoek om shcerm te sluiten
+        Close.InvokeAsync();
+    }
+
+    private void RoomChanche(Room selected)
+    {
+        var Room = selected;
+    }
+
+    private void DeviceTypeChanche(DeviceType selected)
+    {
+        //Zet de juiste device type in de variable en herlaad de UI voor aparte html voor het type Lamp
+        List<DeviceType> list = new List<DeviceType>();
+        list.Add(selected);
+        _DeviceType = list.AsEnumerable();
+        StateHasChanged();
+    }
+
+    private async void SaveNewDevice()
+    {
+        if (DeviceName != string.Empty && RoomName != string.Empty)
+        {
+            //Als alle waarden zijn ingevuld in de UI
+            Device newDevice = new Device
+                {
+                    Name = DeviceName,
+                    RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id,
+                    Type = _DeviceType.ToList().First(),
+                    JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First())
+                };
+
+            OnDiviceCreated.InvokeAsync(newDevice);
+        }
+    }
+
+    private async void SaveEditDevice()
+    {
+        if (DeviceName != _device.Name || RoomName != _device.Room.Name || _DeviceType.ToList().First() != _device.Type)
+        {
+            _device.Name = DeviceName;
+            _device.RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id;
+            _device.Type = _DeviceType.ToList().First();
+            _device.JsonObjectConfig = GetDeivceConfig(_DeviceType.ToList().First());
+
+            //Als er 1 of meer waarden verandert zijn in de UI
+            OnDiviceEdited.InvokeAsync(_device);
+        }
+        else
+        {
+            snackbar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
+        }
+    }
+
+    private string GetDeivceConfig(DeviceType Type)
+    {
+        string Json = string.Empty;
+
+        //Maak een leeg json configuratie bestand aan voor elk type device
+        switch (_DeviceType.ToList().First())
+        {
+            case DeviceType.Lamp:
+                string Color = string.Empty;
+
+                if (Brightness)
+                {
+                    Color = "ff9800";
+                }
+
+                int Helderhied = -1;
+
+                if (Brightness)
+                {
+                    Helderhied = 0;
+                }
+                Json = JsonConvert.SerializeObject(new LampConfig { Ingeschakeld = false, Helderheid = Helderhied, Kleur = "ff9800" });
+                break;
+            case DeviceType.Televisie:
+                Json = JsonConvert.SerializeObject(new TelevisieConfig { Ingeschakeld = false, Zender = "" });
+                break;
+            case DeviceType.Wasmachine:
+                Json = JsonConvert.SerializeObject(new WasmachineConfig { Ingeschakeld = false, Programma = "" });
+                break;
+            case DeviceType.Router:
+                Json = JsonConvert.SerializeObject(new RouterConfig { Ingeschakeld = false });
+                break;
+        }
+
+        return Json;
+    }
+
+    [Parameter]
+    public EventCallback<Device> OnDiviceEdited { get; set; }
+
+    [Parameter]
+    public EventCallback<Device> OnDiviceCreated { get; set; }
+
+    [Parameter]
+    public EventCallback Close { get; set; }
+
+    private Device _device;
+
+    [Parameter]
+    public Device? device
+    {
+        set
+        {
+            if (value is not null)
+            {
+                //Zet de waarden van de device in de variable met het juiste formaat
+                _device = value;
+                DeviceName = value.Name;
+                RoomName = value.Room.Name;
+                List<DeviceType> list = new List<DeviceType>();
+                list.Add(value.Type);
+                _DeviceType = list.AsEnumerable();
+                if (value.Type == DeviceType.Lamp)
+                {
+                    var lampConfig = JsonConvert.DeserializeObject(value.JsonObjectConfig);
+                }
+                IsNewDevice = false;
+            }
+            else
+            {
+                List<DeviceType> list = new List<DeviceType>();
+                list.Add(DeviceType.Lamp);
+                _DeviceType = list.AsEnumerable();
+                IsNewDevice = true;
+            }
+        }
+    }
+
+    private List<Room> _Rooms;
+
+    [Parameter]
+    public List<Room> Rooms
+    {
+        set
+        {
+            _Rooms = value;
+        }
+    }
+}

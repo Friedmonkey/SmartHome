@@ -8,18 +8,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\**" />
+    <Content Remove="Controllers\**" />
+    <EmbeddedResource Remove="Controllers\**" />
+    <None Remove="Controllers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FastEndpoints" Version="5.34.0" />
+    <PackageReference Include="FastEndpoints.Security" Version="5.34.0" />
+    <PackageReference Include="FastEndpoints.Swagger" Version="5.34.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SmartHome.Common\SmartHome.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Database\" />
+    <ProjectReference Include="..\SmartHome.Database\SmartHome.Database.csproj" />
   </ItemGroup>
 
 </Project>

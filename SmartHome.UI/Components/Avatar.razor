@@ -1,0 +1,19 @@
+﻿<MudAvatar>
+    @GetPofileContent()
+</MudAvatar>
+
+@code {
+    [Parameter]
+    public string Username { get; set; }
+
+    [Parameter]
+    public string ProfilePicture { get; set; }
+
+    public string GetPofileContent()
+    {
+        if (string.IsNullOrEmpty(ProfilePicture))
+            return Username.First().ToString();
+        else
+            return ProfilePicture;
+    }
+}

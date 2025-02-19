@@ -1,0 +1,24 @@
+﻿@inject ProfileService profileService;
+
+@if (preferences.DarkMode)
+{
+    <MudTooltip Text="Switch to light mode">
+        <MudIconButton OnClick="Toggle" Icon="@Icons.Material.TwoTone.LightMode" Color="Color.Warning" />
+    </MudTooltip>
+}
+else
+{
+    <MudTooltip Text="Switch to dark mode">
+        <MudIconButton OnClick="Toggle" Icon="@Icons.Material.Rounded.DarkMode" Color="@Color.Warning" />
+    </MudTooltip>
+}
+
+@code {
+    [CascadingParameter(Name = "pref")]
+    public Preferences preferences { get; set; } = new();
+
+    private void Toggle()
+    {
+        profileService?.ToggleDarkMode();
+    }
+}
