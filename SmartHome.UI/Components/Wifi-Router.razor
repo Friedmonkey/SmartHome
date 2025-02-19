@@ -1,4 +1,5 @@
 ﻿@using SmartHome.Common.Api;
+@using SmartHome.Common.Models.Configs;
 @inject IDeviceService deviceService;
 
 <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
@@ -63,12 +64,6 @@
         var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_RouterConfig)));
         UpdateStatus();
     }
-
-    class RouterConfig
-    {
-        public bool Ingeschakeld { get; set; }
-    }
-
     private string _RouterName = "Unknown";
 
     [Parameter]

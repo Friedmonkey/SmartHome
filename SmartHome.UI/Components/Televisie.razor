@@ -1,11 +1,14 @@
-﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
+﻿@using SmartHome.Common.Models.Configs;
+@inject IDeviceService deviceService;
+
+<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
         <MudImage Width="150" Height="150" Src="Afbeeldingen/televisie.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
         <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@_tvName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
-        <MudSwitch @bind-Value="@_TvConfig.Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
-        <MudSelect @bind-Value="@_TvConfig.Zender" Label="Zender" Variant="Variant.Outlined">
+        <MudSwitch @bind-Value="@_televisieConfig.Ingeschakeld" @onclick="@(e => UpdateConfig(_televisieConfig.Ingeschakeld))" Label="@Status" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        <MudSelect @bind-Value="@_televisieConfig.Zender" @onchange="@(e => UpdateConfig(_televisieConfig.Ingeschakeld))" Label="Zender" Variant="Variant.Outlined">
             <MudSelectItem Value="@("NPO 1")" />
             <MudSelectItem Value="@("NPO 2")" />
             <MudSelectItem Value="@("NPO 3")" />
@@ -22,27 +25,52 @@
 </MudPaper>
 
 @code {
-    private TvConfig _TvConfig;
+    string Status = "Uitgeschakeld";
+
+    private async Task UpdateConfig(bool CheckIngeschakeld)
+    {
+        _televisieConfig.Ingeschakeld = CheckIngeschakeld;
+        var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_televisieConfig)));
+        UpdateStatus();
+    }
+
+    private void UpdateStatus()
+    {
+        if (_televisieConfig.Ingeschakeld)
+        {
+            Status = "Ingeschakeld";
+        }
+        else
+        {
+            Status = "Uitgeschakeld";
+        }
+    }
+
+    private TelevisieConfig _televisieConfig;
 
     [Parameter]
     public string Config
     {
         get
         {
-            return JsonConvert.SerializeObject(_TvConfig);
+            return JsonConvert.SerializeObject(_televisieConfig);
         }
 
         set
         {
-            _TvConfig = JsonConvert.DeserializeObject<TvConfig>(value);
+            _televisieConfig = JsonConvert.DeserializeObject<TelevisieConfig>(value);
         }
     }
 
-    class TvConfig
-    {
-        public bool Ingeschakeld { get; set; }
+    private Guid _Id = Guid.Empty;
 
-        public string Zender { get; set; }
+    [Parameter]
+    public Guid Id
+    {
+        set
+        {
+            _Id = value;
+        }
     }
 
     private string _tvName = "Unknown";

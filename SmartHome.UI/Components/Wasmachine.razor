@@ -1,10 +1,13 @@
-﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
+﻿@using SmartHome.Common.Models.Configs;
+@inject IDeviceService deviceService;
+
+<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
         <MudImage Width="150" Height="150" Src="Afbeeldingen/wasmachine.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
         <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@_WasMachineName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
-        <MudSwitch @bind-Value="@_WasConfig.Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        <MudSwitch @bind-Value="@_WasConfig.Ingeschakeld" Label="@Status" Color="Color.Dark" UncheckedColor="Color.Warning" />
         <MudSelect @bind-Value="@_WasConfig.Programma" Label="Programma" Variant="Variant.Outlined">
             <MudSelectItem Value="@("Gekleurde was")" />
             <MudSelectItem Value="@("Katoen")" />
@@ -16,7 +19,39 @@
 
 
 @code {
-    private WasMachineConfig _WasConfig;
+    string Status = "Uitgeschakeld";
+
+    private async Task UpdateConfig(bool CheckIngeschakeld)
+    {
+        _WasConfig.Ingeschakeld = CheckIngeschakeld;
+        var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_WasConfig)));
+        UpdateStatus();
+    }
+
+    private void UpdateStatus()
+    {
+        if (_WasConfig.Ingeschakeld)
+        {
+            Status = "Ingeschakeld";
+        }
+        else
+        {
+            Status = "Uitgeschakeld";
+        }
+    }
+
+    private Guid _Id = Guid.Empty;
+
+    [Parameter]
+    public Guid Id
+    {
+        set
+        {
+            _Id = value;
+        }
+    }
+
+    private WasmachineConfig _WasConfig;
 
     [Parameter]
     public string Config
@@ -28,15 +63,8 @@
 
         set
         {
-            _WasConfig = JsonConvert.DeserializeObject<WasMachineConfig>(value);
+            _WasConfig = JsonConvert.DeserializeObject<WasmachineConfig>(value);
         }
-    }
-
-    class WasMachineConfig
-    {
-        public bool Ingeschakeld { get; set; }
-
-        public string Programma { get; set; }
     }
 
     private string _WasMachineName = "Unknown";
