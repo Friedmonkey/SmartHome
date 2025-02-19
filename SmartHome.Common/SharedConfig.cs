@@ -41,7 +41,6 @@ public class SharedConfig
         }
 
         private const string RoomBase = ApiBase + "room/";
-
         public static class Room
         {
             public const string GetAllRooms = RoomBase + "GetAllRooms";

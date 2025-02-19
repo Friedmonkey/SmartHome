@@ -77,10 +77,18 @@ namespace SmartHome.Backend.Api
         {
             try
             {
-                //Verwijder room uit de database met guid
-                await _context.DbContext.Rooms.Where(d => d.Id == request.RoomGuid).ExecuteDeleteAsync();
+                //Controleer of er geen apparaten in de room bevinden
+                if (!await _context.DbContext.Devices.AnyAsync(x => x.RoomId == request.RoomGuid))
+                {
+                    //Verwijder room uit de database met guid
+                    await _context.DbContext.Rooms.Where(d => d.Id == request.RoomGuid).ExecuteDeleteAsync();
+                    return SuccessResponse.Success();
+                } else
+                {
+                    return SuccessResponse.Failed("It is not possible to delete a room that contains devices. Replace the devices to an other room!");
+                }
 
-                return SuccessResponse.Success();
+                
             }
             catch (Exception ex)
             {

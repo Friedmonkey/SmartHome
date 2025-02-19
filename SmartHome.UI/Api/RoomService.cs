@@ -4,7 +4,7 @@ using static SmartHome.Common.Api.IRoomService;
 
 namespace SmartHome.UI.Api
 {
-    public class RoomService
+    public class RoomService : IRoomService
     {
         private readonly ApiService _api;
 
@@ -18,7 +18,7 @@ namespace SmartHome.UI.Api
             return await _api.Get<RoomListResponse>(SharedConfig.Urls.Room.GetAllRooms, request);
         }
 
-        public async Task<SuccessResponse> UpdateRoom(UpdateRoomRequest request)
+        public async Task<SuccessResponse> UpdateRoomName(UpdateRoomRequest request)
         {
             return await _api.Get<SuccessResponse>(SharedConfig.Urls.Room.UpdateRoom, request);
         }
