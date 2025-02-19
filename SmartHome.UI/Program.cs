@@ -47,11 +47,11 @@ public class Program
         builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
+        builder.Services.AddScoped<IRoomService, RoomService>();
 
         //keep track of selected smarthome
         builder.Services.AddScoped<NavMenu>();
         builder.Services.AddScoped<SmartHomeState>();
-        
         
 
         var application = builder.Build();

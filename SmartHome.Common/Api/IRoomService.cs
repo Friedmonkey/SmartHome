@@ -1,22 +1,21 @@
 ﻿using SmartHome.Common.Models;
+using SmartHome.Common.Models.Entities;
 
 namespace SmartHome.Common.Api;
 
+public record RoomListResponse(List<Room> Rooms) : Response<RoomListResponse>;
 
 public interface IRoomService
 {
-    public record Response(object Room) : Response<Response>;
-    public record RoomsResponse(List<object> Rooms) : Response<RoomsResponse>;
-    
-    public record CreateRequest(string Name, Guid SmartHomeId);
+    public record RoomListRequest(Guid HomeGuid);
+    Task<RoomListResponse> GetAllRooms(RoomListRequest request);
 
-    public Task<SuccessResponse> Create(CreateRequest request);
+    public record UpdateRoomRequest(Room room);
+    Task<SuccessResponse> UpdateRoomName(UpdateRoomRequest request);
 
-    public Task<RoomsResponse> GetRoomsOfSmartHome(GuidRequest request); // return list of Rooms
-    
-    public Task<SuccessResponse> Delete(GuidRequest request);
-    
-    public Task<SuccessResponse> Update(CreateRequest request);
+    public record CreateRoomRequest(Room room);
+    Task<SuccessResponse> CreateRoom(CreateRoomRequest request);
 
-
+    public record DeleteRoomRequest(Guid RoomGuid);
+    Task<SuccessResponse> DeleteRoom(DeleteRoomRequest request);
 }

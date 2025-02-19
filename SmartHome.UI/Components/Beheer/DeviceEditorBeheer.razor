@@ -1,66 +1,65 @@
 ﻿@using SmartHome.Common.Models.Enums;
 @using SmartHome.Common.Models.Configs;
+@using SmartHome.UI.Pages.Beheer
 @inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
 
-<MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center my-4 border-solid border-2 mud-border-primary pa-4" Style="width: 100%; background-color: white;" Elevation="0">
-    <MudPaper class="d-flex flex-wrap align-center gap-1 justify-space-between" Style="width: 90%; background-color: transparent;" Elevation="0">
-        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
-            <MudText Typo="Typo.h4">Device Name</MudText>
-            <MudTextField @bind-Value="@DeviceName" Label="Name" Variant="Variant.Outlined"></MudTextField>
-        </MudPaper>
+<MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%; background-color: white;" Elevation="0">
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+        <MudText Typo="Typo.h4">Device Name</MudText>
+        <MudTextField @bind-Value="@DeviceName" Label="Name" Variant="Variant.Outlined"></MudTextField>
+    </MudPaper>
 
-        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
-            <MudText Class="mb-4" Typo="Typo.h4">Room</MudText>
-            <MudSelect @bind-Value="@RoomName" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
-                @foreach (Room room in _Rooms)
-                {
-                    //Zet alle rooms in het dropdown menu
-                    <MudSelectItem Value="@room.Name"></MudSelectItem>
-                }
-            </MudSelect>
-        </MudPaper>
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+        <MudText Class="mb-4" Typo="Typo.h4">Room</MudText>
+        <MudSelect @bind-Value="@RoomName" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
+            @foreach (Room room in _Rooms)
+            {
+                //Zet alle rooms in het dropdown menu
+                <MudSelectItem Value="@room.Name"></MudSelectItem>
+            }
+        </MudSelect>
+    </MudPaper>
 
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+        <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
+        <MudSelect Class="mb-4" T="DeviceType" ValueChanged="DeviceTypeChanche" SelectedValues="@_DeviceType" Label="Select Type" Variant="Variant.Outlined">
+            <MudSelectItem Value="@DeviceType.Lamp">
+                <img src="/Afbeeldingen/licht-aan.png" height="14" class="mr-1" /> Lamp
+            </MudSelectItem>
+            <MudSelectItem Value="@DeviceType.Televisie">
+                <img src="/Afbeeldingen/televisie.png" height="14" class="mr-1" /> Televisie
+            </MudSelectItem>
+            <MudSelectItem Value="@DeviceType.Wasmachine">
+                <img src="/Afbeeldingen/wasmachine.png" height="14" class="mr-1" /> Wasmachine
+            </MudSelectItem>
+            <MudSelectItem Value="@DeviceType.Router">
+                <img src="/Afbeeldingen/router.png" height="14" class="mr-1" /> Router
+            </MudSelectItem>
+        </MudSelect>
+    </MudPaper>
+    @if (_DeviceType.ToList().ToList().First() == DeviceType.Lamp)
+    {
+        //Extra UI opties voor het type Lamp
         <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
-            <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
-            <MudSelect Class="mb-4" T="DeviceType" ValueChanged="DeviceTypeChanche" SelectedValues="@_DeviceType" Label="Select Type" Variant="Variant.Outlined">
-                <MudSelectItem Value="@DeviceType.Lamp">
-                    <img src="/Afbeeldingen/licht-aan.png" height="14" class="mr-1" /> Lamp
-                </MudSelectItem>
-                <MudSelectItem Value="@DeviceType.Televisie">
-                    <img src="/Afbeeldingen/televisie.png" height="14" class="mr-1" /> Televisie
-                </MudSelectItem>
-                <MudSelectItem Value="@DeviceType.Wasmachine">
-                    <img src="/Afbeeldingen/wasmachine.png" height="14" class="mr-1" /> Wasmachine
-                </MudSelectItem>
-                <MudSelectItem Value="@DeviceType.Router">
-                    <img src="/Afbeeldingen/router.png" height="14" class="mr-1" /> Router
-                </MudSelectItem>
-            </MudSelect>
-        </MudPaper>
-        @if (_DeviceType.ToList().ToList().First() == DeviceType.Lamp)
-        {
-            //Extra UI opties voor het type Lamp
-            <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
-                <MudText Class="mb-4" Typo="Typo.h4">ConfigType</MudText>
-                <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Style="background-color: transparent;" Elevation="0">
-                    <MudCheckBox @bind-Value="@Brightness" Label="Enable Brightness"></MudCheckBox>
-                    <MudCheckBox @bind-Value="@Color" Label="Enable Color"></MudCheckBox>
-                </MudPaper>
+            <MudText Class="mb-4" Typo="Typo.h4">ConfigType</MudText>
+            <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Style="background-color: transparent;" Elevation="0">
+                <MudCheckBox @bind-Value="@Brightness" Label="Enable Brightness"></MudCheckBox>
+                <MudCheckBox @bind-Value="@Color" Label="Enable Color"></MudCheckBox>
             </MudPaper>
-        }
-        <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
-            <MudButton @onclick="CloseMenu" Class="mx-5 my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
-            <MudSpacer />
-            @if (IsNewDevice)
-            {
-                <MudButton @onclick="CreateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
-            }
-            else
-            {
-                <MudButton @onclick="UpdateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
-            }
         </MudPaper>
+    }
+    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
+        <MudButton @onclick="CloseMenu" Class="mx-5 my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
+        <MudSpacer />
+        @if (IsNewDevice)
+        {
+            <MudButton @onclick="CreateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+        }
+        else
+        {
+            <MudButton @onclick="UpdateDevice" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+        }
     </MudPaper>
 </MudPaper>
 
@@ -71,6 +70,7 @@
     private bool Brightness = false;
     private bool Color = false;
     private bool IsNewDevice = true;
+    private Guid SmartHomeId;
 
     private async Task UpdateDevice()
     {
@@ -98,7 +98,6 @@
         {
             snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
         }
-
     }
 
     private async Task CreateDevice()
@@ -136,7 +135,7 @@
     private async void CloseMenu()
     {
         //Verzoek om shcerm te sluiten
-        MudDialog.Close(DialogResult.Ok(true));
+        MudDialog.Close(DialogResult.Ok(""));
     }
 
     private void RoomChanche(Room selected)
@@ -151,11 +150,6 @@
         list.Add(selected);
         _DeviceType = list.AsEnumerable();
         StateHasChanged();
-    }
-
-    private async void SaveEditDevice()
-    {
-        
     }
 
     private string GetDeivceConfig(DeviceType Type)

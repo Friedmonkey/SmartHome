@@ -2,17 +2,14 @@
 @inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
 @inject IDialogService DialogService;
+@inject SmartHomeState smartHomeState;
 
-<MudDialog>
-    <div style="width: 500px; height: 500px; background-color: red;"></div>
-</MudDialog>
-
-<MudDropContainer T="Device" Items="_deviceList" ItemsSelector="@((Device,dropzone) => Device.Room.Id.ToString() == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
+<MudDropContainer T="Device" Items="deviceList" ItemsSelector="@((Device,dropzone) => Device.Room.Id.ToString() == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
     <ChildContent>
-        @for (int i = 0; i < _roomList.Count; i++)
+        @for (int i = 0; i < roomList.Count; i++)
         {
-            string Name = _roomList[i].Name;
-            <MudDropZone T="Device" Identifier="@_roomList[i].Id.ToString()" Style="background-color: white;" Class="flex-grow-1">
+            string Name = roomList[i].Name;
+            <MudDropZone T="Device" Identifier="@roomList[i].Id.ToString()" Style="background-color: white;" Class="flex-grow-1">
                 <MudText Typo="Typo.h6" Class="my-3 ml-2">@Name</MudText>
             </MudDropZone>
         }
@@ -23,52 +20,63 @@
             <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Room : </strong>@context.Room.Name</MudText>
             <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Type : </strong>@context.Type</MudText>
             <MudSpacer />
-            <MudButton @onclick="@(e => OpenDeviceEdit(context))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Primary">Edit</MudButton>
+            <MudButton @onclick="@(e => OpenDeviceEditDialog(context))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Primary">Edit</MudButton>
             <MudButton @onclick="@(e => DeleteDevice(context.Id))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
         </MudPaper>
     </ItemRenderer>
 </MudDropContainer>
 <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4 mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
     <MudSpacer />
-    <MudButton @onclick="@(e => OpenDeviceEdit(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New Device</MudButton>
+    <MudButton @onclick="@(e => OpenDeviceEditDialog(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New Device</MudButton>
     <MudButton @onclick="UpdateRooms" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary">Save Rooms</MudButton>
 </MudPaper>
+
 @code {
-    [CascadingParameter]
-    public IMudDialogInstance MudDialog { get; set; }
-
-    private bool IsEditOrNewDevice = false;
+    private List<Device> deviceList = new List<Device>();
+    private List<Room> roomList = new List<Room>();
     private Device deviceToEditOrCreate;
+    private Guid _SmartHomeId;
 
-    private async void OpenDeviceEdit(Device _deviceToEditOrCreate)
+    protected override async Task OnInitializedAsync()
     {
-        
-
-        if (IsEditOrNewDevice == false)
+        //haal de devices uit de database met de smarthome Guid
+        var result = await deviceService.GetAllDevices(new(_SmartHomeId));
+        if (result.WasSuccess())
         {
-            //zet de device en type aanpassing van het device in variable en refresh html om Device aanpassing menu zichtbaar te maken
-            var dialogParameter = new DialogParameters<DeviceAanpassenBeheer>();
-            dialogParameter.Add(p => p.device, _deviceToEditOrCreate);
-            dialogParameter.Add(p => p.Rooms, _roomList);
-
-            var dialog = await DialogService.ShowAsync<DeviceAanpassenBeheer>("Nieuw Apparaat", dialogParameter);
-            var result = await dialog.Result;
-
-            deviceToEditOrCreate = _deviceToEditOrCreate;
-            IsEditOrNewDevice = true;
+            //Zet de apparaten in een lijst
+            deviceList = result.Devices;
+            roomList = result.Devices.Select(r => r.Room).DistinctBy(r => r.Id).ToList();
+            StateHasChanged();
         }
         else
         {
-            //Wanneer DeviceAanpaseBeheer al open is
-            snackBar.Add("The Edit Field is already open. Close it first!!!", Severity.Warning);
+            snackBar.Add("Error when get the devices from the database!", Severity.Error);
         }
+    }
+
+    private async void OpenDeviceEditDialog(Device _deviceToEditOrCreate)
+    {
+        //zet de device en type aanpassing van het device in variable en refresh html om Device aanpassing menu zichtbaar te maken
+        var dialogParameter = new DialogParameters<DeviceEditorBeheer>();
+        dialogParameter.Add(p => p.device, _deviceToEditOrCreate);
+        dialogParameter.Add(p => p.Rooms, roomList);
+
+        string Title = "New Device";
+        if (_deviceToEditOrCreate is not null)
+        {
+            Title = "Edit Device";
+        }
+
+        //Open de dialog popup voor het invoeren van device gegevens
+        var dialog = await DialogService.ShowAsync<DeviceEditorBeheer>(Title, dialogParameter);
+        var result = await dialog.Result;
     }
 
     private async Task UpdateRooms()
     {
         //Update device naar database met de api
         List<Device> ChanchedRooms = new List<Device>();
-        ChanchedRooms = _deviceList.Where(c => c.RoomId != c.Room.Id).ToList();
+        ChanchedRooms = deviceList.Where(c => c.RoomId != c.Room.Id).ToList();
         var result = await deviceService.UpdateDevicesRange(new(ChanchedRooms));
 
         if (result.WasSuccess())
@@ -89,7 +97,7 @@
         if (result.WasSuccess())
         {
             //Verwijder lijst uit de UI
-            _deviceList.Remove(_deviceList.Where(d => d.Id == deviceGuid).ToList().First());
+            deviceList.Remove(deviceList.Where(d => d.Id == deviceGuid).ToList().First());
             snackBar.Add("Device is succesfully deleted!", Severity.Success);
         }
         else
@@ -101,19 +109,15 @@
     private void ItemUpdated(MudItemDropInfo<Device> dropItem)
     {
         //Pas de room aan in de _deviceList van de Drag en Drop container
-        dropItem.Item.Room = _roomList.Where(r => r.Id == Guid.Parse(dropItem.DropzoneIdentifier)).ToList().First();
+        dropItem.Item.Room = roomList.Where(r => r.Id == Guid.Parse(dropItem.DropzoneIdentifier)).ToList().First();
     }
 
-    private List<Device> _deviceList;
-    private List<Room> _roomList;
-
     [Parameter]
-    public List<Device> DevicesList
+    public Guid SmartHomeId
     {
         set
         {
-            _deviceList = value;
-            _roomList = value.Select(r => r.Room).DistinctBy(r => r.Id).ToList();
+            _SmartHomeId = value;
         }
     }
 }

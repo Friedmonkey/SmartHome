@@ -169,16 +169,6 @@ public class DeviceService : IDeviceService
     }
 
 
-    public async Task<RoomListResponse> GetRoomsByHouseId(RoomListRequest request)
-    {
-        var result = await _context.DbContext.Rooms.ToListAsync();
-
-        if (result == null)
-            return RoomListResponse.Failed("Not Devices found in DataBase");
-        else
-            return new RoomListResponse(result);
-    }
-
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
         var result = await _context.DbContext.Devices
