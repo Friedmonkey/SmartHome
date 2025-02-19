@@ -1,4 +1,7 @@
-﻿<MudDrawer Breakpoint="Breakpoint.Md"
+﻿@inject NavigationManager navManager;
+@inject ISmartHomeService smartHomeService;
+
+<MudDrawer Breakpoint="Breakpoint.Md"
 Elevation="2"
 @bind-Open="@_open"
 Style="overflow:hidden"
@@ -12,8 +15,14 @@ Variant="@DrawerVariant.Mini">
         @if (_open && CurrentSmartHome is not null)
         {
             <div class="d-flex flex-row">
-                <MudIcon Icon="@Icons.Material.Rounded.Home"/>
-                <MudText>@CurrentSmartHome.Name</MudText>
+                <MudIconButton Icon="@Icons.Material.Rounded.Home" OnClick="@(() => navManager.NavigateTo("/smarthome"))"/>
+                @* <div class="d-flex flex-column"> *@
+                @* <MudText>@CurrentSmartHome.Name</MudText> *@
+                @*                     <MudSelect @bind-Value="CurrentSmartHome" Dense="true">
+
+                    </MudSelect> *@
+                @* </div> *@
+                <MudAutocomplete ValueChanged="OnValueChanged" Value="CurrentSmartHome" T="SmartHomeModel" ToStringFunc="@(shm => shm.Name)" Label="Selected SmartHome" SearchFunc="@Search" ShowProgressIndicator="true" />
             </div>
         }
 
@@ -39,6 +48,20 @@ Variant="@DrawerVariant.Mini">
 @code {
     [CascadingParameter(Name = "CurrentSmartHome")]
     public SmartHomeModel? CurrentSmartHome { get; set; }
+
+    public async Task<IEnumerable<SmartHomeModel>> Search(string value, CancellationToken token)
+    {
+        var homes = await smartHomeService.GetJoinedSmartHomes(new());
+        homes.EnforceSuccess();
+        return homes.homes;
+    }
+
+    private void OnValueChanged(SmartHomeModel newSelected)
+    {
+        CurrentSmartHome = newSelected;
+        navManager.NavigateTo($"/smarthome/{newSelected.Id}/overview");
+        StateHasChanged();
+    }
 
     bool _open = false;
 

@@ -36,8 +36,11 @@
                             </ActivatorContent>
                             <ChildContent>
                                 <MudMenuItem Label="Profile" />
-                                <MudMenuItem Label="About" />
                                 <MudMenuItem Label="Clear cache" OnClick="ClearCache"/>
+                                @if (CurrentSmartHome is not null)
+                                {
+                                    <MudMenuItem Label="Exit home" Href="/smarthome" />
+                                }
                                 <MudMenuItem Label="Logout" OnClick="() => NavMenu.Logout(navManager)" />
                             </ChildContent>
                         </MudMenu>
@@ -72,6 +75,7 @@
             var smartHome = await apiService.GetSmartHomeById(new((Guid)guid!));
             if (smartHome.EnsureSuccess(snackBar))
             {
+                var oldGuid = CurrentSmartHome.Id
                 CurrentSmartHome = smartHome.smartHome;
                 return;
             }

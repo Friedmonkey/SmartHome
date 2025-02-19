@@ -1,6 +1,4 @@
-﻿@inject SmartHomeState smartHomeState
-
-<MudNavMenu>
+﻿<MudNavMenu>
     @if (CurrentSmartHome is not null)
     {
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/overview")" Icon="@Icons.Material.Filled.Dashboard">
