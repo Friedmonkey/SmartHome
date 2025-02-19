@@ -10,29 +10,23 @@
     <MudTabPanel Icon="@Icons.Material.Filled.AccessTime" Text="Routine"/>
 </MudTabs>
 
-@{
-    List<Device> _deviceList = new List<Device>();
-    _deviceList = deviceList;
-}
-
-<DeviceBeheer DevicesList="_deviceList"></DeviceBeheer>
+<DeviceBeheer />
 
 @code {
-    List<Device> deviceList = new List<Device>();
+    // List<Device> deviceList = new List<Device>();
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadDevices();
-    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await LoadDevices();
+    // }
 
-    private async Task LoadDevices()
-    {
-        var Devices = await deviceService.GetAllDevices(new());
-        if (Devices.WasSuccess())
-        {
-            //Zet de apparaten in een lijst
-            deviceList = Devices.Devices;
-            StateHasChanged();
-        }
-    }
+    // private async Task LoadDevices()
+    // {
+    //     var Devices = await deviceService.GetAllDevices(new());
+    //     if (Devices.WasSuccess())
+    //     {
+    //         //Zet de apparaten in een lijst
+    //         deviceList = Devices.Devices;
+    //     }
+    // }
 }

@@ -33,7 +33,6 @@ public class ApiContext
         _backendConfig = backendConfig;
     }
 
-    [Obsolete("Try using this less and less, for common stuff make a context for it, see AuthContext and DeviceContext")]
     public SmartHomeContext DbContext => _dbContext;
     public UserManager<AuthAccount> UserManager => _userManager;
     public SignInManager<AuthAccount> SignInManager => _signInManager;

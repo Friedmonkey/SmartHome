@@ -57,12 +57,9 @@ namespace SmartHome.Backend.Api
         }
         public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
         {
-            var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.Id);
+            var smartUserInvite = await _ctx.Auth.GetPendingInvite(request.Id);
 
-            if (smartUser.Role != UserRole.InvitationPending)
-                return SuccessResponse.Failed("You dont have an invitation.");
-
-            smartUser.Role = UserRole.User;
+            smartUserInvite.Role = UserRole.User;
 
             await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
