@@ -17,19 +17,19 @@ public class ApiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ISnackbar _snackbarService;
     private readonly IJwtStoreService _jwtStoreService;
-    private readonly SelectedSmartHomeService _smartHomeState;
+    private readonly SelectedSmartHomeService _selectedSmartHomeService;
     private readonly JwtAuthStateProvider _jwtAuthStateProvider;
     private readonly FrontendConfig _config;
     private readonly MemoryCacheService _memoryCacheService;
 
-    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SelectedSmartHomeService smartHomeState, MemoryCacheService memoryCacheService)
+    public ApiService(IHttpClientFactory httpClientFactory, ISnackbar snackbarService, FrontendConfig config, IJwtStoreService jwtStoreService, JwtAuthStateProvider jwtAuthStateProvider, SelectedSmartHomeService selectedSmartHomeService, MemoryCacheService memoryCacheService)
     {
         _httpClientFactory = httpClientFactory;
         _snackbarService = snackbarService;
         _config = config;
         _jwtStoreService = jwtStoreService;
         _jwtAuthStateProvider = jwtAuthStateProvider;
-        _smartHomeState = smartHomeState;
+        _selectedSmartHomeService = selectedSmartHomeService;
         _memoryCacheService = memoryCacheService;
     }
 
@@ -111,7 +111,7 @@ public class ApiService
                 if (data is SmartHomeRequest req)
                 {
                     bool success = true;
-                    Guid? smartHomeGuid = _smartHomeState.GetCurrentSmartHomeGuid();
+                    Guid? smartHomeGuid = _selectedSmartHomeService.GetCurrentSmartHomeGuid();
                     if (!success || smartHomeGuid is null)
                     {
                         throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +

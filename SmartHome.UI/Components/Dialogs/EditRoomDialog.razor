@@ -1,0 +1,110 @@
+﻿@inject IRoomService roomService;
+@inject ISnackbar snackBar;
+
+<MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
+        <MudText Typo="Typo.h4">Room Name</MudText>
+        <MudTextField @bind-Value="@roomName" Label="Name" Variant="Variant.Outlined"></MudTextField>
+    </MudPaper>
+
+    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
+        <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
+        <MudSpacer />
+        @if (IsNewRoom)
+        {
+            <MudButton @onclick="CreateRoom" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+        }
+        else
+        {
+            <MudButton @onclick="UpdateRoom" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+        }
+    </MudPaper>
+</MudPaper>
+
+@code {
+    bool IsNewRoom = false;
+    string roomName = "";
+    private Room _room;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private async void CloseMenu()
+    {
+        //Verzoek om shcerm te sluiten
+        MudDialog.Close(DialogResult.Ok("Close"));
+    }
+
+    private async Task CreateRoom()
+    {
+        if (roomName == string.Empty)
+        {
+            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
+            return;
+        }
+
+        //Als alle waarden zijn ingevuld in de UI
+        Room newRoom = new Room();
+        newRoom.Name = roomName;
+        //newRoom.SmartHomeId = _smartHomeId;
+
+        //Maar een nieuwe room aan in de database met de api
+        var result = await roomService.CreateRoom(new(newRoom));
+        result.Show(snackBar, "Device is succesfully created!", Severity.Success);
+        if (result.WasSuccess())
+        {
+            MudDialog.Close(DialogResult.Ok(newRoom));
+        }
+    }
+
+
+    private async Task UpdateRoom()
+    {
+        if (roomName == _room.Name)
+        {
+            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
+            return;
+        }
+        if (roomName == string.Empty)
+        {
+            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
+            return;
+        }
+
+        //Als er 1 of meer waarden verandert zijn in de UI
+        Room newroom = _room;
+        newroom.Name = roomName;
+
+        //Update room naar database met de api
+        var result = await roomService.UpdateRoomName(new(newroom));
+        result.Show(snackBar, "Device is succesfully updated!", Severity.Success);
+
+        if (result.WasSuccess())
+        {
+            MudDialog.Close(DialogResult.Ok(newroom));
+        }
+    }
+
+    [Parameter]
+    public Room room
+    {
+        set
+        {
+            //Kijk of de meegegeven room geen waarde heeft
+            if (value is not null)
+            {
+                _room = value;
+                roomName = value.Name;
+            }
+            else
+            {
+                IsNewRoom = true;
+            }
+        }
+
+        get
+        {
+            return _room;
+        }
+    }
+}

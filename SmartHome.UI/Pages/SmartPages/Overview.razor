@@ -2,6 +2,7 @@
 @inherits SmartHomeGuidPage
 
 @inject IDeviceService deviceService;
+@inject IRoomService roomService;
 @inject ISnackbar snackBar;
 
 @if (deviceList.Count <= 0)
@@ -29,10 +30,10 @@
                             <Lamp Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" config="@roomDeviceslist[d].JsonObjectConfig"></Lamp>
                             break;
                         case DeviceType.Televisie:
-                            <Televisie Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Televisie>
+                            <Televisie Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Televisie>
                             break;
                         case DeviceType.Wasmachine:
-                            <Wasmachine Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wasmachine>
+                            <Wasmachine Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wasmachine>
                             break;
                         case DeviceType.Router:
                             <Wifi_Router Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wifi_Router>
@@ -54,7 +55,7 @@
         if (devices.EnsureSuccess(snackBar))
             deviceList = devices.Devices;
 
-        var rooms = await deviceService.GetAllRooms(new());
+        var rooms = await roomService.GetAllRooms(new());
         if (rooms.EnsureSuccess(snackBar))
             roomList = rooms.Rooms;
     }

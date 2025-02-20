@@ -5,15 +5,19 @@
             <p class="menu-wrapper">Overview</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/devices")" Icon="@Icons.Material.Filled.Devices">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/devices")" Icon="@Icons.Material.Filled.Devices">
             <p class="menu-wrapper">Devices</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/logs")" Icon="@Icons.Material.Filled.List">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/rooms")" Icon="@Icons.Material.Filled.SensorDoor">
+            <p class="menu-wrapper">Rooms</p>
+        </MudNavLink>
+
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/logs")" Icon="@Icons.Material.Filled.List">
             <p class="menu-wrapper">Logs</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/routines")" Icon="@Icons.Material.Filled.Autorenew">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/routines")" Icon="@Icons.Material.Filled.Autorenew">
             <p class="menu-wrapper">Routines</p>
         </MudNavLink>
 
