@@ -115,7 +115,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class CreateDeviceEndpoint : BasicEndpointBase<CreateDeviceRequest, SuccessResponse>
+    public class CreateDeviceEndpoint : BasicEndpointBase<CreateDeviceRequest, DeviceCreateResponse>
     {
         public required IDeviceService Service { get; set; }
         public override void Configure()
@@ -132,7 +132,7 @@ namespace SmartHome.Backend.FastEndpoints
             }
             catch (Exception ex)
             {
-                await SendAsync(SuccessResponse.Error(ex));
+                await SendAsync(DeviceCreateResponse.Error(ex));
             }
         }
     }

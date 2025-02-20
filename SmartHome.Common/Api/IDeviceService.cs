@@ -10,6 +10,8 @@ namespace SmartHome.Common.Api
 {
     public record DeviceListResponse(List<Device> Devices) : Response<DeviceListResponse>;
 
+    public record DeviceCreateResponse(Guid DeviceGuid) : Response<DeviceCreateResponse>;
+
     public interface IDeviceService
     {
         ///Maak een Response aan
@@ -28,8 +30,8 @@ namespace SmartHome.Common.Api
         public record DeleteDeviceRequest(Guid DeviceGuid);
         Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request);
 
-        public record CreateDeviceRequest(Device device);
-        Task<SuccessResponse> CreateDevice(CreateDeviceRequest request);
+        public record CreateDeviceRequest(Device device, Guid SmartHomeId);
+        Task<DeviceCreateResponse> CreateDevice(CreateDeviceRequest request);
 
         public record UpdateDeviceConfigRequest(Guid DeviceId, string ConfigJson);
         Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request);

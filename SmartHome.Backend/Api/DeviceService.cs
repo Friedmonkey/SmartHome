@@ -136,6 +136,9 @@ public class DeviceService : IDeviceService
             //Verwijder device uit de database met guid
             await _context.DbContext.Devices.Where(d => d.Id == request.DeviceGuid).ExecuteDeleteAsync();
 
+            //Verwidjer alle user acces met het device id
+            await _context.DbContext.DeviceAccesses.Where(d => d.DeviceId == request.DeviceGuid).ExecuteDeleteAsync();
+
             return SuccessResponse.Success();
         }
         catch (Exception ex)
@@ -144,7 +147,7 @@ public class DeviceService : IDeviceService
         }
     }
 
-    public async Task<SuccessResponse> CreateDevice(CreateDeviceRequest request)
+    public async Task<DeviceCreateResponse> CreateDevice(CreateDeviceRequest request)
     {
         try
         {
@@ -155,16 +158,31 @@ public class DeviceService : IDeviceService
                 await _context.DbContext.Devices.AddAsync(request.device);
                 await _context.DbContext.SaveChangesAsync();
 
-                return SuccessResponse.Success();
+                //Haal alle smartusers op in de home
+                var SmartUserIdList = await _context.DbContext.SmartUsers.Where(u => u.SmartHomeId == request.SmartHomeId).Select(u => u.Id).ToListAsync();
+
+                //Geef alle users in de home acces voor het nieuwe apparaat
+                foreach(Guid SmartUserId in SmartUserIdList)
+                {
+                    DeviceAccess deviceAccess = new DeviceAccess();
+                    deviceAccess.DeviceId = request.device.Id;
+                    deviceAccess.SmartUserId = SmartUserId;
+
+                    await _context.DbContext.DeviceAccesses.AddAsync(deviceAccess);
+                }
+
+                await _context.DbContext.SaveChangesAsync();
+
+                return new DeviceCreateResponse(request.device.Id);
             }
             else
             {
-                return SuccessResponse.Failed("There is already a device with the same name!!");
+                return DeviceCreateResponse.Failed("There is already a device with the same name!!");
             }
         }
         catch (Exception ex)
         {
-            return SuccessResponse.Failed(ex.Message);
+            return DeviceCreateResponse.Failed(ex.Message);
         }
     }
 

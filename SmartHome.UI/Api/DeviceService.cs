@@ -38,9 +38,9 @@ public class DeviceService : IDeviceService
         return await _api.Delete<SuccessResponse>(SharedConfig.Urls.Device.DeleteDevice, request);
     }
 
-    public async Task<SuccessResponse> CreateDevice(CreateDeviceRequest request)
+    public async Task<DeviceCreateResponse> CreateDevice(CreateDeviceRequest request)
     {
-        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.CreaateDevice, request);
+        return await _api.Post<DeviceCreateResponse>(SharedConfig.Urls.Device.CreaateDevice, request);
     }
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {

@@ -66,6 +66,7 @@
         var dialogParameter = new DialogParameters<DeviceEditorBeheer>();
         dialogParameter.Add(p => p.device, _deviceToEditOrCreate);
         dialogParameter.Add(p => p.Rooms, roomList);
+        dialogParameter.Add(p => p.SmartHomeId, _SmartHomeId);
 
         string Title = "New Device";
         if (_deviceToEditOrCreate is not null)

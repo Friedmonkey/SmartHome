@@ -70,7 +70,7 @@
     private bool BrightnessEnable = false;
     private bool ColorEnabled = false;
     private bool IsNewDevice = true;
-    private Guid SmartHomeId;
+    private Guid _SmartHomeId;
 
     private async Task UpdateDevice()
     {
@@ -123,7 +123,9 @@
                 };
 
             //Maar een nieuwe device aan in de database met de api
-            var result = await deviceService.CreateDevice(new(newDevice));
+            var result = await deviceService.CreateDevice(new(newDevice, _SmartHomeId));
+
+            newDevice.Id = result.DeviceGuid;
 
             if (result.WasSuccess())
             {
@@ -197,6 +199,19 @@
         }
 
         return Json;
+    }
+
+    [Parameter]
+    public Guid SmartHomeId
+    {
+        set
+        {
+            _SmartHomeId = value;
+        }
+
+        get {
+            return _SmartHomeId;
+        }
     }
 
     private Device _device;
