@@ -7,62 +7,24 @@
 @inject MemoryCacheService cacheService;
 
 <MudButton OnClick="() => createDialogVisible = true">Create</MudButton>
-<MudExpansionPanel Expanded="true" Class="mt-2">
-    <TitleContent>
-        <MudText>Joined homes</MudText>
-        <MudButton OnClick="RefreshJoined">Refresh</MudButton>
-    </TitleContent>
-    <ChildContent>
-        @if (joinedSmartHomes.Count == 0)
-        {
-            <MudText>You are not part of any SmartHome, Create one or accept any invites</MudText>
-        }
-        <MudGrid>
-            @foreach (var smartHome in joinedSmartHomes)
-            {
-                <MudItem>
-                    <SmartHomeCard Home="smartHome" />
-                </MudItem>
-            }
-        </MudGrid>
-    </ChildContent>
-</MudExpansionPanel>
+<HomeCollection Title="Joined homes" OnRefreshClick="RefreshJoined" SmartHomes="joinedSmartHomes" EmptyText="You are not part of any SmartHome, Create one or accept any invites" />
 <MudDivider />
-<MudExpansionPanel Expanded="true" Class="mt-2">
-    <TitleContent>
-        <MudText>Invited homes</MudText>
-        <MudButton OnClick="RefreshInvited">Refresh</MudButton>
-    </TitleContent>
-    <ChildContent>
-        @if (joinedSmartHomes.Count == 0)
-        {
-            <MudText>You have no pending invites.</MudText>
-        }
-        <MudGrid>
-            @foreach (var smartHome in invitedSmartHomes)
-            {
-                <MudItem>
-                    <SmartHomeCard Home="smartHome" IsInvite="true" />
-                </MudItem>
-            }
-        </MudGrid>
-    </ChildContent>
-</MudExpansionPanel>
+<HomeCollection Title="Invited homes" OnRefreshClick="RefreshInvited" SmartHomes="invitedSmartHomes" IsInvite="true" EmptyText="You have no pending invites." />
 
-<MudDialog @bind-Visible="createDialogVisible">
+<MudDialog Style="width: 80%" @bind-Visible="createDialogVisible">
     <TitleContent>
         <MudText>Create new SmartHome</MudText>
     </TitleContent>
     <DialogContent>
-        <MudText>SmartHome name:</MudText>
-        <MudTextField T="string" Label="Name" @bind-Value="createName" />
-        <MudText>SmartHome wifi name:</MudText>
-        <MudTextField T="string" Label="Name" @bind-Value="wifiName" />
-        <MudText>SmartHome wifi password:</MudText>
-        <MudTextField T="string" Label="Name" @bind-Value="wifiPassword" />
+        <div class="d-flex flex-column gap-2">
+            <MudTextField T="string" Label="SmartHome name:" @bind-Value="createName" />
+            <MudTextField T="string" Label="SmartHome wifi name:" @bind-Value="wifiName" />
+            <MudTextField T="string" Label="SmartHome wifi password:" @bind-Value="wifiPassword" />
+        </div>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="CreateSmartHome">Create</MudButton>
+        <MudButton Variant="Variant.Outlined" OnClick="() => createDialogVisible = false">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="CreateSmartHome">Create</MudButton>
     </DialogActions>
 </MudDialog>
 

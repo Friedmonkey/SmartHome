@@ -3,7 +3,13 @@
 @inject MemoryCacheService cacheService;
 @inject ISnackbar snackBar;
 
-<MudCard Elevation="11">
+<style>
+    .SmartHomeCard {
+        background-color: var(--mud-palette-drawer-background) !important;
+    }
+</style>
+
+<MudCard Class="SmartHomeCard" Elevation="5">
     <MudCardHeader Class="mx-auto">
         <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Home" />
     </MudCardHeader>
