@@ -50,7 +50,6 @@ public class Program
         builder.Services.AddScoped<AuthContext>();
         builder.Services.AddScoped<ApiContext>();
         builder.Services.AddScoped<IAccountService, AccountService>();
-        builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
 

@@ -6,7 +6,13 @@
 @inject NavigationManager navManager;
 @inject MemoryCacheService cacheService;
 
-<MudButton OnClick="() => createDialogVisible = true">Create</MudButton>
+<MudButton 
+    StartIcon="@Icons.Material.Rounded.AddCircle"  IconSize="Size.Large" 
+    Variant="Variant.Filled" Color="Color.Primary"
+    OnClick="() => createDialogVisible = true">
+    Create new smartHome
+</MudButton>
+
 <HomeCollection Title="Joined homes" OnRefreshClick="RefreshJoined" SmartHomes="joinedSmartHomes" EmptyText="You are not part of any SmartHome, Create one or accept any invites" />
 <MudDivider />
 <HomeCollection Title="Invited homes" OnRefreshClick="RefreshInvited" SmartHomes="invitedSmartHomes" IsInvite="true" EmptyText="You have no pending invites." />
@@ -74,9 +80,11 @@
     {
         var request = new CreateSmartHomeRequest(createName, wifiName, wifiPassword);
         var result = await smartHomeService.CreateSmartHome(request);
-        result.Show(snackBar, "Smart home created!");
-        if (result.WasSuccess())
+        if (result.EnsureSuccess(snackBar))
+        {
+            snackBar.Add($"SmartHome {createName} created!", Severity.Success);
             cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetJoinedUrl);
-        navManager.NavigateTo($"/smarthome/{result.Id}/overview");
+            navManager.NavigateTo($"/smarthome/{result.Id}/overview");
+        }
     }
 }
