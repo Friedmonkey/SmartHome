@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
@@ -24,10 +25,13 @@ namespace SmartHome.Backend.Api
                 SSID = request.wifiname,
                 SSPassword = request.password,
             };
+            if (await _ctx.DbContext.SmartHomes.AnyAsync(h => h.Name == home.Name))
+                throw new ApiError("There is already a smarthome with the same name!!");
+
             var homeResult = await _ctx.DbContext.SmartHomes.AddAsync(home);
             var smartUser = new SmartUserModel()
-            { 
-                AccountId = _ctx.GetLoggedInId(),
+            {
+                AccountId = _ctx.Auth.GetLoggedInId(),
                 SmartHomeId = homeResult.Entity.Id,
                 Role = UserRole.Admin,
             };
@@ -37,13 +41,14 @@ namespace SmartHome.Backend.Api
 
             return new GuidResponse(homeResult.Entity.Id);
         }
+
         public async Task<SuccessResponse> InviteToSmartHome(InviteRequest request)
         {
-            await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
+            await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
-            var acc = await _ctx.GetAccountByEmail(request.email);
+            var acc = await _ctx.Auth.GetAccountByEmail(request.email);
 
-            var smartUser = new SmartUserModel() 
+            var smartUser = new SmartUserModel()
             {
                 AccountId = acc.Id,
                 SmartHomeId = request.smartHome,
@@ -55,19 +60,16 @@ namespace SmartHome.Backend.Api
                 return SuccessResponse.Failed("Failed to send invitation");
             return SuccessResponse.Success();
         }
-        public async Task<SuccessResponse> AcceptSmartHomeInvite(AcceptInviteRequest request)
+        public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
         {
-            var smartUser = await _ctx.GetLoggedInSmartUser(request.smartHome);
+            var smartUserInvite = await _ctx.Auth.GetPendingInvite(request.Id);
 
-            if (smartUser.Role != UserRole.InvitationPending)
-                return SuccessResponse.Failed("You dont have an invitation.");
-
-            smartUser.Role = UserRole.User;
+            smartUserInvite.Role = UserRole.User;
 
             await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
         }
-        public async Task<SmartHomeResponse> GetJoinedSmartHomes(EmptyRequest request)
+        public async Task<SmartHomeListResponse> GetJoinedSmartHomes(EmptyRequest request)
         {
             var smartHomeIds = GetSmartUsers()
                 .Where(su => su.Role == UserRole.Admin || su.Role == UserRole.User || su.Role == UserRole.Guest)
@@ -75,7 +77,7 @@ namespace SmartHome.Backend.Api
 
             return await GetHomesFromIds(smartHomeIds);
         }
-        public async Task<SmartHomeResponse> GetSmartHomeInvites(EmptyRequest request)
+        public async Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request)
         {
             var smartHomeIds = GetSmartUsers()
                 .Where(su => su.Role == UserRole.InvitationPending)
@@ -83,20 +85,27 @@ namespace SmartHome.Backend.Api
 
             return await GetHomesFromIds(smartHomeIds);
         }
-
-        public async Task<SmartHomeResponse> GetHomesFromIds(IQueryable<Guid> ids)
+        public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
         {
-             var smartHomes = await _ctx.DbContext.SmartHomes
-                    .Where(home => ids.Contains(home.Id))
-                    .ToListAsync();
+            await _ctx.Auth.EnforceIsPartOfSmartHome(request.Id); //make sure we are apart of the smarthome
 
-            return new SmartHomeResponse(smartHomes);
+            var smartHome = await _ctx.DbContext.SmartHomes.FirstOrDefaultAsync(home => home.Id == request.Id);
+            if (smartHome is null)
+                return SmartHomeResponse.Failed("Smart home not found");
+            return new SmartHomeResponse(smartHome);
         }
 
+        public async Task<SmartHomeListResponse> GetHomesFromIds(IQueryable<Guid> ids)
+        {
+            var smartHomes = await _ctx.DbContext.SmartHomes
+                   .Where(home => ids.Contains(home.Id))
+                   .ToListAsync();
 
+            return new SmartHomeListResponse(smartHomes);
+        }
         private IQueryable<SmartUserModel> GetSmartUsers()
         {
-            var userId = _ctx.GetLoggedInId();
+            var userId = _ctx.Auth.GetLoggedInId();
             var smartUsers = _ctx.DbContext.SmartUsers.Where(su => su.AccountId == userId);
             return smartUsers;
         }

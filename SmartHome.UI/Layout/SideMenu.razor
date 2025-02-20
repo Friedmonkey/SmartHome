@@ -1,32 +1,34 @@
-﻿<MudDrawer Breakpoint="Breakpoint.Md"
-           Class="side-menu"
-           Elevation="2"
-           Open="_open"
-           Style="overflow:hidden"
-           Variant="@DrawerVariant.Mini">
+﻿@inject NavigationManager navManager;
+@inject ISmartHomeService smartHomeService;
+
+<MudDrawer Breakpoint="Breakpoint.Md"
+Elevation="2"
+@bind-Open="@_open"
+Style="overflow:hidden"
+Variant="@DrawerVariant.Mini">
 
     <MudDrawerHeader Class="align-center d-flex align-center pa-0">
         <MudIconButton Color="@Color.Primary"
-                       Icon="@Icons.Material.Rounded.Menu"
-                       Size="Size.Large"
-                       OnClick="@OpenSideMenu" />
+        Icon="@Icons.Material.Rounded.Menu"
+        Size="Size.Large"
+        OnClick="@OpenSideMenu" />
 
     </MudDrawerHeader>
-    
-    <NavMenu />
+
+    <NavMenu/>
 
     <MudSpacer />
     @if (_open)
     {
         <div class="d-flex">
             <MudSpacer />
-            <MudImage Alt="Logo" Src="logo.png" Width="100" Class="mb-4"></MudImage>
+            <MudImage Alt="Logo" Src="logo.png" Width="100" Class="mb-4" />
             <MudSpacer />
         </div>
     }
     else
     {
-        <MudText Typo="Typo.overline" Align="Align.Center">BB</MudText>
+        <MudText Typo="Typo.overline" Align="Align.Center">SH</MudText>
     }
 </MudDrawer>
 
@@ -37,5 +39,4 @@
     {
         _open = !_open;
     }
-
 }

@@ -1,0 +1,12 @@
+﻿@page "/redirect/{base64}"
+@inject NavigationManager navManager;
+
+@code {
+    [Parameter]
+    public string? base64 { get; set; }
+
+    protected override void OnAfterRender(bool firstrender)
+    {
+        NavMenu.Redirect(navManager, base64);
+    }
+}

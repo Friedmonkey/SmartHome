@@ -134,6 +134,9 @@ namespace SmartHome.Database.Migrations
                     b.Property<Guid>("RoomId")
                         .HasColumnType("char(36)");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RoomId");

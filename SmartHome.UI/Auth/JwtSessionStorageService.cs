@@ -1,5 +1,4 @@
 ﻿using Blazored.SessionStorage;
-using SmartHome.Common.Models;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace SmartHome.UI.Auth;

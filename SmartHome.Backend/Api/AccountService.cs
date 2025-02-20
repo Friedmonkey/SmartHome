@@ -48,7 +48,7 @@ public class AccountService : IAccountService
     }
     public async Task<SuccessResponse> Logout(EmptyRequest request)
     {
-        var user = await _ctx.GetLoggedInAccount();
+        var user = await _ctx.Auth.GetLoggedInAccount();
         var result = await _ctx.UserManager.UpdateSecurityStampAsync(user);
         return GetSuccessResponse(result);
     }
@@ -81,9 +81,9 @@ public class AccountService : IAccountService
         if (!result.Succeeded)
             return TokenResponse.Failed("User Refresh failed.");
 
-        return new TokenResponse(JWT: CreateJWT(user), Refresh:user.SecurityStamp);
+        return new TokenResponse(JWT: CreateJWT(user), Refresh: user.SecurityStamp);
     }
-    private SuccessResponse GetSuccessResponse(IdentityResult? result) 
+    private SuccessResponse GetSuccessResponse(IdentityResult? result)
     {
         if (result is null)
             return SuccessResponse.Failed("IdentityResult was null");
@@ -108,7 +108,7 @@ public class AccountService : IAccountService
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? throw new NoNullAllowedException("user.UserName")));
             o.User.Claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new NoNullAllowedException("user.Email")));
             o.User.Roles.Add(AuthRoles.AuthUser);
-            o.ExpireAt = DateTime.Now.AddMinutes(1);
+            o.ExpireAt = DateTime.Now.AddMinutes(15);
         });
 
         return jwtToken;

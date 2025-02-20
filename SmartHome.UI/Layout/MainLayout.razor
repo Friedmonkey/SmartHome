@@ -1,52 +1,83 @@
-﻿@using SmartHome.UI.Auth;
-@inherits LayoutComponentBase;
-@inject NavigationManager navManager;
+﻿@inherits LayoutComponentBase;
 @inject ProfileService profileService;
+@inject SelectedSmartHomeService smartHomeState;
+@inject ApiService apiService;
+@inject ISnackbar snackBar;
+@inject NavigationManager navManager;
+@inject MemoryCacheService cacheService;
 
 <MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme="CustomTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+
+<style>
+    .menu-wrapper {
+    white-space: nowrap;
+    }
+</style>
 <CascadingValue Name="pref" Value="preferences">
-    <MudLayout>
-        <MudAppBar Elevation="0">
-            <MudSpacer />
-            <ThemeToggle />
-            <AuthorizeView>
-                <Authorized>
-                    <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                        <ActivatorContent>
-                            <Avatar Username="@context.User.GetUserName()" ProfilePicture="@context.User.GetProfilePicture()" />
-                            <MudButton>@context.User.GetUserName()</MudButton>
-                        </ActivatorContent>
-                        <ChildContent>
-                            <MudMenuItem Label="Profile" />
-                            <MudMenuItem Label="About" />
-                            <MudMenuItem Label="Logout" OnClick="() => NavMenu.Logout(navManager)" />
-                        </ChildContent>
-                    </MudMenu>
-                </Authorized>
-                <NotAuthorized>
-                    <MudAvatar>?</MudAvatar>
-                    <MudButton Style="width:7%;" OnClick="() => NavMenu.Login(navManager)">LOGIN</MudButton>
-                </NotAuthorized>
-            </AuthorizeView>
-            <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/"/>
-            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/MudBlazor/MudBlazor/"/>
-        </MudAppBar>
-        <SideMenu />
-        <MudMainContent>
-            <div class="pa-4">
-                @Body
-            </div>
-        </MudMainContent>
-    </MudLayout>
+    <CascadingValue Name="CurrentSmartHome" Value="CurrentSmartHome">
+        <MudLayout>
+            <MudAppBar Elevation="1">
+                <HomeDropdown />
+                <MudSpacer />
+                <ThemeToggle />
+                <AuthorizeView>
+                    <Authorized>
+                        <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                            <ActivatorContent>
+                                <Avatar Username="@context.User.GetUserName()" ProfilePicture="@context.User.GetProfilePicture()" />
+                                <MudButton>@context.User.GetUserName()</MudButton>
+                            </ActivatorContent>
+                            <ChildContent>
+                                <MudMenuItem Label="Profile" />
+                                <MudMenuItem Label="Clear cache" OnClick="ClearCache"/>
+                                @if (CurrentSmartHome is not null)
+                                {
+                                    <MudMenuItem Label="Exit home" Href="/smarthome" />
+                                }
+                                <MudMenuItem Label="Logout" OnClick="() => NavMenu.Logout(navManager)" />
+                            </ChildContent>
+                        </MudMenu>
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudAvatar>?</MudAvatar>
+                        <MudButton Style="width:7%;" OnClick="() => NavMenu.Login(navManager)">LOGIN</MudButton>
+                    </NotAuthorized>
+                </AuthorizeView>
+                <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/"/>
+                <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/MudBlazor/MudBlazor/"/>
+            </MudAppBar>
+            <SideMenu />
+            <MudMainContent>
+                <div class="pa-4">
+                    @Body
+                </div>
+            </MudMainContent>
+        </MudLayout>
+    </CascadingValue>
 </CascadingValue>
 
 @code{
     private bool isDarkMode;
     private Preferences preferences = new();
+    public SmartHomeModel? CurrentSmartHome { get; private set; } = null;
+    protected override async Task OnParametersSetAsync()
+    {
+        Guid? guid = smartHomeState.GetCurrentSmartHomeGuid();
+        if (guid is not null)
+        {
+            var smartHome = await apiService.GetSmartHomeById(new((Guid)guid!));
+            if (smartHome.EnsureSuccess(snackBar))
+            {
+                CurrentSmartHome = smartHome.smartHome;
+                return;
+            }
+        }
+        CurrentSmartHome = null;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,6 +90,11 @@
         preferences = newPreferences;
         isDarkMode = newPreferences.DarkMode;
         StateHasChanged();
+    }
+    private void ClearCache()
+    {
+        cacheService.FullyClearCache();
+        snackBar.Add("Cache was cleared.");
     }
 
     public void Dispose()

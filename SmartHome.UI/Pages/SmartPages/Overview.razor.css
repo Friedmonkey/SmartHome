@@ -1,0 +1,5 @@
+﻿@media screen and (max-width: 975px) {
+    ::deep .Apparaat-Container {
+        width: 375px !important;
+    }
+}

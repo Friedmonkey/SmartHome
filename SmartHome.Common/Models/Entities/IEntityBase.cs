@@ -1,7 +1,6 @@
-﻿namespace SmartHome.Common.Models.Entities
+﻿namespace SmartHome.Common.Models.Entities;
+
+public interface IEntityBase
 {
-    public interface IEntityBase
-    {
-        public Guid Id { get; }
-    }
+    public Guid Id { get; }
 }
