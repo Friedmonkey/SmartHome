@@ -49,6 +49,7 @@ public class Program
         builder.Services.AddScoped<DeviceContext>();
         builder.Services.AddScoped<AuthContext>();
         builder.Services.AddScoped<RoomContext>();
+        builder.Services.AddScoped<RoutineContext>();
         builder.Services.AddScoped<ApiContext>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IRoomService, RoomService>();
