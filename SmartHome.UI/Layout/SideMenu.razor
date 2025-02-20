@@ -1,4 +1,7 @@
-﻿<MudDrawer Breakpoint="Breakpoint.Md"
+﻿@inject NavigationManager navManager;
+@inject ISmartHomeService smartHomeService;
+
+<MudDrawer Breakpoint="Breakpoint.Md"
 Elevation="2"
 @bind-Open="@_open"
 Style="overflow:hidden"
@@ -9,13 +12,6 @@ Variant="@DrawerVariant.Mini">
         Icon="@Icons.Material.Rounded.Menu"
         Size="Size.Large"
         OnClick="@OpenSideMenu" />
-        @if (_open && CurrentSmartHome is not null)
-        {
-            <div class="d-flex flex-row">
-                <MudIcon Icon="@Icons.Material.Rounded.Home"/>
-                <MudText>@CurrentSmartHome.Name</MudText>
-            </div>
-        }
 
     </MudDrawerHeader>
 
@@ -37,9 +33,6 @@ Variant="@DrawerVariant.Mini">
 </MudDrawer>
 
 @code {
-    [CascadingParameter(Name = "CurrentSmartHome")]
-    public SmartHomeModel? CurrentSmartHome { get; set; }
-
     bool _open = false;
 
     void OpenSideMenu()

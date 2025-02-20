@@ -1,6 +1,4 @@
-﻿@inject SmartHomeState smartHomeState
-
-<MudNavMenu>
+﻿<MudNavMenu>
     @if (CurrentSmartHome is not null)
     {
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/overview")" Icon="@Icons.Material.Filled.Dashboard">
@@ -28,9 +26,6 @@
         <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
             <p class="menu-wrapper">Smart Homes</p>
         </MudNavLink>
-        <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">
-            <p class="menu-wrapper">Person</p>
-         </MudNavLink>
     }  
 </MudNavMenu>
 
@@ -38,7 +33,12 @@
     [CascadingParameter(Name = "CurrentSmartHome")]
     public SmartHomeModel? CurrentSmartHome { get; set; }
 
-    public static void Redirect(NavigationManager navManager, string? base64)
+    public static void ReloadPage(NavigationManager navManager, string page)
+    {
+        var base64 = Base64Encode(page);
+        navManager.NavigateTo($"/redirect/{base64}");
+    }
+    public static void Redirect(NavigationManager navManager, string? base64, string targetPage = "/")
     { 
         if (base64 != null)
         {
@@ -55,7 +55,7 @@
             return;
         }
 
-        navManager.NavigateTo("/");
+        navManager.NavigateTo(targetPage);
     }
     public static void Login(NavigationManager navManager)
     {

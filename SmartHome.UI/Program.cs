@@ -45,7 +45,6 @@ public class Program
         builder.Services.AddScoped<ApiService>();
 
         builder.Services.AddScoped<IAccountService, AccountService>();
-        builder.Services.AddScoped<IPersonTestingService, PersonTestingService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
 
