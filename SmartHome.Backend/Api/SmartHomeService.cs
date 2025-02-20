@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
@@ -24,6 +25,9 @@ namespace SmartHome.Backend.Api
                 SSID = request.wifiname,
                 SSPassword = request.password,
             };
+            if (await _ctx.DbContext.SmartHomes.AnyAsync(h => h.Name == home.Name))
+                throw new ApiError("There is already a smarthome with the same name!!");
+
             var homeResult = await _ctx.DbContext.SmartHomes.AddAsync(home);
             var smartUser = new SmartUserModel()
             {
@@ -37,6 +41,7 @@ namespace SmartHome.Backend.Api
 
             return new GuidResponse(homeResult.Entity.Id);
         }
+
         public async Task<SuccessResponse> InviteToSmartHome(InviteRequest request)
         {
             await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
@@ -57,12 +62,9 @@ namespace SmartHome.Backend.Api
         }
         public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
         {
-            var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.Id);
+            var smartUserInvite = await _ctx.Auth.GetPendingInvite(request.Id);
 
-            if (smartUser.Role != UserRole.InvitationPending)
-                return SuccessResponse.Failed("You dont have an invitation.");
-
-            smartUser.Role = UserRole.User;
+            smartUserInvite.Role = UserRole.User;
 
             await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();

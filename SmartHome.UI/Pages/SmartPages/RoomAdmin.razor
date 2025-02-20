@@ -1,0 +1,84 @@
+﻿@page "/smarthome/{SmartGuid}/admin/rooms"
+@inherits SmartHomeGuidPage
+
+@inject IRoomService roomService;
+@inject IDialogService DialogService;
+@inject ISnackbar snackBar;
+
+<MudDataGrid Items="@roomList" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" />
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudButton @onclick="@(e => OpenRoomEditDialog(context.Item))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Primary">Edit</MudButton>
+                    <MudButton @onclick="@(e => DeleteRoom(context.Item.Id))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+<MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4 mt-2" Style="width: 100%;" Elevation="0">
+    <MudSpacer />
+    <MudButton @onclick="@(e => OpenRoomEditDialog(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New Room</MudButton>
+</MudPaper>
+
+@code {
+    //DeleteRoom
+    private List<Room> roomList = new List<Room>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await roomService.GetAllRooms(new());
+
+        if (result.EnsureSuccess(snackBar))
+            roomList = result.Rooms;
+    }
+
+    private async void OpenRoomEditDialog(Room _roomToEditOrCreate)
+    {
+        bool IsNewRoom = true;
+
+        //zet de room en type aanpassing van de room in variable en refresh html om room edit menu zichtbaar te maken
+        var dialogParameter = new DialogParameters<EditRoomDialog>();
+        dialogParameter.Add(p => p.room, _roomToEditOrCreate);
+        //dialogParameter.Add(p => p.smartHomeId, _SmartHomeId);
+
+        string Title = "New Room";
+        if (_roomToEditOrCreate is not null)
+        {
+            Title = "Edit Room";
+            IsNewRoom = false;
+        }
+
+        //Open de dialog popup voor het invoeren van room gegevens
+        var dialog = await DialogService.ShowAsync<EditRoomDialog>(Title, dialogParameter);
+        var result = await dialog.Result;
+
+        if (result.Data != "Close")
+        {
+            //Update de roomlist nadat er een room is bewerkt of toegevoegd
+            if (IsNewRoom)
+            {
+                roomList.Add(result.Data as Room);
+            }
+            else
+            {
+                roomList.Where(r => r.Id == (result.Data as Room).Id).ToList().First().Name = (result.Data as Room).Name;
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteRoom(Guid roomGuid)
+    {
+        //Verwijder room uit de databse met de api
+        var result = await roomService.DeleteRoom(new(roomGuid));
+        result.Show(snackBar, "Room is succesfully deleted!", Severity.Success);
+
+        if (result.WasSuccess())
+        {   //local delete from ui
+            roomList.RemoveAll(d => d.Id == roomGuid);
+        }
+    }
+}

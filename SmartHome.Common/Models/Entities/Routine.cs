@@ -7,18 +7,19 @@ public class Routine : Entity
     [Required]
     [Column(TypeName = "varchar(20)")]
     public string? Name { get; set; }
-
+    
     [Required]
-    [Column(TypeName = "datetime(6)")]
-    public DateTime Start { get; set; }
+    [Column(TypeName = "time")]
+    public TimeOnly Start { get; set; }
 
     [Required]
     public Guid SmartHomeId { get; set; }
 
     [Required]
-    [Column(TypeName = "binary(7)")]
+    [Column(TypeName = "binary(8)")]
     public byte RepeatDays { get; set; }
 
-    public SmartHomeModel SmartHome { get; set; }
+    public SmartHomeModel? SmartHome { get; set; }
+    public List<DeviceAction>? DeviceActions { get; set; }
     
 }

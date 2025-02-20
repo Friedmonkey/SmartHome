@@ -1,38 +1,35 @@
-﻿@inject SelectedSmartHomeService smartHomeState;
-@inject ApiService apiService;
-@inject ISnackbar snackBar;
-
-<MudNavMenu>
-    <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
-        <p class="menu-wrapper">Smart Homes</p>
-    </MudNavLink>
+﻿<MudNavMenu>
     @if (CurrentSmartHome is not null)
     {
         <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/overview")" Icon="@Icons.Material.Filled.Dashboard">
             <p class="menu-wrapper">Overview</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/devices")" Icon="@Icons.Material.Filled.Devices">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/devices")" Icon="@Icons.Material.Filled.Devices">
             <p class="menu-wrapper">Devices</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/logs")" Icon="@Icons.Material.Filled.List">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/rooms")" Icon="@Icons.Material.Filled.SensorDoor">
+            <p class="menu-wrapper">Rooms</p>
+        </MudNavLink>
+
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/logs")" Icon="@Icons.Material.Filled.List">
             <p class="menu-wrapper">Logs</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/routines")" Icon="@Icons.Material.Filled.Autorenew">
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/routines")" Icon="@Icons.Material.Filled.Autorenew">
             <p class="menu-wrapper">Routines</p>
         </MudNavLink>
 
-        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/beheer")" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">
-            <p class="menu-wrapper">Beheer</p>
+        <MudNavLink Href="@($"/smarthome/{CurrentSmartHome.Id}/admin/user-management")" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">
+            <p class="menu-wrapper">User managment</p>
         </MudNavLink>
     }
     else
     {
-        <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">
-            <p class="menu-wrapper">Person</p>
-         </MudNavLink>
+        <MudNavLink Href="/smarthome" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+            <p class="menu-wrapper">Smart Homes</p>
+        </MudNavLink>
     }  
 </MudNavMenu>
 
@@ -40,7 +37,12 @@
     [CascadingParameter(Name = "CurrentSmartHome")]
     public SmartHomeModel? CurrentSmartHome { get; set; }
 
-    public static void Redirect(NavigationManager navManager, string? base64)
+    public static void ReloadPage(NavigationManager navManager, string page)
+    {
+        var base64 = Base64Encode(page);
+        navManager.NavigateTo($"/redirect/{base64}");
+    }
+    public static void Redirect(NavigationManager navManager, string? base64, string targetPage = "/")
     { 
         if (base64 != null)
         {
@@ -57,7 +59,7 @@
             return;
         }
 
-        navManager.NavigateTo("/");
+        navManager.NavigateTo(targetPage);
     }
     public static void Login(NavigationManager navManager)
     {

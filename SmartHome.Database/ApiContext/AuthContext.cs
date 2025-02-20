@@ -45,12 +45,20 @@ public class AuthContext
         bool isAdmin = smartUser.Role == UserRole.Admin;
         return isAdmin;
     }
-#warning TODO: make sure GetLoggedInSmartUser is user or admin and make separate one for invites
+
+    public async Task<SmartUserModel> GetPendingInvite(Guid smarthomeId)
+    {
+        var id = GetLoggedInId();
+        var smartUser = await GetSmartUser(id, smarthomeId);
+        if (smartUser is null || smartUser.Role != UserRole.InvitationPending)
+            throw new ApiError("You do not have an invite for this SmartHome!");
+        return smartUser;
+    }
     public async Task<SmartUserModel> GetLoggedInSmartUser(Guid smarthomeId)
     {
         var id = GetLoggedInId();
         var smartUser = await GetSmartUser(id, smarthomeId);
-        if (smartUser is null)
+        if (smartUser is null || (smartUser.Role != UserRole.User && smartUser.Role != UserRole.Admin))
             throw new ApiError("You are not part of this SmartHome!");
         return smartUser;
     }

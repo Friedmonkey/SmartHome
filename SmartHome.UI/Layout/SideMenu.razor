@@ -1,4 +1,7 @@
-﻿<MudDrawer Breakpoint="Breakpoint.Md"
+﻿@inject NavigationManager navManager;
+@inject ISmartHomeService smartHomeService;
+
+<MudDrawer Breakpoint="Breakpoint.Md"
 Elevation="2"
 @bind-Open="@_open"
 Style="overflow:hidden"
@@ -19,7 +22,7 @@ Variant="@DrawerVariant.Mini">
     {
         <div class="d-flex">
             <MudSpacer />
-            <MudImage Alt="Logo" Src="logo.png" Width="100" Class="mb-4"></MudImage>
+            <MudImage Alt="Logo" Src="logo.png" Width="100" Class="mb-4" />
             <MudSpacer />
         </div>
     }

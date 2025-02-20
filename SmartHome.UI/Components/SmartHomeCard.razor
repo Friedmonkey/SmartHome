@@ -3,22 +3,30 @@
 @inject MemoryCacheService cacheService;
 @inject ISnackbar snackBar;
 
-<MudCard Elevation="11">
-    <MudCardHeader>
+<style>
+    .SmartHomeCard {
+        background-color: var(--mud-palette-drawer-background) !important;
+    }
+</style>
+<MudCard Class="SmartHomeCard" Elevation="5">
+    <MudCardHeader Class="mx-auto">
         <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Home" />
     </MudCardHeader>
-    <MudCardContent>
-        <MudText>@Home.Name</MudText>
+    <MudCardContent Class="mx-auto">
+        <MudText Typo="Typo.h5">@Home.Name</MudText>
+    </MudCardContent>
+    <MudCardActions Class="mx-auto">
         @if (IsInvite)
         {
-            <MudButton OnClick="AcceptInvite" Color="Color.Success">Accept invite</MudButton>
+            <MudButton Variant="Variant.Filled" OnClick="AcceptInvite" Color="Color.Success">Accept invite</MudButton>
         }
         else
         { 
-            <MudButton OnClick="OpenHome">Open home</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="OpenHome">Open home</MudButton>
         }
-    </MudCardContent>
+    </MudCardActions>
 </MudCard>
+
 
 @code {
     [Parameter]
@@ -29,7 +37,15 @@
 
     public async Task AcceptInvite()
     {
-        await smartHomeService.AcceptSmartHomeInvite(new(Home.Id));
+        if (Home is null)
+        {
+            snackBar.Add("Home was null", Severity.Error);
+            return;
+        }
+
+        var result = await smartHomeService.AcceptSmartHomeInvite(new(Home.Id));
+        result.Show(snackBar, "Invite accepted.");
+        NavMenu.ReloadPage(navManager, "/smarthome");
     }
     public void OpenHome()
     {

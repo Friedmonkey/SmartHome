@@ -20,11 +20,8 @@
 <CascadingValue Name="pref" Value="preferences">
     <CascadingValue Name="CurrentSmartHome" Value="CurrentSmartHome">
         <MudLayout>
-            <MudAppBar Elevation="0">
-                @if (CurrentSmartHome is not null)
-                {
-                    <MudText>@CurrentSmartHome.Name</MudText>
-                }
+            <MudAppBar Elevation="1">
+                <HomeDropdown />
                 <MudSpacer />
                 <ThemeToggle />
                 <AuthorizeView>
@@ -36,8 +33,11 @@
                             </ActivatorContent>
                             <ChildContent>
                                 <MudMenuItem Label="Profile" />
-                                <MudMenuItem Label="About" />
                                 <MudMenuItem Label="Clear cache" OnClick="ClearCache"/>
+                                @if (CurrentSmartHome is not null)
+                                {
+                                    <MudMenuItem Label="Exit home" Href="/smarthome" />
+                                }
                                 <MudMenuItem Label="Logout" OnClick="() => NavMenu.Logout(navManager)" />
                             </ChildContent>
                         </MudMenu>

@@ -1,35 +1,27 @@
 ﻿using SmartHome.Common.Models;
 using SmartHome.Common.Models.Entities;
-using static SmartHome.Common.Api.IRoutineService;
 
 namespace SmartHome.Common.Api;
 
-
 public interface IRoutineService
 {
-    public record RoutineListResponse(List<Routine> routines) : Response<RoutineListResponse>;
-    public Task<RoutineListResponse> GetRoutinesForUser(SmartHomeRequest request);
+    public record RoutineListResponse(List<Routine> Routines) : Response<RoutineListResponse>;
+    public record ActionListResponse(List<DeviceAction> Actions) : Response<ActionListResponse>;
 
-        
+    public record RoutineRequest(Routine routine) : SmartHomeRequest;
+    public record DeviceActionRequest(DeviceAction action) : SmartHomeRequest;
 
+    //public record CreateRoutineRequest(string Name, TimeOnly Start, byte RepeatDays) : SmartHomeRequest;
+    //public record UpdateRoutineRequest(Guid Id, string Name, TimeOnly Start, byte RepeatDays) : SmartHomeRequest;
+    //public record CreateActionRequest(string Name, string JsonObjectConfig, Guid RoutineId, Guid DeviceId);
+    //public record UpdateActionRequest(Guid Id, string Name, string JsonObjectConfig, Guid RoutineId, Guid DeviceId);
 
-
-
-
-
-
-    public record Response(object Routine) : Response<Response>;
-    public record RoutinesResponse(List<object> Routines) : Response<RoutinesResponse>;
+    public Task<GuidResponse> CreateRoutine(RoutineRequest request);
+    public Task<RoutineListResponse> GetAllRoutines(EmptySmartHomeRequest request); // return list of Routines
+    public Task<SuccessResponse> UpdateRoutine(RoutineRequest request);
+    public Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request);
     
-    public record CreateRequest(string Name, Guid SmartHomeId, DateTime Start, byte RepeatDays);
-
-    public Task<SuccessResponse> Create(CreateRequest request);
-
-    public Task<RoutinesResponse> GetRoutineOfSmartHome(GuidRequest request); // return list of Rooms
-    
-    public Task<SuccessResponse> Delete(GuidRequest request);
-    
-    public Task<SuccessResponse> Update(CreateRequest request);
-
-
+    public Task<GuidResponse> CreateDeviceAction(DeviceActionRequest request);
+    public Task<SuccessResponse> UpdateDeviceAction(DeviceActionRequest request);
+    public Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request);
 }

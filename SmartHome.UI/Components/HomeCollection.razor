@@ -1,0 +1,48 @@
+﻿<MudExpansionPanel @bind-Expanded="panelExpanded" Class="mt-2" Style="@(panelExpanded ? "transition: background-color 0.5s ease;" : "background-color: var(--mud-palette-drawer-background); transition: background-color 0.5s ease;")">
+    <TitleContent>
+        <div class="d-flex align-center mt-2 mb-1">
+            <MudIcon Icon="@(Icons.Material.Filled.ExpandMore)" class="@("mr-3 "+(panelExpanded?"mud-expand-panel-icon mud-transform":""))"></MudIcon>
+            <div class="d-flex flex-row gap-1">
+                <MudText Class="my-auto">@Title</MudText>
+            </div>
+        </div>
+    </TitleContent>
+    <ChildContent>
+        <div class="d-flex flex-column gap-2 pb-1">
+            <div>
+                <MudIconButton OnClick="OnRefreshClick" Icon="@Icons.Material.Rounded.Refresh" />
+                <MudButton OnClick="OnRefreshClick">Refresh</MudButton>
+            </div>
+            @if (SmartHomes.Count == 0)
+            {
+                <MudText Class="mx-auto mb-5" Typo="Typo.h4">@EmptyText</MudText>
+            }
+            <MudGrid Class="gap-2">
+                @foreach (var smartHome in SmartHomes)
+                {
+                    <MudItem>
+                        <SmartHomeCard Home="smartHome" IsInvite="@IsInvite" />
+                    </MudItem>
+                }
+            </MudGrid>
+        </div>
+    </ChildContent>
+</MudExpansionPanel>
+@code {
+    [Parameter]
+    public string Title { get; set; } = "SmartHome collection";
+
+    [Parameter]
+    public List<SmartHomeModel> SmartHomes { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnRefreshClick { get; set; }
+
+    [Parameter]
+    public bool IsInvite { get; set; }
+
+    [Parameter]
+    public string EmptyText { get; set; } = "The smarthome collection was empty";
+
+    private bool panelExpanded = true;
+}

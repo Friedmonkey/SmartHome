@@ -22,13 +22,17 @@ public class SelectedSmartHomeService
     public string? GetCurrentSmartHomeGuidStr()
     {
         var uri = new Uri(_navigationManager.Uri);
-        if (uri.Segments.Count() < 3) // smarthome/{guid}/page
+        var count = uri.Segments.Count();
+        if (count < 3) // smarthome/{guid}/page
+            return null;
+        int idx = uri.Segments.ToList().FindIndex(0, count, str => str.ToLower().EndsWith("smarthome/"));
+        if (idx == -1 || idx == 0)
             return null;
 
-        if (!uri.Segments[^3].ToLower().EndsWith("smarthome/"))
+        if (count < idx + 1)
             return null;
 
-        var guidString = uri.Segments[^2].Replace("/", "");
+        var guidString = uri.Segments[idx + 1].Replace("/", "");
         return guidString;
     }
 }

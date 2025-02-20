@@ -115,27 +115,27 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class GetAllRoomsEndpoint : BasicEndpointBase<EmptySmartHomeRequest, RoomListResponse>
-    {
-        public required IDeviceService Service { get; set; }
-        public override void Configure()
-        {
-            Get(SharedConfig.Urls.Device.GetAllRooms);
-            SecureJwtEndpoint();
-        }
+    //public class GetAllRoomsEndpoint : BasicEndpointBase<EmptySmartHomeRequest, RoomListResponse>
+    //{
+    //    public required IDeviceService Service { get; set; }
+    //    public override void Configure()
+    //    {
+    //        Get(SharedConfig.Urls.Device.GetAllRooms);
+    //        SecureJwtEndpoint();
+    //    }
 
-        public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
-        {
-            try
-            {
-                await SendAsync(await Service.GetAllRooms(request));
-            }
-            catch (Exception ex)
-            {
-                await SendAsync(RoomListResponse.Error(ex));
-            }
-        }
-    }
+    //    public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
+    //    {
+    //        try
+    //        {
+    //            await SendAsync(await Service.GetAllRooms(request));
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            await SendAsync(RoomListResponse.Error(ex));
+    //        }
+    //    }
+    //}
 
     public class UpdateDivicesConfigEndpoint : BasicEndpointBase<UpdateDeviceConfigRequest, SuccessResponse>
     {
