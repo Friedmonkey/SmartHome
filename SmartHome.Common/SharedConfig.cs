@@ -39,6 +39,18 @@ public class SharedConfig
             public const string GetAllRooms = DeviceBase + "GetAllRooms";
             public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
         }
+        
+        private const string RoutineBase = ApiBase + "Routine/";
+        public static class Routine
+        {
+            public const string GetRoutinesOfSmartHomeWithAccess =  RoutineBase + "GetRoutinesOfSmartHomeWithAccess";
+            public const string UpdateRoutine = RoutineBase + "UpdateRoutine";
+            public const string DeleteRoutine = RoutineBase + "DeleteRoutine";
+            public const string CreateRoutine = RoutineBase + "CreateRoutine";
+            public const string CreateDeviceAction = RoutineBase + "CreateDeviceAction";
+            public const string UpdateDeviceAction = RoutineBase + "UpdateDeviceAction";
+            public const string DeleteDeviceAction = RoutineBase + "DeleteDeviceAction";
+        }
 
         private const string SmartHomeBase = ApiBase + "SmartHome/";
         public static class SmartHome
