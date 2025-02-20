@@ -20,11 +20,8 @@
 <CascadingValue Name="pref" Value="preferences">
     <CascadingValue Name="CurrentSmartHome" Value="CurrentSmartHome">
         <MudLayout>
-            <MudAppBar Elevation="0">
-                @if (CurrentSmartHome is not null)
-                {
-                    <MudText>@CurrentSmartHome.Name</MudText>
-                }
+            <MudAppBar Elevation="1">
+                <HomeDropdown />
                 <MudSpacer />
                 <ThemeToggle />
                 <AuthorizeView>

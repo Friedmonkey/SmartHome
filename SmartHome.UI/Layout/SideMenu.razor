@@ -12,19 +12,6 @@ Variant="@DrawerVariant.Mini">
         Icon="@Icons.Material.Rounded.Menu"
         Size="Size.Large"
         OnClick="@OpenSideMenu" />
-        @if (_open && CurrentSmartHome is not null)
-        {
-            <div class="d-flex flex-row">
-                <MudIconButton Icon="@Icons.Material.Rounded.Home" OnClick="@(() => navManager.NavigateTo("/smarthome"))"/>
-                @* <div class="d-flex flex-column"> *@
-                @* <MudText>@CurrentSmartHome.Name</MudText> *@
-                @*                     <MudSelect @bind-Value="CurrentSmartHome" Dense="true">
-
-                    </MudSelect> *@
-                @* </div> *@
-                <MudAutocomplete ValueChanged="OnValueChanged" Value="CurrentSmartHome" T="SmartHomeModel" ToStringFunc="@(shm => shm.Name)" Label="Selected SmartHome" SearchFunc="@Search" ShowProgressIndicator="true" Strict="false" />
-            </div>
-        }
 
     </MudDrawerHeader>
 
@@ -46,39 +33,6 @@ Variant="@DrawerVariant.Mini">
 </MudDrawer>
 
 @code {
-    [CascadingParameter(Name = "CurrentSmartHome")]
-    public SmartHomeModel? CurrentSmartHome { get; set; }
-
-    private SmartHomeModel ExitHome = new SmartHomeModel() 
-    {
-        Id = Guid.AllBitsSet,
-        Name = "Exit"
-    };
-    private void OnValueChanged(SmartHomeModel newSelected)
-    {
-        if (newSelected == ExitHome)
-        {
-            navManager.NavigateTo("/smarthome");
-        }
-        else
-        { 
-            CurrentSmartHome = newSelected;
-            NavMenu.ReloadPage(navManager, $"/smarthome/{newSelected.Id}/overview");
-        }
-    }
-
-    public async Task<IEnumerable<SmartHomeModel>> Search(string value, CancellationToken token)
-    {
-        var homes = await smartHomeService.GetJoinedSmartHomes(new());
-        homes.EnforceSuccess();
-
-        //to avoid changing the cache
-        var newHomes = homes.homes.ToList();
-        newHomes.Insert(0, ExitHome);
-        return newHomes;
-    }
-
-
     bool _open = false;
 
     void OpenSideMenu()

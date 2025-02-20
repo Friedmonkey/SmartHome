@@ -41,7 +41,7 @@
         var base64 = Base64Encode(page);
         navManager.NavigateTo($"/redirect/{base64}");
     }
-    public static void Redirect(NavigationManager navManager, string? base64)
+    public static void Redirect(NavigationManager navManager, string? base64, string targetPage = "/")
     { 
         if (base64 != null)
         {
@@ -58,7 +58,7 @@
             return;
         }
 
-        navManager.NavigateTo("/");
+        navManager.NavigateTo(targetPage);
     }
     public static void Login(NavigationManager navManager)
     {
