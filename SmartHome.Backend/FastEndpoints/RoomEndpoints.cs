@@ -49,7 +49,7 @@ public class UpdateRoomEndpoint : BasicEndpointBase<RoomRequest, SuccessResponse
     }
 }
 
-public class CreateRoomEndpoint : BasicEndpointBase<RoomRequest, SuccessResponse>
+public class CreateRoomEndpoint : BasicEndpointBase<RoomRequest, GuidResponse>
 {
     public required IRoomService Service { get; set; }
     public override void Configure()
@@ -66,7 +66,7 @@ public class CreateRoomEndpoint : BasicEndpointBase<RoomRequest, SuccessResponse
         }
         catch (Exception ex)
         {
-            await SendAsync(SuccessResponse.Error(ex));
+            await SendAsync(GuidResponse.Error(ex));
         }
     }
 }

@@ -22,9 +22,9 @@ public class RoomService : IRoomService
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Room.UpdateRoomName, request);
     }
 
-    public async Task<SuccessResponse> CreateRoom(RoomRequest request)
+    public async Task<GuidResponse> CreateRoom(RoomRequest request)
     {
-        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Room.CreateRoom, request);
+        return await _api.Post<GuidResponse>(SharedConfig.Urls.Room.CreateRoom, request);
     }
 
     public async Task<SuccessResponse> DeleteRoom(SmartHomeGuidRequest request)

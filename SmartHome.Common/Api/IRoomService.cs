@@ -12,7 +12,7 @@ public interface IRoomService
 
     Task<SuccessResponse> UpdateRoomName(RoomRequest request);
 
-    Task<SuccessResponse> CreateRoom(RoomRequest request);
+    Task<GuidResponse> CreateRoom(RoomRequest request);
 
     Task<SuccessResponse> DeleteRoom(SmartHomeGuidRequest request);
 }

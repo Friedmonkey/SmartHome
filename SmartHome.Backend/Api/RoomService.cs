@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
+using SmartHome.Common.Models.Entities;
 
 namespace SmartHome.Backend.Api;
 
@@ -21,76 +22,49 @@ public class RoomService : IRoomService
 
     public async Task<SuccessResponse> UpdateRoomName(RoomRequest request)
     {
-        try
-        {
-            //Controleer of er al een room  met dezelfde naam in de database is
-            if (!await _ctx.DbContext.Rooms.AnyAsync(x => x.Name == request.room.Name))
-            {
-                await _ctx.DbContext.Rooms
-                        .Where(d => d.Id == request.room.Id)
-                .ExecuteUpdateAsync(u => u
-                            .SetProperty(p => p.Name, request.room.Name)
-                        );
-            }
-            else
-            {
-                return SuccessResponse.Failed("There is already a room with the same name!!");
-            }
+        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
-            return SuccessResponse.Success();
-        }
-        catch (Exception ex)
-        {
-            return SuccessResponse.Failed(ex.Message);
-        }
+        await _ctx.Room.EnforceRoomNameUnique(request.smartHome, request.room?.Name);
+        //Controleer of er al een room  met dezelfde naam in de database is
+        await _ctx.DbContext.Rooms
+            .Where(d => d.Id == request.room.Id)
+                .ExecuteUpdateAsync(u => u
+                .SetProperty(p => p.Name, request.room.Name)
+            );
+
+        return SuccessResponse.Success();
     }
 
-    public async Task<SuccessResponse> CreateRoom(RoomRequest request)
+    public async Task<GuidResponse> CreateRoom(RoomRequest request)
     {
-        try
-        {
-            //Controleer of er al een room met dezelfde naam in de database is
-            if (!await _ctx.DbContext.Rooms.AnyAsync(x => x.Name == request.room.Name))
-            {
-                //Maak een nieuwe room in de database
-                await _ctx.DbContext.Rooms.AddAsync(request.room);
-                await _ctx.DbContext.SaveChangesAsync();
+        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        await _ctx.Room.EnforceRoomNameUnique(request.smartHome, request.room.Name);
 
-                return SuccessResponse.Success();
-            }
-            else
-            {
-                return SuccessResponse.Failed("There is already a room with the same name!!");
-            }
-        }
-        catch (Exception ex)
+        Room newRoom = new Room()
         {
-            return SuccessResponse.Failed(ex.Message);
-        }
+            Name = request.room.Name,
+            SmartHomeId = request.smartHome,
+        };
+        var result = await _ctx.DbContext.Rooms.AddAsync(newRoom);
+        await _ctx.DbContext.SaveChangesAsync();
+
+        return new GuidResponse(result.Entity.Id);
     }
 
     public async Task<SuccessResponse> DeleteRoom(SmartHomeGuidRequest request)
     {
-        try
+        bool test = await _ctx.DbContext.Devices.AnyAsync(x => x.RoomId == request.Id);
+
+        //Controleer of er geen apparaten in de room bevinden
+        if (!test)
         {
-            bool test = await _ctx.DbContext.Devices.AnyAsync(x => x.RoomId == request.Id);
-
-            //Controleer of er geen apparaten in de room bevinden
-            if (!test)
-            {
-                //Verwijder room uit de database met guid
-                await _ctx.DbContext.Rooms.Where(d => d.Id == request.Id).ExecuteDeleteAsync();
-                return SuccessResponse.Success();
-            } else
-            {
-                return SuccessResponse.Failed("It is not possible to delete a room that contains devices. Replace the devices to an other room!");
-            }
-
-            
+            //Verwijder room uit de database met guid
+            await _ctx.DbContext.Rooms.Where(d => d.Id == request.Id).ExecuteDeleteAsync();
+            return SuccessResponse.Success();
         }
-        catch (Exception ex)
+        else
         {
-            return SuccessResponse.Failed(ex.Message);
+            return SuccessResponse.Failed("It is not possible to delete a room that contains devices. Replace the devices to an other room!");
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common;
-using SmartHome.Common.Api;
-using static SmartHome.Common.SharedConfig.Urls;
 using Device = SmartHome.Common.Models.Entities.Device;
 
 namespace SmartHome.Database.ApiContext;
@@ -42,8 +40,11 @@ public class DeviceContext
     //{ 
     //    _dbContext.Rooms
     //}
-    public async Task EnforceDeviceNameUnique(Guid smartHomeId, string deviceName)
+    public async Task EnforceDeviceNameUnique(Guid smartHomeId, string? deviceName)
     {
+        if (string.IsNullOrEmpty(deviceName))
+            throw new ApiError("Device name cannot be empty!");
+
         bool alreadyExists = await _dbContext.Devices
             .Where(d => _dbContext.Rooms
                 .Where(r => r.SmartHomeId == smartHomeId)
