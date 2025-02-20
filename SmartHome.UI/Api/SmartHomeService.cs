@@ -16,7 +16,6 @@ public class SmartHomeService : ISmartHomeService
     {
         return await _api.Post<GuidResponse>(SharedConfig.Urls.SmartHome.CreateSmartHomeUrl, request);
     }
-
     public async Task<SuccessResponse> InviteToSmartHome(InviteRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.SmartHome.InviteToSmartHomeUrl, request);
@@ -41,6 +40,15 @@ public class SmartHomeService : ISmartHomeService
 
     public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
     {
-        return await _api.Get<SmartHomeResponse>(SharedConfig.Urls.SmartHome.GetByIDUrl, request);
+        object cacheKey = new { id = request.Id };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(2);
+        return await _api.GetWithCache<SmartHomeResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetByIDUrl, request, cacheTime);
+    }
+
+    public async Task<UserListResponse> GetAllUsers(EmptySmartHomeRequest request)
+    {
+        object cacheKey = new { };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(5);
+        return await _api.GetWithCache<UserListResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetAllUsers, request, cacheTime);
     }
 }

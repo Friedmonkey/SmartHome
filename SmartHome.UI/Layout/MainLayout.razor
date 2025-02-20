@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase;
 @inject ProfileService profileService;
 @inject SelectedSmartHomeService smartHomeState;
-@inject ApiService apiService;
+@inject ISmartHomeService smartHomeService;
 @inject ISnackbar snackBar;
 @inject NavigationManager navManager;
 @inject MemoryCacheService cacheService;
@@ -32,7 +32,7 @@
                                 <MudButton>@context.User.GetUserName()</MudButton>
                             </ActivatorContent>
                             <ChildContent>
-                                <MudMenuItem Label="Profile" />
+                                <MudMenuItem Label="Reload" OnClick="() => NavMenu.ReloadPage(navManager, navManager.ToBaseRelativePath(navManager.Uri))" />
                                 <MudMenuItem Label="Clear cache" OnClick="ClearCache"/>
                                 @if (CurrentSmartHome is not null)
                                 {
@@ -69,7 +69,7 @@
         Guid? guid = smartHomeState.GetCurrentSmartHomeGuid();
         if (guid is not null)
         {
-            var smartHome = await apiService.GetSmartHomeById(new((Guid)guid!));
+            var smartHome = await smartHomeService.GetSmartHomeById(new((Guid)guid!));
             if (smartHome.EnsureSuccess(snackBar))
             {
                 CurrentSmartHome = smartHome.smartHome;

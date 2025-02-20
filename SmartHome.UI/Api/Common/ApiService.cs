@@ -69,8 +69,13 @@ public class ApiService
     }
     public async ValueTask<T> GetWithCache<T>(object cacheKey, string url, object? data = null, TimeSpan? cacheTime = null, bool authenticated = true) where T : Response<T>
     {
+        //auto get current smart home guid and use it for cache as well
+        Guid guid = Guid.Empty;
+        if (data is not null)
+            (guid, _) = TryGetCurrentSmartHomeGuid(ref data);
+
         TimeSpan expire = cacheTime ?? TimeSpan.FromMinutes(5);
-        string key = _memoryCacheService.HashKey(url, new { cacheKey, authenticated });
+        string key = _memoryCacheService.HashKey(url, new { cacheKey, guid, authenticated });
 
         if (_memoryCacheService.TryGet(key, expire, out T result))
             return result;
@@ -108,25 +113,10 @@ public class ApiService
 
             if (data is not null)
             {
-                if (data is SmartHomeRequest req)
-                {
-                    bool success = true;
-                    Guid? smartHomeGuid = _selectedSmartHomeService.GetCurrentSmartHomeGuid();
-                    if (!success || smartHomeGuid is null)
-                    {
-                        throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
-                        "If you are making an api request on OnInitializedAsync, make sure to call\n" +
-                        "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
-                        "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
-                    }
+                var (guid, req) = TryGetCurrentSmartHomeGuid(ref data);
+                if (req is not null)
+                    data = req with { smartHome = guid };
 
-
-                    if (req.smartHome != Guid.Empty)
-                        _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
-
-                    //update the smartHome guid using record with syntax
-                    data = req with { smartHome = (Guid)smartHomeGuid };
-                }
                 content = GetData(method, data, ref url); //can put data in url for GET requests
             }
 
@@ -155,23 +145,33 @@ public class ApiService
         }
     }
 
-    public void RemoveSmartHomeCache(GuidRequest request)
+    private (Guid, SmartHomeRequest?) TryGetCurrentSmartHomeGuid(ref object data)
     {
-        string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
-            new
-            {
-                cacheKey = new { id = request.Id },
-                authenticated = true
-            }
-        );
-        _memoryCacheService.RemoveCache(cacheKey);
+        if (data is SmartHomeRequest req)
+        {
+            Guid? smartHomeGuid = _selectedSmartHomeService.GetCurrentSmartHomeGuid();
+            if (smartHomeGuid is null)
+                throw new ApiError("Unable to resolve SmartHome Guid from state.", fatal: true);
+
+            if (req.smartHome != Guid.Empty)
+                _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
+
+            //update the smartHome guid using record with syntax
+            return ((Guid)smartHomeGuid, req);
+        }
+        return (Guid.Empty, null);
     }
-    public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
-    {
-        object cacheKey = new { id = request.Id };
-        TimeSpan cacheTime = TimeSpan.FromMinutes(2);
-        return await GetWithCache<SmartHomeResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetByIDUrl, request, cacheTime);
-    }
+    //public void RemoveSmartHomeCache(GuidRequest request)
+    //{
+    //    string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
+    //        new
+    //        {
+    //            cacheKey = new { id = request.Id },
+    //            authenticated = true
+    //        }
+    //    );
+    //    _memoryCacheService.RemoveCache(cacheKey);
+    //}
     private JsonContent? GetData(HttpMethod method, object data, ref string url)
     {
         if (method == HttpMethod.Post)

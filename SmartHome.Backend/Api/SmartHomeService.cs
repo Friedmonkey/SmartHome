@@ -94,7 +94,20 @@ namespace SmartHome.Backend.Api
                 return SmartHomeResponse.Failed("Smart home not found");
             return new SmartHomeResponse(smartHome);
         }
+        public async Task<UserListResponse> GetAllUsers(EmptySmartHomeRequest request)
+        {
+            await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
+            var smartUsers = await _ctx.DbContext.SmartUsers.Where(sm => sm.SmartHomeId == request.smartHome).ToListAsync();
+
+            ////somehow couple the account
+            //foreach (var user in smartUsers)
+            //{
+            //    user.Account = await _ctx.UserManager.FindByIdAsync(user.AccountId.ToString());
+            //}
+
+            return new UserListResponse(smartUsers);
+        }
         public async Task<SmartHomeListResponse> GetHomesFromIds(IQueryable<Guid> ids)
         {
             var smartHomes = await _ctx.DbContext.SmartHomes

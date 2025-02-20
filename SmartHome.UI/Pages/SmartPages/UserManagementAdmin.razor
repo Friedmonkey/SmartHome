@@ -1,9 +1,44 @@
-﻿@page "/smarthome/{SmartGuid}/admin/user-management"
+﻿@page "/smarthome/{SmartGuid}/admin/users"
 @inherits SmartHomeGuidPage
 
-<MudText Typo="Typo.h1">This needs to be implmented</MudText>
+@inject ISmartHomeService smartHomeService;
+@inject ISnackbar snackBar;
 
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h5">Invite user</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTextField Label="Email" T="string" @bind-Value="inviteEmail" />
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Invite">Invite user</MudButton>
+    </MudCardActions>
+</MudCard>
+@foreach (var user in allUsers)
+{ 
+    <MudText>@user.Id</MudText>
+}
+@* <MudTable 
+    Items="allUsers">
+    <th></th>
+</MudTable> *@
 
 @code {
+    private List<SmartUserModel> allUsers = new();
+    private string inviteEmail = string.Empty;
 
+    protected override async Task OnInitializedAsync()
+    {
+        var users = await smartHomeService.GetAllUsers(new());
+        if (users.EnsureSuccess(snackBar))
+            allUsers = users.users;
+    }
+
+    public async Task Invite()
+    {
+        var inviteResult = await smartHomeService.InviteToSmartHome(new(inviteEmail));
+        if (inviteResult.WasSuccessAndShow(snackBar, "User invited!"))
+            inviteEmail = string.Empty;
+    }
 }
