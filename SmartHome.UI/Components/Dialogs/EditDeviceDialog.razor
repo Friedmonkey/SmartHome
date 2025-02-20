@@ -1,13 +1,13 @@
 ﻿@inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
 
-<MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%; background-color: white;" Elevation="0">
-    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+<MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
         <MudText Typo="Typo.h4">Device Name</MudText>
         <MudTextField @bind-Value="@DeviceName" Label="Name" Variant="Variant.Outlined"></MudTextField>
     </MudPaper>
 
-    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
         <MudText Class="mb-4" Typo="Typo.h4">Room</MudText>
         <MudSelect @bind-Value="@RoomName" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
             @foreach (Room room in _Rooms)
@@ -18,7 +18,7 @@
         </MudSelect>
     </MudPaper>
 
-    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
         <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
         <MudSelect Class="mb-4" T="DeviceType" ValueChanged="DeviceTypeChanche" SelectedValues="@_DeviceType" Label="Select Type" Variant="Variant.Outlined">
             <MudSelectItem Value="@DeviceType.Lamp">
@@ -38,15 +38,15 @@
     @if (_DeviceType.ToList().ToList().First() == DeviceType.Lamp)
     {
         //Extra UI opties voor het type Lamp
-        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; background-color: transparent; width: 45%" Elevation="0">
+        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
             <MudText Class="mb-4" Typo="Typo.h4">ConfigType</MudText>
-            <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Style="background-color: transparent;" Elevation="0">
+            <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Elevation="0">
                 <MudCheckBox @bind-Value="@BrightnessEnable" Label="Enable Brightness"></MudCheckBox>
                 <MudCheckBox @bind-Value="@ColorEnabled" Label="Enable Color"></MudCheckBox>
             </MudPaper>
         </MudPaper>
     }
-    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%; background-color: transparent;" Elevation="0">
+    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
         <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
         <MudSpacer />
         @if (IsNewDevice)
