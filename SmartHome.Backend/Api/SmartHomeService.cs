@@ -55,9 +55,8 @@ namespace SmartHome.Backend.Api
                 Role = UserRole.InvitationPending,
             };
 
-            var result = await _ctx.DbContext.SmartUsers.AddAsync(smartUser);
-            if (result is null)
-                return SuccessResponse.Failed("Failed to send invitation");
+            await _ctx.DbContext.SmartUsers.AddAsync(smartUser);
+            await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
         }
         public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
