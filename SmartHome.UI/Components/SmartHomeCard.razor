@@ -3,23 +3,23 @@
 @inject MemoryCacheService cacheService;
 @inject ISnackbar snackBar;
 
-<MudCard Elevation="11" Style="width:18rem; height:10rem">
-    <MudCardContent>
-        <div class="d-flex flex-row my-2">
-            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Home" />
-            <div class="d-flex flex-column px-5 gap-15">
-                <MudText Typo="Typo.h5">@Home.Name</MudText>
-                @if (IsInvite)
-                {
-                    <MudButton OnClick="AcceptInvite" Color="Color.Success">Accept invite</MudButton>
-                }
-                else
-                { 
-                    <MudButton OnClick="OpenHome">Open home</MudButton>
-                }
-            </div>
-        </div>
+<MudCard Elevation="11">
+    <MudCardHeader Class="mx-auto">
+        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Home" />
+    </MudCardHeader>
+    <MudCardContent Class="mx-auto">
+        <MudText Typo="Typo.h5">@Home.Name</MudText>
     </MudCardContent>
+    <MudCardActions Class="mx-auto">
+        @if (IsInvite)
+        {
+            <MudButton OnClick="AcceptInvite" Color="Color.Success">Accept invite</MudButton>
+        }
+        else
+        { 
+            <MudButton OnClick="OpenHome">Open home</MudButton>
+        }
+    </MudCardActions>
 </MudCard>
 
 @code {

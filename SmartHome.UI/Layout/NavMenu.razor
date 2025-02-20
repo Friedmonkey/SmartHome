@@ -28,7 +28,7 @@
         </MudNavLink>
         <MudNavLink Href="person" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">
             <p class="menu-wrapper">Person</p>
-         </MudNavLink>
+        </MudNavLink>
     }  
 </MudNavMenu>
 
@@ -36,6 +36,11 @@
     [CascadingParameter(Name = "CurrentSmartHome")]
     public SmartHomeModel? CurrentSmartHome { get; set; }
 
+    public static void ReloadPage(NavigationManager navManager, string page)
+    {
+        var base64 = Base64Encode(page);
+        navManager.NavigateTo($"/redirect/{base64}");
+    }
     public static void Redirect(NavigationManager navManager, string? base64)
     { 
         if (base64 != null)
