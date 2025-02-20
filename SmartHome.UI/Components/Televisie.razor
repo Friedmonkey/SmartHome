@@ -7,8 +7,8 @@
         <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@_tvName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
-        <MudSwitch @bind-Value="@_televisieConfig.Ingeschakeld" @onclick="@(e => UpdateConfig(_televisieConfig.Ingeschakeld))" Label="@Status" Color="Color.Dark" UncheckedColor="Color.Warning" />
-        <MudSelect @bind-Value="@_televisieConfig.Zender" @onchange="@(e => UpdateConfig(_televisieConfig.Ingeschakeld))" Label="Zender" Variant="Variant.Outlined">
+        <MudSwitch @onclick="@(e => UpdateConfig(!_televisieConfig.Ingeschakeld))" @bind-Value="_televisieConfig.Ingeschakeld" Label="@Status" Color="Color.Warning" UncheckedColor="Color.Dark" />
+        <MudSelect @bind-Value="_televisieConfig.Zender" Label="Zender" Variant="Variant.Outlined">
             <MudSelectItem Value="@("NPO 1")" />
             <MudSelectItem Value="@("NPO 2")" />
             <MudSelectItem Value="@("NPO 3")" />
@@ -20,7 +20,7 @@
             <MudSelectItem Value="@("Net 5")" />
             <MudSelectItem Value="@("RTL 8")" />
         </MudSelect>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary">Zappen</MudButton>
+        <MudButton Variant="Variant.Filled" @onclick="@(e => UpdateConfig(_televisieConfig.Ingeschakeld))" Color="Color.Primary">Zappen</MudButton>
     </MudPaper>
 </MudPaper>
 
@@ -30,6 +30,7 @@
     private async Task UpdateConfig(bool CheckIngeschakeld)
     {
         _televisieConfig.Ingeschakeld = CheckIngeschakeld;
+        string json = JsonConvert.SerializeObject(_televisieConfig);
         var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_televisieConfig)));
         UpdateStatus();
     }
@@ -59,6 +60,8 @@
         set
         {
             _televisieConfig = JsonConvert.DeserializeObject<TelevisieConfig>(value);
+            UpdateStatus();
+            StateHasChanged();
         }
     }
 

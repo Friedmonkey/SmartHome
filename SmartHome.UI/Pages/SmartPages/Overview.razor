@@ -34,10 +34,10 @@
                             <Lamp Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" config="@roomDeviceslist[d].JsonObjectConfig"></Lamp>
                             break;
                         case DeviceType.Televisie:
-                            <Televisie Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Televisie>
+                            <Televisie Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Televisie>
                             break;
                         case DeviceType.Wasmachine:
-                            <Wasmachine Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wasmachine>
+                            <Wasmachine Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wasmachine>
                             break;
                         case DeviceType.Router:
                             <Wifi_Router Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wifi_Router>
