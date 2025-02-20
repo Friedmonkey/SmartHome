@@ -137,7 +137,7 @@ namespace SmartHome.Backend.FastEndpoints
         }
     }
 
-    public class DeleteRoutineActionEndpoint : BasicEndpointBase<Guid, SuccessResponse>
+    public class DeleteRoutineActionEndpoint : BasicEndpointBase<SmartHomeGuidRequest, SuccessResponse>
     {
         public required IRoutineService Service { get; set; }
         public override void Configure()
@@ -146,7 +146,7 @@ namespace SmartHome.Backend.FastEndpoints
             SecureJwtEndpoint();
         }
 
-        public override async Task HandleAsync(Guid request, CancellationToken ct)
+        public override async Task HandleAsync(SmartHomeGuidRequest request, CancellationToken ct)
         {
             try
             {
