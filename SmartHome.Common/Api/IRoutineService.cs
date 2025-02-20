@@ -11,8 +11,8 @@ public interface IRoutineService
     public record ActionListResponse(List<Action> Actions) : Response<ActionListResponse>;
     public record CreateRoutineRequest(string Name, TimeOnly Start, byte RepeatDays) : SmartHomeRequest;
     public record UpdateRoutineRequest(Guid Id, string Name, TimeOnly Start, byte RepeatDays) : SmartHomeRequest;
-    public record CreateActionRequest(string Name, string JsonObjectConfig, Guid RoutineId, Guid DeviceId);
-    public record UpdateActionRequest(Guid Id, string Name, string JsonObjectConfig, Guid RoutineId, Guid DeviceId);
+    public record CreateActionRequest(string Name, string JsonObjectConfig, Guid RoutineId, Guid DeviceId) : SmartHomeRequest;
+    public record UpdateActionRequest(Guid Id, string Name, string JsonObjectConfig, Guid RoutineId, Guid DeviceId) : SmartHomeRequest;
 
     public Task<GuidResponse> CreateRoutine(CreateRoutineRequest request);
     public Task<RoutineListResponse> GetRoutinesOfSmartHome(SmartHomeRequest request); // return list of Routines
@@ -21,5 +21,5 @@ public interface IRoutineService
     
     public Task<GuidResponse> CreateDeviceAction(CreateActionRequest request);
     public Task<SuccessResponse> UpdateDeviceAction(UpdateActionRequest request);
-    public Task<SuccessResponse> DeleteDeviceAction(Guid request);
+    public Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request);
 }

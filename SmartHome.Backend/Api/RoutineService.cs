@@ -18,6 +18,11 @@ public class RoutineService : IRoutineService
 
     public async Task<GuidResponse> CreateRoutine(CreateRoutineRequest request)
     {
+        var Exist = await _ctx.DbContext.Routines.Where(rs => rs.Name == request.Name).FirstOrDefaultAsync();
+        if(Exist != null)
+        {
+            return GuidResponse.Failed("Name of routine already exist");
+        }
         await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
         var routine = new Routine() 
         { 
@@ -34,6 +39,7 @@ public class RoutineService : IRoutineService
     }
     public async Task<RoutineListResponse> GetRoutinesOfSmartHome(SmartHomeRequest request)
     {
+        await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
         var listOfRoutine = await _ctx.DbContext.Routines
         .Where(rs => rs.SmartHomeId == request.smartHome)
         .ToListAsync();
@@ -52,6 +58,11 @@ public class RoutineService : IRoutineService
     }
     public async Task<SuccessResponse> UpdateRoutine(UpdateRoutineRequest request)
     {
+        var Exist = await _ctx.DbContext.Routines.Where(rs => rs.Name == request.Name).FirstOrDefaultAsync();
+        if (Exist != null)
+        {
+            return SuccessResponse.Failed("Name of routine already exist");
+        }
         await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
         var routine = new Routine()
         {
@@ -69,7 +80,7 @@ public class RoutineService : IRoutineService
     public async  Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request)
     {
         await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
-        var toDelete = await _ctx.DbContext.Routines.Where(rs => rs.Id == request.Id).FirstOrDefaultAsync();
+        var toDelete = await _ctx.DbContext.Routines.Where(rs => rs.Id == request.Id && rs.SmartHomeId == request.smartHome).FirstOrDefaultAsync();
         if(toDelete is null)
         {
             return SuccessResponse.Failed("Given Routine Id is not valid");
@@ -81,6 +92,12 @@ public class RoutineService : IRoutineService
     
     public async Task<GuidResponse> CreateDeviceAction(CreateActionRequest request)
     {
+        var Exist = await _ctx.DbContext.DeviceActions.Where(rs => rs.Name == request.Name).FirstOrDefaultAsync();
+        if (Exist != null)
+        {
+            return GuidResponse.Failed("Name of device action already exist");
+        }
+        await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
         var deviceAction = new DeviceAction()
         {
             Name = request.Name,
@@ -94,6 +111,12 @@ public class RoutineService : IRoutineService
     }
     public async Task<SuccessResponse> UpdateDeviceAction(UpdateActionRequest request)
     {
+        var Exist = await _ctx.DbContext.DeviceActions.Where(rs => rs.Name == request.Name).FirstOrDefaultAsync();
+        if (Exist != null)
+        {
+            return SuccessResponse.Failed("Name of device action already exist");
+        }
+        await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
         var deviceAction = new DeviceAction()
         {
             Id = request.Id,
@@ -106,9 +129,10 @@ public class RoutineService : IRoutineService
         await _ctx.DbContext.SaveChangesAsync();
         return SuccessResponse.Success();
     }
-    public async Task<SuccessResponse> DeleteDeviceAction(Guid request)
+    public async Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request)
     {
-        var toDelete = await _ctx.DbContext.DeviceActions.Where(da =>  da.Id == request).FirstOrDefaultAsync();
+        await _ctx.EnforceIsSmartHomeAdmin(request.smartHome);
+        var toDelete = await _ctx.DbContext.DeviceActions.Where(da =>  da.Id == request.Id && da.Routine!.SmartHomeId == request.smartHome).FirstOrDefaultAsync();
         if (toDelete != null)
         {
             return SuccessResponse.Failed("Does not exist");
