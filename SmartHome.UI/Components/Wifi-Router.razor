@@ -62,12 +62,6 @@
         var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_RouterConfig)));
         UpdateStatus();
     }
-
-    class RouterConfig
-    {
-        public bool Ingeschakeld { get; set; }
-    }
-
     private string _RouterName = "Unknown";
 
     [Parameter]

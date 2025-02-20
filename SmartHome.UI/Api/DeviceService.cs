@@ -38,11 +38,10 @@ public class DeviceService : IDeviceService
         return await _api.Post<GuidResponse>(SharedConfig.Urls.Device.CreaateDevice, request);
     }
 
-    public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
-    {
-        return await _api.Get<RoomListResponse>(SharedConfig.Urls.Device.GetAllRooms, request);
-    }
-
+    //public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
+    //{
+    //    return await _api.Get<RoomListResponse>(SharedConfig.Urls.Device.GetAllRooms, request);
+    //}
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.UpdateDeviceConfig, request);

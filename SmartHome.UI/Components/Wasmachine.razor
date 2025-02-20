@@ -1,22 +1,71 @@
-﻿<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
+﻿@using SmartHome.Common.Models.Configs;
+@inject IDeviceService deviceService;
+
+@{
+    Dictionary<string, int> _ProgrammaList = new Dictionary<string, int>();
+    _ProgrammaList = ProgrammaList;
+}
+
+<MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
         <MudImage Width="150" Height="150" Src="Afbeeldingen/wasmachine.png" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
         <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@_WasMachineName</MudText>
     </MudPaper>
     <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Style="background-color: transparent" Elevation="0">
-        <MudSwitch @bind-Value="@_WasConfig.Ingeschakeld" Label="Ingeschakeld" Color="Color.Dark" UncheckedColor="Color.Warning" />
+        <MudSwitch @bind-Value="@_WasConfig.Ingeschakeld" @onclick="@(e => UpdateConfig(!_WasConfig.Ingeschakeld, false))" Label="@Status" Color="Color.Warning" UncheckedColor="Color.Dark" />
         <MudSelect @bind-Value="@_WasConfig.Programma" Label="Programma" Variant="Variant.Outlined">
-            <MudSelectItem Value="@("Gekleurde was")" />
-            <MudSelectItem Value="@("Katoen")" />
-            <MudSelectItem Value="@("Spijker Broeken")" />
+            @foreach (string Programma in ProgrammaList.Keys) {
+                <MudSelectItem Value="@(Programma)" />
+            }
         </MudSelect>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary">Starten</MudButton>
+        <MudButton @onclick="@(e => UpdateConfig(_WasConfig.Ingeschakeld, true))" Variant="Variant.Filled" Color="Color.Primary">Starten</MudButton>
     </MudPaper>
 </MudPaper>
 
 
 @code {
-    private WasMachineConfig _WasConfig;
+    Dictionary<string, int> ProgrammaList = new Dictionary<string, int>();
+
+    string Status = "Uitgeschakeld";
+
+    private async Task UpdateConfig(bool CheckIngeschakeld, bool ProgrammaStart)
+    {
+        //Serialize de config in een json en stuur het naar de database
+        _WasConfig.Ingeschakeld = CheckIngeschakeld;
+
+        if (ProgrammaStart) {
+            _WasConfig.ProgrammaDuur = ProgrammaList.Where(p => p.Key == _WasConfig.Programma).ToList().First().Value;
+            _WasConfig.ProgrammaStart = DateTime.Now;
+        }
+
+        var Response = await deviceService.UpdateDeviceConfig(new(_Id, JsonConvert.SerializeObject(_WasConfig)));
+        UpdateStatus();
+    }
+
+    private void UpdateStatus()
+    {
+        if (_WasConfig.Ingeschakeld)
+        {
+            Status = "Ingeschakeld";
+        }
+        else
+        {
+            Status = "Uitgeschakeld";
+        }
+    }
+
+    private Guid _Id = Guid.Empty;
+
+    [Parameter]
+    public Guid Id
+    {
+        set
+        {
+            _Id = value;
+        }
+    }
+
+    private WasmachineConfig _WasConfig;
 
     [Parameter]
     public string Config
@@ -28,15 +77,20 @@
 
         set
         {
-            _WasConfig = JsonConvert.DeserializeObject<WasMachineConfig>(value);
+            _WasConfig = JsonConvert.DeserializeObject<WasmachineConfig>(value);
+            UpdateStatus();
+            ProgrammaList.Add("Gekleurde was (1 Uur)", 60);
+            ProgrammaList.Add("Katoen (1,5 Uur)", 90);
+            ProgrammaList.Add("Spijker Broeken (45 Minuten)", 45);
+            DateTime EindTime = _WasConfig.ProgrammaStart.AddMinutes(_WasConfig.ProgrammaDuur);
+            //Controlleer of het programma klaar is
+            if (_WasConfig.ProgrammaStart >= EindTime) {
+                _WasConfig.Programma = "";
+                _WasConfig.ProgrammaDuur = 0;
+            }
+
+            StateHasChanged();
         }
-    }
-
-    class WasMachineConfig
-    {
-        public bool Ingeschakeld { get; set; }
-
-        public string Programma { get; set; }
     }
 
     private string _WasMachineName = "Unknown";
