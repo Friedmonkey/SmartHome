@@ -5,20 +5,20 @@ using static SmartHome.Common.Api.IRoutineService;
 
 namespace SmartHome.Backend.FastEndpoints;
 
-public class GetRoutinesOfSmartHomeWithAccessEndpoint : BasicEndpointBase<SmartHomeRequest, RoutineListResponse>
+public class GetAllRoutinesEndpoint : BasicEndpointBase<EmptySmartHomeRequest, RoutineListResponse>
 {
     public required IRoutineService Service { get; set; }
     public override void Configure()
     {
-        Get(SharedConfig.Urls.Routine.GetRoutinesOfSmartHomeWithAccess);
+        Get(SharedConfig.Urls.Routine.GetAllRoutines);
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(SmartHomeRequest request, CancellationToken ct)
+    public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
     {
         try
         {
-            await SendAsync(await Service.GetRoutinesOfSmartHome(request));
+            await SendAsync(await Service.GetAllRoutines(request));
         }
         catch (Exception ex)
         {
@@ -27,7 +27,7 @@ public class GetRoutinesOfSmartHomeWithAccessEndpoint : BasicEndpointBase<SmartH
     }
 }
 
-public class CreateRoutineEndpoint : BasicEndpointBase<CreateRoutineRequest, GuidResponse>
+public class CreateRoutineEndpoint : BasicEndpointBase<RoutineRequest, GuidResponse>
 {
     public required IRoutineService Service { get; set; }
     public override void Configure()
@@ -36,7 +36,7 @@ public class CreateRoutineEndpoint : BasicEndpointBase<CreateRoutineRequest, Gui
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(CreateRoutineRequest request, CancellationToken ct)
+    public override async Task HandleAsync(RoutineRequest request, CancellationToken ct)
     {
         try
         {
@@ -49,7 +49,7 @@ public class CreateRoutineEndpoint : BasicEndpointBase<CreateRoutineRequest, Gui
     }
 }
 
-public class UpdateRoutineEndpoint : BasicEndpointBase<UpdateRoutineRequest, SuccessResponse>
+public class UpdateRoutineEndpoint : BasicEndpointBase<RoutineRequest, SuccessResponse>
 {
     public required IRoutineService Service { get; set; }
     public override void Configure()
@@ -58,7 +58,7 @@ public class UpdateRoutineEndpoint : BasicEndpointBase<UpdateRoutineRequest, Suc
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(UpdateRoutineRequest request, CancellationToken ct)
+    public override async Task HandleAsync(RoutineRequest request, CancellationToken ct)
     {
         try
         {
@@ -93,7 +93,7 @@ public class DeleteRoutineEndpoint : BasicEndpointBase<SmartHomeGuidRequest, Suc
     }
 }
 
-public class CreateRoutineActionEndpoint : BasicEndpointBase<CreateActionRequest, GuidResponse>
+public class CreateRoutineActionEndpoint : BasicEndpointBase<DeviceActionRequest, GuidResponse>
 {
     public required IRoutineService Service { get; set; }
     public override void Configure()
@@ -102,7 +102,7 @@ public class CreateRoutineActionEndpoint : BasicEndpointBase<CreateActionRequest
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(CreateActionRequest request, CancellationToken ct)
+    public override async Task HandleAsync(DeviceActionRequest request, CancellationToken ct)
     {
         try
         {
@@ -115,7 +115,7 @@ public class CreateRoutineActionEndpoint : BasicEndpointBase<CreateActionRequest
     }
 }
 
-public class UpdateRoutineActionEndpoint : BasicEndpointBase<UpdateActionRequest, SuccessResponse>
+public class UpdateRoutineActionEndpoint : BasicEndpointBase<DeviceActionRequest, SuccessResponse>
 {
     public required IRoutineService Service { get; set; }
     public override void Configure()
@@ -124,7 +124,7 @@ public class UpdateRoutineActionEndpoint : BasicEndpointBase<UpdateActionRequest
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(UpdateActionRequest request, CancellationToken ct)
+    public override async Task HandleAsync(DeviceActionRequest request, CancellationToken ct)
     {
         try
         {
@@ -137,7 +137,7 @@ public class UpdateRoutineActionEndpoint : BasicEndpointBase<UpdateActionRequest
     }
 }
 
-public class DeleteRoutineActionEndpoint : BasicEndpointBase<Guid, SuccessResponse>
+public class DeleteRoutineActionEndpoint : BasicEndpointBase<SmartHomeGuidRequest, SuccessResponse>
 {
     public required IRoutineService Service { get; set; }
     public override void Configure()
@@ -146,7 +146,7 @@ public class DeleteRoutineActionEndpoint : BasicEndpointBase<Guid, SuccessRespon
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(Guid request, CancellationToken ct)
+    public override async Task HandleAsync(SmartHomeGuidRequest request, CancellationToken ct)
     {
         try
         {

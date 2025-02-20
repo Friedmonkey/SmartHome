@@ -11,31 +11,31 @@ public class RoutineService : IRoutineService
         this._api = api;
     }
 
-    public Task<GuidResponse> CreateDeviceAction(CreateActionRequest request)
+    public async Task<GuidResponse> CreateDeviceAction(DeviceActionRequest request)
     {
         throw new NotImplementedException();
     }
-    public Task<GuidResponse> CreateRoutine(CreateRoutineRequest request)
+    public async Task<GuidResponse> CreateRoutine(RoutineRequest request)
     {
         throw new NotImplementedException();
     }
-    public Task<SuccessResponse> DeleteDeviceAction(Guid request)
+    public async Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request)
     {
         throw new NotImplementedException();
     }
-    public Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request)
+    public async Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request)
     {
         throw new NotImplementedException();
     }
-    public Task<RoutineListResponse> GetRoutinesOfSmartHome(SmartHomeRequest request)
+    public async Task<RoutineListResponse> GetAllRoutines(EmptySmartHomeRequest request)
     {
         throw new NotImplementedException();
     }
-    public Task<SuccessResponse> UpdateDeviceAction(UpdateActionRequest request)
+    public async Task<SuccessResponse> UpdateDeviceAction(DeviceActionRequest request)
     {
         throw new NotImplementedException();
     }
-    public Task<SuccessResponse> UpdateRoutine(UpdateRoutineRequest request)
+    public async Task<SuccessResponse> UpdateRoutine(RoutineRequest request)
     {
         throw new NotImplementedException();
     }
