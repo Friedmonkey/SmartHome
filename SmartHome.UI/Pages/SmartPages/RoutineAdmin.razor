@@ -2,10 +2,83 @@
 @inherits SmartHomeGuidPage
 
 @inject IRoutineService routineService;
+@inject IDialogService DialogService;
+@inject ISnackbar snackBar;
 
-<MudText Typo="Typo.h1">This needs to be implmented</MudText>
-
+<MudDataGrid Items="@routineList" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+    <Columns>
+        <PropertyColumn Property="@(x => x.Name)" />
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudButton @onclick="@(e => OpenroutineEditDialog(context.Item))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Primary">Edit</MudButton>
+                    <MudButton @onclick="@(e => Deleteroutine(context.Item.Id))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+<MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4 mt-2" Style="width: 100%;" Elevation="0">
+    <MudSpacer />
+    <MudButton @onclick="@(e => OpenroutineEditDialog(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New routine</MudButton>
+</MudPaper>
 
 @code {
+    //Deleteroutine
+    private List<Routine> routineList = [];
 
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await routineService.GetAllRoutines(new());
+
+        if (result.EnsureSuccess(snackBar))
+            routineList = result.Routines;
+    }
+
+    private async void OpenroutineEditDialog(Routine _routineToEditOrCreate)
+    {
+        bool IsNewroutine = true;
+
+        //zet de routine en type aanpassing van de routine in variable en refresh html om routine edit menu zichtbaar te maken
+        var dialogParameter = new DialogParameters<EditRoutineDialog>();
+        dialogParameter.Add(p => p.Routine, _routineToEditOrCreate);
+        //dialogParameter.Add(p => p.smartHomeId, _SmartHomeId);
+
+        string Title = "New routine";
+        if (_routineToEditOrCreate is not null)
+        {
+            Title = "Edit routine";
+            IsNewroutine = false;
+        }
+
+        //Open de dialog popup voor het invoeren van routine gegevens
+        var dialog = await DialogService.ShowAsync<EditRoutineDialog>(Title, dialogParameter);
+        var result = await dialog.Result;
+
+        if (result.Data != "Close")
+        {
+            //Update de routinelist nadat er een routine is bewerkt of toegevoegd
+            if (IsNewroutine)
+            {
+                routineList.Add(result.Data as Routine);
+            }
+            else
+            {
+                routineList.Where(r => r.Id == (result.Data as Routine).Id).ToList().First().Name = (result.Data as Routine).Name;
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task Deleteroutine(Guid routineGuid)
+    {
+        //Verwijder routine uit de databse met de api
+        var result = await routineService.DeleteRoutine(new(routineGuid));
+        result.Show(snackBar, "routine is succesfully deleted!", Severity.Success);
+
+        if (result.WasSuccess())
+        {   //local delete from ui
+            routineList.RemoveAll(d => d.Id == routineGuid);
+        }
+    }
 }
