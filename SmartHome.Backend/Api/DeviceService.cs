@@ -50,7 +50,7 @@ public class DeviceService : IDeviceService
         }
 
         List<Room> rooms = new List<Room>();
-        rooms = await _ctx.DbContext.Rooms.ToListAsync();
+        rooms = await _ctx.DbContext.Rooms.Where(x => x.SmartHomeId == request.smartHome).ToListAsync();
 
         //Zet de room obejct in de devices
         deviceList = deviceList.Select(d => {
@@ -58,8 +58,8 @@ public class DeviceService : IDeviceService
                 d.Room =
                 new Room
                 {
-                    Id = rooms.Where(x => x.Id == d.RoomId).ToList().First().Id,
-                    Name = rooms.Where(x => x.Id == d.RoomId).ToList().First().Name,
+                    Id = rooms.Where(x => x.Id == d.RoomId).FirstOrDefault().Id,
+                    Name = rooms.Where(x => x.Id == d.RoomId).FirstOrDefault().Name,
                     
                 };
             }
