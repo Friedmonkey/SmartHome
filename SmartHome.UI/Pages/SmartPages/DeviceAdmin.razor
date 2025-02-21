@@ -1,6 +1,7 @@
 ﻿@page "/smarthome/{SmartGuid}/admin/devices"
 @inherits SmartHomeGuidPage
 
+@using SmartHome.Common.Models.Entities;
 @inject IDeviceService deviceService;
 @inject IRoomService roomService;
 @inject ISnackbar snackBar;
