@@ -22,15 +22,15 @@ public class RoutineService : IRoutineService
     }
     public async Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request)
     {
-         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.DeleteDeviceAction, request);
+         return await _api.Delete<SuccessResponse>(SharedConfig.Urls.Routine.DeleteDeviceAction, request);
     }
     public async Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request)
     {
-         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.DeleteRoutine, request);
+         return await _api.Delete<SuccessResponse>(SharedConfig.Urls.Routine.DeleteRoutine, request);
     }
     public async Task<RoutineListResponse> GetAllRoutines(EmptySmartHomeRequest request)
     {
-         return await _api.Post<RoutineListResponse>(SharedConfig.Urls.Routine.GetAllRoutines, request);
+         return await _api.Get<RoutineListResponse>(SharedConfig.Urls.Routine.GetAllRoutines, request);
     }
     public async Task<SuccessResponse> UpdateDeviceAction(DeviceActionRequest request)
     {

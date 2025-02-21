@@ -19,6 +19,8 @@ public class RoutineService : IRoutineService
     public async Task<GuidResponse> CreateRoutine(RoutineRequest request)
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        await _ctx.Routine.EnforceRoutineNameUnique(request.smartHome, request.routine.Name);
+
         var routine = new Routine() 
         { 
             SmartHomeId = request.smartHome,
@@ -39,14 +41,13 @@ public class RoutineService : IRoutineService
         .Where(rs => rs.SmartHomeId == request.smartHome)
         .ToListAsync();
 
-        //idk what this does
-        //foreach (var routine in listOfRoutine)
-        //{
-        //    await _ctx.DbContext.Entry(routine)
-        //        .Collection(r => r.DeviceActions)
-        //        .LoadAsync();
-        //    routine.DeviceActions ??= [];
-        //}
+        foreach (var routine in listOfRoutine)
+        {
+            await _ctx.DbContext.Entry(routine)
+                .Collection(r => r.DeviceActions)
+                .LoadAsync();
+            routine.DeviceActions ??= [];
+        }
 
         return new RoutineListResponse(listOfRoutine);
     }
@@ -81,13 +82,7 @@ public class RoutineService : IRoutineService
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.action.RoutineId);
-
-        throw new ApiError("no fully supported yet");
-
-
-        if (string.IsNullOrEmpty(request.action.Name)) //why does this couple tabel even have a name??
-            return GuidResponse.Failed("Action name cannot be empty"); 
-        //if we wanna keep the name we need validation to make sure the name is unique within a routine
+        await _ctx.Routine.EnforceDeviceActionNameUnique(request.action.RoutineId, request.action.Name);
 
         var deviceAction = new DeviceAction()
         {
@@ -105,13 +100,8 @@ public class RoutineService : IRoutineService
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.action.RoutineId);
+        await _ctx.Routine.EnforceDeviceActionInRoutine(request.action.RoutineId, request.action.Id);
 
-        throw new ApiError("no supported yet");
-
-        //TODO: check if this action with this id exists on this routine which we know is part of the smart home that we are admin in
-
-
-        //TODO: just fix this update by getting it first maby idk
         var deviceAction = new DeviceAction()
         {
             Id = request.action.Id,
@@ -130,14 +120,11 @@ public class RoutineService : IRoutineService
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.Id);
 
-        //TODO: check if this action exists on this routine
-        throw new ApiError("no supported yet");
-
         var toDelete = await _ctx.DbContext.DeviceActions.Where(da => da.Id == request.Id).FirstOrDefaultAsync();
         if (toDelete != null)
-        {
             return SuccessResponse.Failed("Does not exist");
-        }
+
+        await _ctx.Routine.EnforceDeviceActionInRoutine(toDelete!.RoutineId, request.Id);
         _ctx.DbContext.DeviceActions.Remove(toDelete!);
         await _ctx.DbContext.SaveChangesAsync();
         return SuccessResponse.Success();

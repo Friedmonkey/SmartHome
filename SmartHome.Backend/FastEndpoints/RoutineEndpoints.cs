@@ -32,7 +32,7 @@ public class CreateRoutineEndpoint : BasicEndpointBase<RoutineRequest, GuidRespo
     public required IRoutineService Service { get; set; }
     public override void Configure()
     {
-        Get(SharedConfig.Urls.Routine.CreateRoutine);
+        Post(SharedConfig.Urls.Routine.CreateRoutine);
         SecureJwtEndpoint();
     }
 
@@ -76,7 +76,7 @@ public class DeleteRoutineEndpoint : BasicEndpointBase<SmartHomeGuidRequest, Suc
     public required IRoutineService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.Routine.DeleteRoutine);
+        Delete(SharedConfig.Urls.Routine.DeleteRoutine);
         SecureJwtEndpoint();
     }
 
@@ -98,7 +98,7 @@ public class CreateRoutineActionEndpoint : BasicEndpointBase<DeviceActionRequest
     public required IRoutineService Service { get; set; }
     public override void Configure()
     {
-        Delete(SharedConfig.Urls.Routine.CreateDeviceAction);
+        Post(SharedConfig.Urls.Routine.CreateDeviceAction);
         SecureJwtEndpoint();
     }
 
@@ -142,7 +142,7 @@ public class DeleteRoutineActionEndpoint : BasicEndpointBase<SmartHomeGuidReques
     public required IRoutineService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.Routine.DeleteDeviceAction);
+        Delete(SharedConfig.Urls.Routine.DeleteDeviceAction);
         SecureJwtEndpoint();
     }
 

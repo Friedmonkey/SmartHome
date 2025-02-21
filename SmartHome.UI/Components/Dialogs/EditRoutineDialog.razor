@@ -1,0 +1,119 @@
+﻿@inject IRoutineService routineService;
+@inject ISnackbar snackBar;
+
+<MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">CreateRoutine
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
+        <MudText Typo="Typo.h4">Routine Name</MudText>
+        <MudTextField @bind-Value="@RoutineName" Label="Name" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField @bind-Value="@RoutineDate" Label="Start Date" Variant="Variant.Outlined"></MudTextField>
+    </MudPaper>
+
+    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
+        <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
+        <MudSpacer />
+        @if (IsNewRoutine)
+        {
+            <MudButton @onclick="CreateRoutine" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+        }
+        else
+        {
+            <MudButton @onclick="UpdateRoutine" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+        }
+    </MudPaper>
+</MudPaper>
+
+@code {
+    bool IsNewRoutine = false;
+    string RoutineName = "";
+    TimeOnly RoutineDate;
+    private Routine _Routine;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private async void CloseMenu()
+    {
+        //Verzoek om shcerm te sluiten
+        MudDialog.Close(DialogResult.Ok("Close"));
+    }
+
+    private async Task CreateRoutine()
+    {
+        if (RoutineName == string.Empty)
+        {
+            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
+            return;
+        }
+
+        //Als alle waarden zijn ingevuld in de UI
+        Routine newRoutine = new Routine();
+        newRoutine.Name = RoutineName;
+        newRoutine.Start = RoutineDate;
+        //newRoutine.SmartHomeId = _smartHomeId;
+
+        //Maar een nieuwe Routine aan in de database met de api
+        var result = await routineService.CreateRoutine(new(newRoutine));
+        result.Show(snackBar, "Routine is succesfully created!", Severity.Success);
+        if (result.WasSuccess())
+        {
+            MudDialog.Close(DialogResult.Ok(newRoutine));
+        }
+    }
+
+
+    private async Task UpdateRoutine()
+    {
+        if (RoutineName == _Routine.Name)
+        {
+            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
+            return;
+        }
+        if (RoutineName == string.Empty)
+        {
+            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
+            return;
+        }
+        if (RoutineDate == _Routine.Start)
+        {
+            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
+            return;
+        }
+
+        //Als er 1 of meer waarden verandert zijn in de UI
+        Routine newRoutine = _Routine;
+        newRoutine.Name = RoutineName;
+        newRoutine.Start = RoutineDate;
+
+        //Update Routine naar database met de api
+        var result = await routineService.UpdateRoutine(new(newRoutine));
+        result.Show(snackBar, "Routine is succesfully updated!", Severity.Success);
+
+        if (result.WasSuccess())
+        {
+            MudDialog.Close(DialogResult.Ok(newRoutine));
+        }
+    }
+
+    [Parameter]
+    public Routine Routine
+    {
+        set
+        {
+            //Kijk of de meegegeven Routine geen waarde heeft
+            if (value is not null)
+            {
+                _Routine = value;
+                RoutineName = value.Name;
+            }
+            else
+            {
+                IsNewRoutine = true;
+            }
+        }
+
+        get
+        {
+            return _Routine;
+        }
+    }
+}
