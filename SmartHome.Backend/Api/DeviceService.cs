@@ -2,7 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
+using System.Security.Cryptography.Xml;
 using static SmartHome.Common.Api.IDeviceService;
+//using static SmartHome.Common.SharedConfig.Urls;
 
 namespace SmartHome.Backend.Api;
 
@@ -44,6 +46,24 @@ public class DeviceService : IDeviceService
                         .Contains(d.Id) // User has access to the device
                 ).ToListAsync();
         }
+
+        List<Room> rooms = new List<Room>();
+        rooms = await _ctx.DbContext.Rooms.ToListAsync();
+
+        //Zet de room obejct in de devices
+        deviceList = deviceList.Select(d => {
+            {
+                d.Room =
+                new Room
+                {
+                    Id = rooms.Where(x => x.Id == d.RoomId).ToList().First().Id,
+                    Name = rooms.Where(x => x.Id == d.RoomId).ToList().First().Name,
+                    
+                };
+            }
+            return d;
+        }).ToList();
+
         if (deviceList is null)
             return DeviceListResponse.Failed("deviceList was null, unhandled role?");
         return new DeviceListResponse(deviceList);
@@ -54,7 +74,7 @@ public class DeviceService : IDeviceService
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
         foreach (Device device in request.devices)
         {
-            await _ctx.Device.UpdateDeviceSafe(request.smartHome, device, smartUser.Id);
+            await _ctx.DbContext.Devices.Where(d => d.Id == device.Id).ExecuteUpdateAsync(setters => setters.SetProperty(d => d.RoomId, device.Room.Id));
         }
 
         return SuccessResponse.Success();
@@ -64,9 +84,22 @@ public class DeviceService : IDeviceService
     {
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-        await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser.Id);
+        if (!_ctx.DbContext.Devices.Where(d => d.Id != request.device.Id).Any(d => d.Name == request.device.Name))
+        {
+            //Als de device naam niet al bestaaat
 
-        return SuccessResponse.Success();
+            _ctx.DbContext.Devices.Where(d => d.Id == request.device.Id).ExecuteUpdateAsync(setters => setters
+            .SetProperty(d => d.Name, request.device.Name)
+            .SetProperty(d => d.JsonObjectConfig, request.device.JsonObjectConfig)
+            .SetProperty(d => d.RoomId, request.device.RoomId)
+            .SetProperty(d => d.Type, request.device.Type)
+            );
+
+            return SuccessResponse.Success();
+        } else
+        {
+            return SuccessResponse.Failed("Device naam bestaat al");
+        }        
     }
     public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
     {
@@ -97,26 +130,23 @@ public class DeviceService : IDeviceService
             JsonObjectConfig = request.device.JsonObjectConfig,
         };
         var result = await _ctx.DbContext.Devices.AddAsync(newDevice);
+
+
+        var SmartUserIdList = await _ctx.DbContext.SmartUsers.Where(d => d.SmartHomeId == request.smartHome).Select(d => d.Id).ToListAsync();
+
+        foreach(Guid SmartUserId in SmartUserIdList)
+        {
+            DeviceAccess deviceAccess = new DeviceAccess();
+            deviceAccess.DeviceId = newDevice.Id;
+            deviceAccess.SmartUserId = SmartUserId;
+
+            await _ctx.DbContext.DeviceAccesses.AddAsync(deviceAccess);
+        }
+
         await _ctx.DbContext.SaveChangesAsync();
 
         return new GuidResponse(result.Entity.Id);
     }
-    //public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
-    //{
-    //    await _ctx.Auth.EnforceIsPartOfSmartHome(request.smartHome);
-    //    var result = await _ctx.DbContext.Rooms.Where(r => r.SmartHomeId == request.smartHome).ToListAsync();
-
-    //    return new RoomListResponse(result);
-    //}
-    //        return RoomListResponse.Failed("Not Devices found in DataBase");
-    //    else
-    //        return new RoomListResponse(result);
-    //}
-
-    //        return RoomListResponse.Failed("Not Devices found in DataBase");
-    //    else
-    //        return new RoomListResponse(result);
-    //}
 
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {

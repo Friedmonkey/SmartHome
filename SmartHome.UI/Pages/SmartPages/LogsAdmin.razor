@@ -1,10 +1,20 @@
 ﻿@page "/smarthome/{SmartGuid}/admin/logs"
 @inherits SmartHomeGuidPage
-
 @* @inject ILogService logService; *@
+@inject ISnackbar snackBar;
 
-<MudText Typo="Typo.h1">This needs to be implmented</MudText>
+<MudPaper Class="justify-center" Style="width: 100%; height: 100%;">
+    <MudPaper Class="rounded-lg " Style="background-color: slategray;">
+
+    </MudPaper>
+</MudPaper>
 
 @code {
+    List<Log> logList = new List<Log>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        //logList = await logService.GetAllLogs(new());
+       // var result = await logService.GetAllLogs(new());
+    }
 }

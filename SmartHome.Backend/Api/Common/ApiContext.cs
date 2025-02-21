@@ -15,12 +15,14 @@ public class ApiContext
 
     public readonly AuthContext Auth;
     public readonly DeviceContext Device;
+    public readonly LogContext log;
     public readonly RoomContext Room;
     public readonly RoutineContext Routine;
 
     public ApiContext(
         AuthContext authCtx,
         DeviceContext deviceCtx,
+        LogContext logCtx,
         RoomContext roomCtx,
         RoutineContext routineCtx,
 
@@ -30,6 +32,7 @@ public class ApiContext
     {
         Auth = authCtx;
         Device = deviceCtx;
+        log = logCtx;
         Room = roomCtx;
         Routine = routineCtx;
 
