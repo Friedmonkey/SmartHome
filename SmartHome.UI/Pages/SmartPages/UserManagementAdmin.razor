@@ -1,9 +1,76 @@
-﻿@page "/smarthome/{SmartGuid}/admin/user-management"
+﻿@page "/smarthome/{SmartGuid}/admin/users"
 @inherits SmartHomeGuidPage
 
-<MudText Typo="Typo.h1">This needs to be implmented</MudText>
+@inject ISmartHomeService smartHomeService;
+@inject NavigationManager navManager;
+@inject ISnackbar snackBar;
 
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h5">Invite user</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTextField Label="Email" T="string" @bind-Value="inviteEmail" />
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Invite">Invite user</MudButton>
+    </MudCardActions>
+</MudCard>
+<MudTable 
+Items="allUsers">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Users in home</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <ColGroup>
+        <col style="width:45%;" /> @* name *@
+        <col style="width:45%;" /> @* email *@
+        <col style="width:10%;" /> @* button *@
+    </ColGroup>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<SmartUserModel, object>(x=>x.Account.UserName)">Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<SmartUserModel, object>(x=>x.Account.Email)">Email</MudTableSortLabel></MudTh>
+        <MudTh>Manage</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Name">@context.Account.UserName</MudTd>
+        <MudTd DataLabel="Email">@context.Account.Email</MudTd>
+        <MudTd DataLabel="Manage">
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => Manage(context.Id)">Manage device access</MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
 
 @code {
+    [CascadingParameter(Name = "CurrentSmartHome")]
+    public SmartHomeModel? CurrentSmartHome { get; set; }
 
+    private List<SmartUserModel> allUsers = new();
+    private string inviteEmail = string.Empty;
+
+    private string searchString = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {   //all users needs to link the .account as well
+        var users = await smartHomeService.GetAllUsers(new());
+        if (users.EnsureSuccess(snackBar))
+            allUsers = users.users;
+    }
+
+    public async Task Invite()
+    {
+        var inviteResult = await smartHomeService.InviteToSmartHome(new(inviteEmail));
+        if (inviteResult.WasSuccessAndShow(snackBar, "User invited!"))
+            inviteEmail = string.Empty;
+    }
+
+    public void Manage(Guid id)
+    {
+        if (CurrentSmartHome is null)
+        {
+            snackBar.Add("CurrentSmartHome was empty!", Severity.Error);
+        }
+        navManager.NavigateTo($"/smarthome/{CurrentSmartHome.Id}/admin/users/{id}");
+    }
 }

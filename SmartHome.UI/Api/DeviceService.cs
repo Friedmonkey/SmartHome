@@ -1,6 +1,7 @@
 ﻿using SmartHome.Common;
 using SmartHome.Common.Api;
 using static SmartHome.Common.Api.IDeviceService;
+using static SmartHome.Common.Api.ISmartHomeService;
 
 namespace SmartHome.UI.Api;
 
@@ -15,7 +16,9 @@ public class DeviceService : IDeviceService
 
     public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
-        return await _api.Get<DeviceListResponse>(SharedConfig.Urls.Device.GetAllDevices, request);
+        object cacheKey = new { };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(5);
+        return await _api.GetWithCache<DeviceListResponse>(cacheKey, SharedConfig.Urls.Device.GetAllDevices, request, cacheTime);
     }
 
     public async Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request)
@@ -38,10 +41,6 @@ public class DeviceService : IDeviceService
         return await _api.Post<GuidResponse>(SharedConfig.Urls.Device.CreaateDevice, request);
     }
 
-    //public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
-    //{
-    //    return await _api.Get<RoomListResponse>(SharedConfig.Urls.Device.GetAllRooms, request);
-    //}
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.UpdateDeviceConfig, request);
