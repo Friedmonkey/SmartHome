@@ -41,13 +41,13 @@ public class RoutineService : IRoutineService
         .Where(rs => rs.SmartHomeId == request.smartHome)
         .ToListAsync();
 
-        foreach (var routine in listOfRoutine)
-        {
-            await _ctx.DbContext.Entry(routine)
-                .Collection(r => r.DeviceActions)
-                .LoadAsync();
-            routine.DeviceActions ??= [];
-        }
+        //foreach (var routine in listOfRoutine)
+        //{
+        //    await _ctx.DbContext.Entry(routine)
+        //        .Collection(r => r.DeviceActions)
+        //        .LoadAsync();
+        //    routine.DeviceActions ??= [];
+        //}
 
         return new RoutineListResponse(listOfRoutine);
     }

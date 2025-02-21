@@ -5,9 +5,9 @@
     <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
         <MudText Typo="Typo.h4">Routine Name</MudText>
         <MudTextField @bind-Value="@RoutineName" Label="Name" Variant="Variant.Outlined"></MudTextField>
-        <MudTextField @bind-Value="@RoutineDate" Label="Start Date" Variant="Variant.Outlined"></MudTextField>
+        @* <MudTextField @bind-Value="@RoutineDate" Label="Start Date" Variant="Variant.Outlined"></MudTextField> *@
     </MudPaper>
-
+    
     <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
         <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
         <MudSpacer />
