@@ -101,13 +101,23 @@ public class DeviceService : IDeviceService
 
         return new GuidResponse(result.Entity.Id);
     }
-    public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
-    {
-        await _ctx.Auth.EnforceIsPartOfSmartHome(request.smartHome);
-        var result = await _ctx.DbContext.Rooms.Where(r => r.SmartHomeId == request.smartHome).ToListAsync();
+    //public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
+    //{
+    //    await _ctx.Auth.EnforceIsPartOfSmartHome(request.smartHome);
+    //    var result = await _ctx.DbContext.Rooms.Where(r => r.SmartHomeId == request.smartHome).ToListAsync();
 
-        return new RoomListResponse(result);
-    }
+    //    return new RoomListResponse(result);
+    //}
+    //        return RoomListResponse.Failed("Not Devices found in DataBase");
+    //    else
+    //        return new RoomListResponse(result);
+    //}
+
+    //        return RoomListResponse.Failed("Not Devices found in DataBase");
+    //    else
+    //        return new RoomListResponse(result);
+    //}
+
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
         await _ctx.Device.EnforceHasAccessToDevice(request.smartHome, request.DeviceId);

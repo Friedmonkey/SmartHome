@@ -15,10 +15,14 @@ public class ApiContext
 
     public readonly AuthContext Auth;
     public readonly DeviceContext Device;
+    public readonly RoomContext Room;
+    public readonly RoutineContext Routine;
 
     public ApiContext(
         AuthContext authCtx,
         DeviceContext deviceCtx,
+        RoomContext roomCtx,
+        RoutineContext routineCtx,
 
         SmartHomeContext dbContext,
         UserManager<AuthAccount> userManager, SignInManager<AuthAccount> signInManager,
@@ -26,6 +30,8 @@ public class ApiContext
     {
         Auth = authCtx;
         Device = deviceCtx;
+        Room = roomCtx;
+        Routine = routineCtx;
 
         _dbContext = dbContext;
         _userManager = userManager;

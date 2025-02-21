@@ -1,0 +1,117 @@
+﻿@page "/smarthome/{SmartGuid}/admin/devices"
+@inherits SmartHomeGuidPage
+
+@inject IDeviceService deviceService;
+@inject IRoomService roomService;
+@inject ISnackbar snackBar;
+@inject IDialogService DialogService;
+
+<MudDropContainer T="Device" Items="deviceList" ItemsSelector="@((Device,dropzone) => Device.RoomId.ToString() == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
+    <ChildContent>
+        @foreach (Room room in roomList)
+        {
+            <MudDropZone T="Device" Identifier="@room.Id.ToString()" Class="flex-grow-1">
+                <MudText Typo="Typo.h6" Class="my-3 ml-2">@room.Name</MudText>
+            </MudDropZone>
+        }
+    </ChildContent>
+    <ItemRenderer>
+        <MudPaper Class="d-flex flex-wrap flex-grow-1 gap-4 border-solid border-2 mud-border-primary ml-2 mr-2" Style="" Elevation="0">
+            <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Name : </strong>@context.Name</MudText>
+            @* <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Room : </strong>@context.Room.Name</MudText> *@
+            <MudText Typo="Typo.h6" Class="mr-1" Style="width: 20%; min-width: 200px;"><strong>Type : </strong>@context.Type</MudText>
+            <MudSpacer />
+            <MudButton @onclick="@(e => OpenDeviceEditDialog(context))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Primary">Edit</MudButton>
+            <MudButton @onclick="@(e => DeleteDevice(context.Id))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+        </MudPaper>
+    </ItemRenderer>
+</MudDropContainer>
+<MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4 mt-2" Style="width: 100%;" Elevation="0">
+    <MudSpacer />
+    <MudButton @onclick="@(e => OpenDeviceEditDialog(null))" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">Add New Device</MudButton>
+    @if (roomList.Count > 0)
+    {
+        <MudButton @onclick="UpdateRooms" Class="mx-5 my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary">Save Rooms</MudButton>
+    }
+</MudPaper>
+
+@code {
+    private List<Device> deviceList = new List<Device>();
+    private List<Room> roomList = new List<Room>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var roomResult = await roomService.GetAllRooms(new());
+        if (roomResult.EnsureSuccess(snackBar))
+            roomList = roomResult.Rooms;
+
+        var deviceResult = await deviceService.GetAllDevices(new());
+        if (deviceResult.EnsureSuccess(snackBar))
+            deviceList = deviceResult.Devices;
+    }
+
+    private async void OpenDeviceEditDialog(Device deviceToEditOrCreate)
+    {
+        bool IsNewDevice = true;
+
+        //zet de device en type aanpassing van het device in variable en refresh html om Device aanpassing menu zichtbaar te maken
+        var dialogParameter = new DialogParameters<EditDeviceDialog>();
+        dialogParameter.Add(p => p.device, deviceToEditOrCreate);
+        dialogParameter.Add(p => p.Rooms, roomList);
+
+        string Title = "New Device";
+        if (deviceToEditOrCreate is not null)
+        {
+            Title = "Edit Device";
+            IsNewDevice = false;
+        }
+
+        //Open de dialog popup voor het invoeren van device gegevens
+        var dialog = await DialogService.ShowAsync<EditDeviceDialog>(Title, dialogParameter);
+        var result = await dialog.Result;
+
+        if (result.Data != "Close")
+        {
+            //Update de roomlist nadat er een room is bewerkt of toegevoegd
+            if (IsNewDevice)
+            {
+                Device newImplementDeivce = result.Data as Device;
+                newImplementDeivce.Room = roomList.Where(r => r.Id == newImplementDeivce.RoomId).ToList().First();
+                deviceList.Add(newImplementDeivce);
+            }
+            else
+            {
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().Name = (result.Data as Device).Name;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().RoomId = (result.Data as Device).RoomId;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().Type = (result.Data as Device).Type;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().Room = (result.Data as Device).Room;
+                deviceList.Where(r => r.Id == (result.Data as Device).Id).ToList().First().JsonObjectConfig = (result.Data as Device).JsonObjectConfig;
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateRooms()
+    {   //Update device naar database met de api
+        var changedRooms = deviceList.Where(c => c.RoomId != c.Room.Id).ToList();
+        var result = await deviceService.UpdateDevicesRange(new(changedRooms));
+        result.Show(snackBar, "Device is succesfully updated!", Severity.Success);
+    }
+
+    private async Task DeleteDevice(Guid deviceGuid)
+    {
+        //Verwijder device uit de databse met de api
+        var result = await deviceService.DeleteDevice(new(deviceGuid));
+        result.Show(snackBar, "Device is succesfully deleted!", Severity.Success);
+        if (result.WasSuccess())
+        {   //local delete from ui
+            deviceList.RemoveAll(d => d.Id == deviceGuid);
+        }
+    }
+
+    private void ItemUpdated(MudItemDropInfo<Device> dropItem)
+    {
+        //Pas de room aan in de _deviceList van de Drag en Drop container
+        dropItem.Item.Room = roomList.Where(r => r.Id == Guid.Parse(dropItem.DropzoneIdentifier)).First();
+    }
+}

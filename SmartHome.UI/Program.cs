@@ -47,6 +47,8 @@ public class Program
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
+        builder.Services.AddScoped<IRoomService, RoomService>();
+        builder.Services.AddScoped<IRoutineService, RoutineService>();
 
         //keep track of selected smarthome
         builder.Services.AddScoped<SelectedSmartHomeService>();
