@@ -135,3 +135,25 @@ public class GetSmartHomeByIdEndpoint : BasicEndpointBase<GuidRequest, SmartHome
         }
     }
 }
+
+public class GetAllUsersEndpoint : BasicEndpointBase<EmptySmartHomeRequest, UserListResponse>
+{
+    public required ISmartHomeService Service { get; set; }
+    public override void Configure()
+    {
+        Get(SharedConfig.Urls.SmartHome.GetAllUsers);
+        SecureJwtEndpoint();
+    }
+
+    public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await SendAsync(await Service.GetAllUsers(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(UserListResponse.Error(ex));
+        }
+    }
+}

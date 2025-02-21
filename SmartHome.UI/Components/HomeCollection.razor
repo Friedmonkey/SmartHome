@@ -17,10 +17,10 @@
             {
                 <MudText Class="mx-auto mb-5" Typo="Typo.h4">@EmptyText</MudText>
             }
-            <MudGrid Class="gap-2">
+            <MudGrid>
                 @foreach (var smartHome in SmartHomes)
                 {
-                    <MudItem>
+                    <MudItem xs="3">
                         <SmartHomeCard Home="smartHome" IsInvite="@IsInvite" />
                     </MudItem>
                 }

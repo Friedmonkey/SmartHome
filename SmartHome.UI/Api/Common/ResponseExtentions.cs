@@ -5,6 +5,18 @@ using SmartHome.Common.Models;
 namespace SmartHome.UI.Api;
 public static class ResponseExtentions
 {
+    public static bool WasSuccessAndShow<T>(this Response<T>? response, ISnackbar snackbar, string? successMessage = null, Severity severity = Severity.Info) where T : Response<T>
+    {
+        if (response.EnsureSuccess(snackbar))
+        {
+            if (successMessage is not null)
+            { 
+                snackbar.Add(successMessage, severity);
+                return true;
+            }
+        }
+        return false;
+    }
     public static void Show<T>(this Response<T>? response, ISnackbar snackbar, string? successMessage = null, Severity severity = Severity.Info) where T : Response<T>
     {
         if (response.EnsureSuccess(snackbar))

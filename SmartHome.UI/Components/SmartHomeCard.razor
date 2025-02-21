@@ -5,7 +5,7 @@
 
 <style>
     .SmartHomeCard {
-        background-color: var(--mud-palette-drawer-background) !important;
+    background-color: var(--mud-palette-drawer-background) !important;
     }
 </style>
 <MudCard Class="SmartHomeCard" Elevation="5">
@@ -45,6 +45,8 @@
 
         var result = await smartHomeService.AcceptSmartHomeInvite(new(Home.Id));
         result.Show(snackBar, "Invite accepted.");
+        cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetJoinedUrl);
+        cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetInvitesUrl);
         NavMenu.ReloadPage(navManager, "/smarthome");
     }
     public void OpenHome()
