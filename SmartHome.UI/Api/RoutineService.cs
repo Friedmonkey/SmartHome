@@ -1,4 +1,5 @@
-﻿using SmartHome.Common.Api;
+﻿using SmartHome.Common;
+using SmartHome.Common.Api;
 using static SmartHome.Common.Api.IRoutineService;
 
 namespace SmartHome.UI.Api;
@@ -13,30 +14,30 @@ public class RoutineService : IRoutineService
 
     public async Task<GuidResponse> CreateDeviceAction(DeviceActionRequest request)
     {
-        throw new NotImplementedException();
+         return await _api.Post<GuidResponse>(SharedConfig.Urls.Routine.CreateDeviceAction, request);
     }
     public async Task<GuidResponse> CreateRoutine(RoutineRequest request)
     {
-        throw new NotImplementedException();
+         return await _api.Post<GuidResponse>(SharedConfig.Urls.Routine.CreateRoutine, request);
     }
     public async Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request)
     {
-        throw new NotImplementedException();
+         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.DeleteDeviceAction, request);
     }
     public async Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request)
     {
-        throw new NotImplementedException();
+         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.DeleteRoutine, request);
     }
     public async Task<RoutineListResponse> GetAllRoutines(EmptySmartHomeRequest request)
     {
-        throw new NotImplementedException();
+         return await _api.Post<RoutineListResponse>(SharedConfig.Urls.Routine.GetAllRoutines, request);
     }
     public async Task<SuccessResponse> UpdateDeviceAction(DeviceActionRequest request)
     {
-        throw new NotImplementedException();
+         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.DeleteDeviceAction, request);
     }
     public async Task<SuccessResponse> UpdateRoutine(RoutineRequest request)
     {
-        throw new NotImplementedException();
+         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.UpdateRoutine, request);
     }
 }
