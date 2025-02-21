@@ -99,11 +99,13 @@ namespace SmartHome.Backend.Api
 
             var smartUsers = await _ctx.DbContext.SmartUsers.Where(sm => sm.SmartHomeId == request.smartHome).ToListAsync();
 
-            ////somehow couple the account
-            //foreach (var user in smartUsers)
-            //{
-            //    user.Account = await _ctx.UserManager.FindByIdAsync(user.AccountId.ToString());
-            //}
+            //somehow couple the account
+            foreach (var user in smartUsers)
+            {
+                user.Account = await _ctx.UserManager.Users.FirstOrDefaultAsync(a => a.Id == user.AccountId);
+                if (user.Account == null)
+                    throw new ApiError("Unable to get Account for user" + user.Id);
+            }
 
             return new UserListResponse(smartUsers);
         }
