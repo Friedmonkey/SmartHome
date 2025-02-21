@@ -49,6 +49,13 @@ public class SharedConfig
             public const string DeleteRoom2 = RoomBase + "DeleteRoom2";
         }
 
+        private const string LogBase = ApiBase + "log/";
+        public static class Log
+        {
+            public const string GetAllLogs = LogBase + "GetAllLogs";
+            public const string CreateLog = RoomBase + "CreateLog";
+        }
+
         private const string SmartHomeBase = ApiBase + "SmartHome/";
         public static class SmartHome
         {

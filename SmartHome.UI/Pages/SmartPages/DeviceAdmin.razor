@@ -6,7 +6,7 @@
 @inject ISnackbar snackBar;
 @inject IDialogService DialogService;
 
-<MudDropContainer T="Device" Items="deviceList" ItemsSelector="@((Device,dropzone) => Device.RoomId.ToString() == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
+<MudDropContainer T="Device" Items="deviceList" ItemsSelector="@((Device,dropzone) => Device.Room.Id.ToString() == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
     <ChildContent>
         @foreach (Room room in roomList)
         {
@@ -37,6 +37,7 @@
 
 @code {
     private List<Device> deviceList = new List<Device>();
+
     private List<Room> roomList = new List<Room>();
 
     protected override async Task OnInitializedAsync()
@@ -95,7 +96,7 @@
     {   //Update device naar database met de api
         var changedRooms = deviceList.Where(c => c.RoomId != c.Room.Id).ToList();
         var result = await deviceService.UpdateDevicesRange(new(changedRooms));
-        result.Show(snackBar, "Device is succesfully updated!", Severity.Success);
+        result.Show(snackBar, "Device is succesfully updated!", Severity.Success); 
     }
 
     private async Task DeleteDevice(Guid deviceGuid)
@@ -112,6 +113,6 @@
     private void ItemUpdated(MudItemDropInfo<Device> dropItem)
     {
         //Pas de room aan in de _deviceList van de Drag en Drop container
-        dropItem.Item.Room = roomList.Where(r => r.Id == Guid.Parse(dropItem.DropzoneIdentifier)).First();
+        dropItem.Item.Room = roomList.Where(r => r.Id == Guid.Parse(dropItem.DropzoneIdentifier)).ToList().First();
     }
 }
