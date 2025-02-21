@@ -1,11 +1,34 @@
 ﻿@page "/smarthome/{SmartGuid}/admin/logs"
 @inherits SmartHomeGuidPage
-@* @inject ILogService logService; *@
+@inject ILogService logService;
 @inject ISnackbar snackBar;
+
+@{
+    List<Log> _LogList = new List<Log>();
+    _LogList = logList;
+}
 
 <MudPaper Class="justify-center" Style="width: 100%; height: 100%;">
     <MudPaper Class="rounded-lg " Style="background-color: slategray;">
-
+        @foreach (Log log in _LogList) {
+            <MudText Typo="Typo.subtitle2">
+                @log.CreateOn.Day + 
+                "-" + 
+                @log.CreateOn.Month + 
+                "-" + 
+                @log.CreateOn.Year + 
+                " " + 
+                @log.CreateOn.Hour + 
+                ":" + 
+                @log.CreateOn.Minute + 
+                ":" 
+                @log.CreateOn.Second + 
+                " > " + 
+                @log.Action +
+                " > " +
+                @log.Type
+            </MudText>
+        }
     </MudPaper>
 </MudPaper>
 
@@ -14,7 +37,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //logList = await logService.GetAllLogs(new());
+        var result = await logService.GetAllLogs(new());
+
+        if (result.EnsureSuccess(snackBar)) {
+            logList = result.Logs;
+            StateHasChanged();
+        }
        // var result = await logService.GetAllLogs(new());
     }
 }

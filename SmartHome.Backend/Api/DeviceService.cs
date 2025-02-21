@@ -20,6 +20,8 @@ public class DeviceService : IDeviceService
     public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
+        
+        //_ctx.CreateLog("User", request, LogType.Action);
 
         List<Device>? deviceList = null;
         if (smartUser.Role == UserRole.Admin)

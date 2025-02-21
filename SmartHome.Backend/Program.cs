@@ -51,7 +51,6 @@ public class Program
         builder.Services.AddScoped<RoomContext>();
         builder.Services.AddScoped<RoutineContext>();
         builder.Services.AddScoped<ApiContext>();
-        builder.Services.AddScoped<LogContext>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IRoomService, RoomService>();
         builder.Services.AddScoped<ILogService, LogService>();
