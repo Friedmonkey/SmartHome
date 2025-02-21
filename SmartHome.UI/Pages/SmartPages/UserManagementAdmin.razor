@@ -67,6 +67,10 @@ Items="allUsers">
 
     public void Manage(Guid id)
     {
+        if (CurrentSmartHome is null)
+        {
+            snackBar.Add("CurrentSmartHome was empty!", Severity.Error);
+        }
         navManager.NavigateTo($"/smarthome/{CurrentSmartHome.Id}/admin/users/{id}");
     }
 }
