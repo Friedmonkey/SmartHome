@@ -1,4 +1,4 @@
-﻿<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+﻿<MudSwitch @bind-Value="@Config.Enabled" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
 
 @code {
     [Parameter]
@@ -12,5 +12,5 @@
         base.OnInitialized();
     }
 
-    private string StatusText => Config.Ingeschakeld ? "Ingeschakeld" : "Uitgeschakeld";
+    private string StatusText => Config.Enabled ? "Ingeschakeld" : "Uitgeschakeld";
 }

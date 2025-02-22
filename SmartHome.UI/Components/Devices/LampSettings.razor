@@ -1,11 +1,11 @@
-﻿<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
-@if (Config.Helderheid != -1)
+﻿<MudSwitch @bind-Value="@Config.Enabled" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+@if (Config.Brightness != -1)
 {
-    <MudSlider Style="width: 90%" Size="Size.Large" @bind-Value="Config.Helderheid"></MudSlider>
+    <MudSlider Style="width: 90%" Size="Size.Large" @bind-Value="Config.Brightness"></MudSlider>
 }
-@if (Config.Kleur != "")
+@if (Config.Color != "")
 {
-    <MudColorPicker Label="Kleur" @bind-Text="Config.Kleur" ColorPickerView="ColorPickerView.Palette" />
+    <MudColorPicker Label="Kleur" @bind-Text="Config.Color" ColorPickerView="ColorPickerView.Palette" />
 }
 
 @code {
@@ -20,5 +20,5 @@
         base.OnInitialized();
     }
 
-    private string StatusText => Config.Ingeschakeld ? "Ingeschakeld" : "Uitgeschakeld";
+    private string StatusText => Config.Enabled ? "Ingeschakeld" : "Uitgeschakeld";
 }

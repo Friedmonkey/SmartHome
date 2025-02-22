@@ -1,5 +1,5 @@
-﻿<MudSwitch @bind-Value="Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
-<MudSelect @bind-Value="Config.Zender" Label="Zender" Variant="Variant.Outlined">
+﻿<MudSwitch @bind-Value="Config.Enabled" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+<MudSelect @bind-Value="Config.Channel" Label="Zender" Variant="Variant.Outlined">
     <MudSelectItem Value="@("NPO 1")" />
     <MudSelectItem Value="@("NPO 2")" />
     <MudSelectItem Value="@("NPO 3")" />
@@ -17,13 +17,13 @@
     [Parameter]
     public Device Device { get; set; }
 
-    private TelevisieConfig Config;
+    private TelevisionConfig Config;
 
     protected override void OnInitialized()
     {
-        Config = Device.GetConfig<TelevisieConfig>();
+        Config = Device.GetConfig<TelevisionConfig>();
         base.OnInitialized();
     }
 
-    private string StatusText => Config.Ingeschakeld ? "Ingeschakeld" : "Uitgeschakeld";
+    private string StatusText => Config.Enabled ? "Ingeschakeld" : "Uitgeschakeld";
 }
