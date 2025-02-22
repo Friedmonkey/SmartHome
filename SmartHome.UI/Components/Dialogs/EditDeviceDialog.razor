@@ -1,239 +1,127 @@
-﻿@inject IDeviceService deviceService;
+﻿@inject IRoomService roomService;
+@inject IDeviceService deviceSerice;
 @inject ISnackbar snackBar;
 
-<MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">
-    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
+<MudDialog>
+    <TitleContent>
         <MudText Typo="Typo.h4">Device Name</MudText>
-        <MudTextField @bind-Value="@DeviceName" Label="Name" Variant="Variant.Outlined"></MudTextField>
-    </MudPaper>
-
-    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
-        <MudText Class="mb-4" Typo="Typo.h4">Room</MudText>
-        <MudSelect @bind-Value="@RoomName" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
-            @foreach (Room room in _Rooms)
-            {
-                //Zet alle rooms in het dropdown menu
-                <MudSelectItem Value="@room.Name"></MudSelectItem>
-            }
-        </MudSelect>
-    </MudPaper>
-
-    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
-        <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
-        <MudSelect Class="mb-4" T="DeviceType" ValueChanged="DeviceTypeChanche" SelectedValues="@_DeviceType" Label="Select Type" Variant="Variant.Outlined">
-            <MudSelectItem Value="@DeviceType.Lamp">
-                <img src="/Afbeeldingen/licht-aan.png" height="14" class="mr-1" /> Lamp
-            </MudSelectItem>
-            <MudSelectItem Value="@DeviceType.Televisie">
-                <img src="/Afbeeldingen/televisie.png" height="14" class="mr-1" /> Televisie
-            </MudSelectItem>
-            <MudSelectItem Value="@DeviceType.Wasmachine">
-                <img src="/Afbeeldingen/wasmachine.png" height="14" class="mr-1" /> Wasmachine
-            </MudSelectItem>
-            <MudSelectItem Value="@DeviceType.Router">
-                <img src="/Afbeeldingen/router.png" height="14" class="mr-1" /> Router
-            </MudSelectItem>
-        </MudSelect>
-    </MudPaper>
-    @if (_DeviceType.ToList().ToList().First() == DeviceType.Lamp)
-    {
-        //Extra UI opties voor het type Lamp
+        <MudTextField @bind-Value="@NewDevice.Name" Label="Name" Variant="Variant.Outlined" />
+    </TitleContent>
+    <DialogContent>
         <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
-            <MudText Class="mb-4" Typo="Typo.h4">ConfigType</MudText>
-            <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Elevation="0">
-                <MudCheckBox @bind-Value="@BrightnessEnable" Label="Enable Brightness"></MudCheckBox>
-                <MudCheckBox @bind-Value="@ColorEnabled" Label="Enable Color"></MudCheckBox>
-            </MudPaper>
+            <MudText Class="mb-4" Typo="Typo.h4">Room</MudText>
+            @if (Rooms.Count == 0)
+            {
+                <MudText Color="Color.Error">There are no rooms, create a room first!</MudText>
+            }
+            else
+            { 
+                <MudSelect @bind-Value="@NewDevice.RoomId" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
+                    @foreach (Room room in Rooms)
+                    {
+                        <MudSelectItem Value="@room.Id">@room.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            }
         </MudPaper>
-    }
-    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
-        <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
-        <MudSpacer />
-        @if (IsNewDevice)
-        {
-            <MudButton @onclick="CreateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
-        }
-        else
-        {
-            <MudButton @onclick="UpdateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
-        }
-    </MudPaper>
-</MudPaper>
+
+        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
+            <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
+            <MudSelect Class="mb-4" T="DeviceType" @bind-Value="@NewDevice.Type" Label="Select Type" Variant="Variant.Outlined">
+                @foreach (DeviceType deviceType in Enum.GetValues<DeviceType>())
+                {
+                    <MudSelectItem Value="@deviceType">
+                        <img src="@deviceType.GetImage()" height="14" class="mr-1" /> @deviceType.ToString()
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
+            <MudButton Onclick="Close" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Cancel</MudButton>
+            <MudSpacer />
+            @if (IsNewDevice)
+            {
+                <MudButton @onclick="CreateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Create new device</MudButton>
+            }
+            else
+            {
+                <MudButton @onclick="UpdateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Update Device</MudButton>
+            }
+        </MudPaper>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    private string DeviceName = "";
-    private string RoomName = "";
-    private IEnumerable<DeviceType> _DeviceType;
-    private bool BrightnessEnable = false;
-    private bool ColorEnabled = false;
-    private bool IsNewDevice = true;
+    [CascadingParameter]
+    IMudDialogInstance? MudDialog { get; set; }
+
+    [Parameter]
+    public List<Room> Rooms { get; set; }
+
+    [Parameter]
+    public Device NewDevice { get; set; }
+
+    [Parameter]
+    public bool IsNewDevice { get; set; }
 
     private async Task UpdateDevice()
     {
-        if (!(DeviceName != _device.Name || RoomName != _device.Room.Name || _DeviceType.ToList().First() != _device.Type))
-        {
-            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
+        if (!Validate())
             return;
-        }
-        if (!(DeviceName != string.Empty && RoomName != string.Empty))
-        {
-            snackBar.Add("Not all values has a value. Change all the values!", Severity.Warning);
-            return;
-        }
 
-        //Als er 1 of meer waarden verandert zijn in de UI
-        _device.Name = DeviceName;
-        _device.RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id;
-        _device.Type = _DeviceType.ToList().First();
-        _device.JsonObjectConfig = GetDeviceConfig(_DeviceType.ToList().First());
-
-        //Update device naar database met de api
-        var result = await deviceService.UpdateDevice(new(_device));
+        NewDevice.SaveDeviceConfig();
+        var result = await deviceSerice.UpdateDevice(new(NewDevice));
 
         if (result.EnsureSuccess(snackBar))
         {
             snackBar.Add("Device is succesfully updated!", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(_device));
+            Close();
         }
     }
 
     private async Task CreateDevice()
     {
-        if (DeviceName == string.Empty || RoomName == string.Empty)
-        {
-            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
+        NewDevice.JsonObjectConfig = DeviceConfig.MakeNewDevice;
+        if (!Validate())
             return;
-        }
-        //Als alle waarden zijn ingevuld in de UI
-        Device newDevice = new Device
+        NewDevice.LoadDeviceConfig(); //loads new config for the type
+
+
+        NewDevice.SaveDeviceConfig();
+        var result = await deviceSerice.CreateDevice(new(NewDevice));
+        if (result.WasSuccessAndShow(snackBar, "Device is succesfully created!", Severity.Success))
         {
-            Name = DeviceName,
-            RoomId = _Rooms.Where(r => r.Name == RoomName).ToList().First().Id,
-            Type = _DeviceType.ToList().First(),
-            JsonObjectConfig = GetDeviceConfig(_DeviceType.ToList().First())
-            //Room = _Rooms.Where(r => r.Name == RoomName).ToList().First()
-        };
+            NewDevice.Id = result.Id;
+            Close();
+        }
+    }
 
-        //Maar een nieuwe device aan in de database met de api
-        var result = await deviceService.CreateDevice(new(newDevice));
-        result.Show(snackBar, "Device is succesfully created!", Severity.Success);
-
-        if (result.WasSuccess())
+    private bool Validate()
+    {
+        try
         {
-            newDevice.Id = result.Id;
-            MudDialog.Close(DialogResult.Ok(newDevice));
+            if (string.IsNullOrWhiteSpace(NewDevice.Name))
+                throw new Exception("Device name is required.");
+
+            if (!Enum.IsDefined(NewDevice.Type))
+                throw new Exception("Device type is not defined.");
+
+            if (string.IsNullOrWhiteSpace(NewDevice.JsonObjectConfig))
+                throw new Exception("Device config is required.");
+
+            if (NewDevice.RoomId == Guid.Empty)
+                throw new Exception("Device room is required.");
+
+            return true;
         }
-    }
-
-    [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; } = default!;
-
-    private async void CloseMenu()
-    {
-        //Verzoek om shcerm te sluiten
-        MudDialog.Close(DialogResult.Ok("Close"));
-    }
-
-    private void RoomChanche(Room selected)
-    {
-        var Room = selected;
-    }
-
-    private void DeviceTypeChanche(DeviceType selected)
-    {
-        //Zet de juiste device type in de variable en herlaad de UI voor aparte html voor het type Lamp
-        List<DeviceType> list = new List<DeviceType>();
-        list.Add(selected);
-        _DeviceType = list.AsEnumerable();
-        StateHasChanged();
-    }
-
-    private string GetDeviceConfig(DeviceType Type)
-    {
-        string Json = string.Empty;
-
-        //Maak een leeg json configuratie bestand aan voor elk type device
-        switch (_DeviceType.ToList().First())
+        catch (Exception ex)
         {
-            case DeviceType.Lamp:
-                string Color = string.Empty;
-
-                if (ColorEnabled)
-                {
-                    Color = "#ff9800";
-                }
-
-                int Helderhied = -1;
-
-                if (BrightnessEnable)
-                {
-                    Helderhied = 0;
-                }
-                Json = JsonConvert.SerializeObject(new LampConfig { Ingeschakeld = false, Helderheid = Helderhied, Kleur = Color });
-                break;
-            case DeviceType.Televisie:
-                Json = JsonConvert.SerializeObject(new TelevisieConfig { Ingeschakeld = false, Zender = "" });
-                break;
-            case DeviceType.Wasmachine:
-                Json = JsonConvert.SerializeObject(new WasmachineConfig { Ingeschakeld = false, Programma = "" });
-                break;
-            case DeviceType.Router:
-                Json = JsonConvert.SerializeObject(new RouterConfig { Ingeschakeld = false });
-                break;
-        }
-
-        return Json;
-    }
-
-    private Device _device;
-
-    [Parameter]
-    public Device? device
-    {
-        set
-        {
-            if (value is null)
-            {
-                List<DeviceType> list = new List<DeviceType>();
-                list.Add(DeviceType.Lamp);
-                _DeviceType = list.AsEnumerable();
-                IsNewDevice = true;
-            }
-            else
-            {
-                //Zet de waarden van de device in de variable met het juiste formaat
-                _device = value;
-                DeviceName = value.Name;
-                RoomName = value.Room.Name;
-                List<DeviceType> list = new List<DeviceType>();
-                list.Add(value.Type);
-                _DeviceType = list.AsEnumerable();
-                if (value.Type == DeviceType.Lamp)
-                {
-                    var lampConfig = JsonConvert.DeserializeObject(value.JsonObjectConfig);
-                }
-                IsNewDevice = false;
-            }
-        }
-
-        get {
-
-            return _device;
+            snackBar.Add(ex.Message, Severity.Error);
+            return false;
         }
     }
 
-    private List<Room> _Rooms;
-
-    [Parameter]
-    public List<Room> Rooms
-    {
-        set
-        {
-            _Rooms = value;
-        }
-
-        get {
-            return _Rooms;
-        }
-    }
+    public void Close() => MudDialog?.Close();
 }
