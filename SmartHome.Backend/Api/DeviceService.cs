@@ -54,7 +54,7 @@ public class DeviceService : IDeviceService
         foreach (var device in deviceList)
         {
             if (!Rooms.TryGetValue(device.RoomId, out Room? room))
-                room = await _ctx.DbContext.Rooms.FirstOrDefaultAsync(r => r.Id == device.Id && r.SmartHomeId == request.smartHome);
+                room = await _ctx.DbContext.Rooms.FirstOrDefaultAsync(r => r.Id == device.RoomId && r.SmartHomeId == request.smartHome);
             if (room is null)
                 throw new ApiError("Room not found!");
 
@@ -72,7 +72,7 @@ public class DeviceService : IDeviceService
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
         foreach (Device device in request.devices)
         {
-            await _ctx.Device.UpdateDeviceSafe(request.smartHome, device, smartUser.Id);
+            await _ctx.Device.UpdateDeviceSafe(request.smartHome, device, smartUser);
         }
 
         return SuccessResponse.Success();
@@ -82,7 +82,7 @@ public class DeviceService : IDeviceService
     {
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-        await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser.Id);
+        await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser);
 
         return SuccessResponse.Success();
     }
@@ -123,11 +123,12 @@ public class DeviceService : IDeviceService
 
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
-        await _ctx.Device.EnforceHasAccessToDevice(request.smartHome, request.DeviceId);
+        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
+        var device = await _ctx.Device.GetDeviceWithAccess(smartUser, request.DeviceId);
 
-        var result = await _ctx.DbContext.Devices
-            .Where(d => d.Id == request.DeviceId)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JsonObjectConfig, request.ConfigJson));
+        device.JsonObjectConfig = request.ConfigJson;
+
+        await _ctx.DbContext.SaveChangesAsync();
 
         return SuccessResponse.Success();
     }

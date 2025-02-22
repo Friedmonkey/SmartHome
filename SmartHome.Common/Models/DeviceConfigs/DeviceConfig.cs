@@ -1,5 +1,6 @@
 ﻿using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 namespace SmartHome.Common.Models.Configs;
 
@@ -7,6 +8,7 @@ namespace SmartHome.Common.Models.Configs;
 // Base config class
 public abstract class DeviceConfig
 {
+    [NotMapped, Newtonsoft.Json.JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
     public const string MakeNewDevice = "makeNewDevice";
 }
 
@@ -86,7 +88,7 @@ public static class DeviceExtensions
         if (!device.IsLoaded())
             throw new Exception("Device configuration is not set.");
 
-        device.JsonObjectConfig = JsonSerializer.Serialize(device.Config);
+        device.JsonObjectConfig = JsonSerializer.Serialize(device.Config, device.Config.GetType());
     }
 
     private static T DeserializeConfig<T>(Device device) where T : DeviceConfig, new()

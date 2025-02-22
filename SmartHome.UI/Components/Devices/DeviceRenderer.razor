@@ -1,5 +1,6 @@
 ﻿@inject IDeviceService deviceSerice;
 @inject ISnackbar snackBar;
+@inject MemoryCacheService cacheService;
 
 @if (Device is not null)
 {
@@ -25,10 +26,10 @@
                     break;
             }
         </MudPaper>
-    <MudPaper>
-        <MudButton OnClick="Save">Save</MudButton>
+        <MudPaper>
+            <MudButton OnClick="Save">Save</MudButton>
+        </MudPaper>
     </MudPaper>
-</MudPaper>
 }
 
 @code {
@@ -49,7 +50,9 @@
         if (Device is null)
             throw new ArgumentException();
 
+        Device.SaveDeviceConfig();
         var result = await deviceSerice.UpdateDevice(new(Device));
-        result.Show(snackBar);
+        if (result.WasSuccessAndShow(snackBar, "Device updated!", Severity.Success))
+            cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.Device.GetAllDevices);
     }
 }

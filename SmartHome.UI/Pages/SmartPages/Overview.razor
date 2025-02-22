@@ -36,7 +36,10 @@
     {
         var devices = await deviceService.GetAllDevices(new());
         if (devices.EnsureSuccess(snackBar))
+        { 
             deviceList = devices.Devices;
+            deviceList.LoadMultipleDeviceConfigs();
+        }
 
         var rooms = await roomService.GetAllRooms(new());
         if (rooms.EnsureSuccess(snackBar))

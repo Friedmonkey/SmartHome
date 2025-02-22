@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common;
+using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
 using Device = SmartHome.Common.Models.Entities.Device;
 
@@ -14,9 +15,9 @@ public class DeviceContext
         _dbContext = dbContext;
     }
 
-    public async Task UpdateDeviceSafe(Guid smartHomeId, Device updateDevice, Guid smartUserId)
+    public async Task UpdateDeviceSafe(Guid smartHomeId, Device updateDevice, SmartUserModel smartUser)
     {
-        Device existingDevice = await GetDeviceWithAccess(updateDevice.Id, smartUserId);
+        Device existingDevice = await GetDeviceWithAccess(smartUser, updateDevice.Id);
 
         if (updateDevice.Name != existingDevice.Name)
         { 
@@ -81,9 +82,9 @@ public class DeviceContext
             throw new ApiError("The device does not exist within the given smarthome!");
     }
 
-    public async Task<Device> GetDeviceWithAccess(Guid deviceid, Guid smartUserId)
+    public async Task<Device> GetDeviceWithAccess(SmartUserModel smartUser, Guid deviceid)
     {
-        await EnforceHasAccessToDevice(smartUserId, deviceid);
+        await EnforceHasAccessToDevice(smartUser, deviceid);
         return await GetDevice(deviceid);
     }
     public async Task<Device> GetDevice(Guid deviceid)
@@ -94,9 +95,12 @@ public class DeviceContext
 
         return device;
     }
-    public async Task EnforceHasAccessToDevice(Guid smartUserId, Guid deviceid)
+    public async Task EnforceHasAccessToDevice(SmartUserModel smartUser, Guid deviceid)
     {
-        var hasAccess = await _dbContext.DeviceAccesses.AnyAsync(da => da.SmartUserId == smartUserId && da.DeviceId == deviceid);
+        if (smartUser.Role == UserRole.Admin)
+            return;
+
+        var hasAccess = await _dbContext.DeviceAccesses.AnyAsync(da => da.SmartUserId == smartUser.Id && da.DeviceId == deviceid);
         if (!hasAccess)
             throw new ApiError("User does not have access to device or it does not exist!");
     }
