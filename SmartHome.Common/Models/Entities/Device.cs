@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using SmartHome.Common.Models.Enums;
+using SmartHome.Common.Models.Configs;
 
 namespace SmartHome.Common.Models.Entities;
 public class Device : Entity
@@ -19,4 +20,6 @@ public class Device : Entity
     public Guid RoomId { get; set; }
 
     public Room Room { get; set; }
+
+    public DeviceConfig Config { get; set; }
 }

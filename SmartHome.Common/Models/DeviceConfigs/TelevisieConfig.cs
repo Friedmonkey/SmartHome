@@ -1,6 +1,6 @@
 ﻿namespace SmartHome.Common.Models.Configs;
 
-public class TelevisieConfig
+public class TelevisieConfig : DeviceConfig
 {
     public bool Ingeschakeld { get; set; }
 

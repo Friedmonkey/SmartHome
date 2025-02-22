@@ -6,7 +6,7 @@
 @inject ISnackbar snackBar;
 @inject IDialogService DialogService;
 
-<MudDropContainer T="Device" Items="deviceList" ItemsSelector="@((Device,dropzone) => Device.Room.Id.ToString() == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
+<MudDropContainer T="Device" Items="deviceList" ItemsSelector="@((Device,dropzone) => Device.RoomId.ToString() == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
     <ChildContent>
         @foreach (Room room in roomList)
         {
@@ -37,7 +37,6 @@
 
 @code {
     private List<Device> deviceList = new List<Device>();
-
     private List<Room> roomList = new List<Room>();
 
     protected override async Task OnInitializedAsync()

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
@@ -49,21 +50,17 @@ public class DeviceService : IDeviceService
                 ).ToListAsync();
         }
 
-        List<Room> rooms = new List<Room>();
-        rooms = await _ctx.DbContext.Rooms.Where(x => x.SmartHomeId == request.smartHome).ToListAsync();
+        Dictionary<Guid, Room> Rooms = new Dictionary<Guid, Room>();
+        foreach (var device in deviceList)
+        {
+            if (!Rooms.TryGetValue(device.RoomId, out Room? room))
+                room = await _ctx.DbContext.Rooms.FirstOrDefaultAsync(r => r.Id == device.Id && r.SmartHomeId == request.smartHome);
+            if (room is null)
+                throw new ApiError("Room not found!");
 
-        //Zet de room obejct in de devices
-        deviceList = deviceList.Select(d => {
-            {
-                d.Room =
-                new Room
-                {
-                    Id = rooms.Where(x => x.Id == d.RoomId).FirstOrDefault().Id,
-                    Name = rooms.Where(x => x.Id == d.RoomId).FirstOrDefault().Name,
-                };
-            }
-            return d;
-        }).ToList();
+            Rooms[device.RoomId] = room;
+            device.Room = room;
+        }
 
         if (deviceList is null)
             return DeviceListResponse.Failed("deviceList was null, unhandled role?");
@@ -75,7 +72,7 @@ public class DeviceService : IDeviceService
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
         foreach (Device device in request.devices)
         {
-            await _ctx.DbContext.Devices.Where(d => d.Id == device.Id).ExecuteUpdateAsync(setters => setters.SetProperty(d => d.RoomId, device.Room.Id));
+            await _ctx.Device.UpdateDeviceSafe(request.smartHome, device, smartUser.Id);
         }
 
         return SuccessResponse.Success();
@@ -85,22 +82,9 @@ public class DeviceService : IDeviceService
     {
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-        if (!_ctx.DbContext.Devices.Where(d => d.Id != request.device.Id).Any(d => d.Name == request.device.Name))
-        {
-            //Als de device naam niet al bestaaat
+        await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser.Id);
 
-            _ctx.DbContext.Devices.Where(d => d.Id == request.device.Id).ExecuteUpdateAsync(setters => setters
-            .SetProperty(d => d.Name, request.device.Name)
-            .SetProperty(d => d.JsonObjectConfig, request.device.JsonObjectConfig)
-            .SetProperty(d => d.RoomId, request.device.RoomId)
-            .SetProperty(d => d.Type, request.device.Type)
-            );
-
-            return SuccessResponse.Success();
-        } else
-        {
-            return SuccessResponse.Failed("Device naam bestaat al");
-        }        
+        return SuccessResponse.Success();
     }
     public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
     {
@@ -113,6 +97,7 @@ public class DeviceService : IDeviceService
     public async Task<GuidResponse> CreateDevice(DeviceRequest request)
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        _ctx.Device.EnforceCorrectDeviceType(request.device.Type);
 
         if (request.device.RoomId == Guid.Empty)
             return GuidResponse.Failed("Invalid room ID!");
@@ -122,7 +107,6 @@ public class DeviceService : IDeviceService
 
         await _ctx.Device.EnforceDeviceNameUnique(request.smartHome, request.device.Name);
 
-
         Device newDevice = new Device() 
         {
             Name = request.device.Name,
@@ -131,18 +115,6 @@ public class DeviceService : IDeviceService
             JsonObjectConfig = request.device.JsonObjectConfig,
         };
         var result = await _ctx.DbContext.Devices.AddAsync(newDevice);
-
-
-        var SmartUserIdList = await _ctx.DbContext.SmartUsers.Where(d => d.SmartHomeId == request.smartHome).Select(d => d.Id).ToListAsync();
-
-        foreach(Guid SmartUserId in SmartUserIdList)
-        {
-            DeviceAccess deviceAccess = new DeviceAccess();
-            deviceAccess.DeviceId = newDevice.Id;
-            deviceAccess.SmartUserId = SmartUserId;
-
-            await _ctx.DbContext.DeviceAccesses.AddAsync(deviceAccess);
-        }
 
         await _ctx.DbContext.SaveChangesAsync();
 

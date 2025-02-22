@@ -1,0 +1,27 @@
+﻿@inject IDeviceService deviceService;
+
+
+<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+@if (Config.Helderheid != -1)
+{
+    <MudSlider Style="width: 90%" Size="Size.Large" @bind-Value="Config.Helderheid"></MudSlider>
+}
+@if (Config.Kleur != "")
+{
+    <MudColorPicker Label="Kleur" @bind-Text="Config.Kleur" ColorPickerView="ColorPickerView.Palette" />
+}
+
+@code {
+    [Parameter]
+    public Device Device { get; set; }
+
+    private LampConfig Config;
+
+    protected override void OnInitialized()
+    {
+        Config = Device.GetConfig<LampConfig>();
+        base.OnInitialized();
+    }
+
+    private string StatusText => Config.Ingeschakeld ? "Ingeschakeld" : "Uitgeschakeld";
+}

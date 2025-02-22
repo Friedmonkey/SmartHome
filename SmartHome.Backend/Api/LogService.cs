@@ -13,6 +13,12 @@ namespace SmartHome.Backend.Api
         {
             _ctx = context;
         }
+
+        public Task<SuccessResponse> CreateLog(ILogService.CreateLogRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<LogListResponse> GetAllLogs(EmptySmartHomeRequest request)
         {
             List<Log> logsList =  await _ctx.DbContext.Logs.Where(l => l.SmartHomeId == request.smartHome).ToListAsync();

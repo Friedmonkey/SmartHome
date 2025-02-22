@@ -20,7 +20,7 @@
 
     <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
         <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
-        <MudSelect Class="mb-4" T="DeviceType" ValueChanged="DeviceTypeChanche" SelectedValues="@_DeviceType" Label="Select Type" Variant="Variant.Outlined">
+        <MudSelect Class="mb-4" T="DeviceType" ValueChanged="DeviceTypeChange" SelectedValues="@_DeviceType" Label="Select Type" Variant="Variant.Outlined">
             <MudSelectItem Value="@DeviceType.Lamp">
                 <img src="/Afbeeldingen/licht-aan.png" height="14" class="mr-1" /> Lamp
             </MudSelectItem>
@@ -130,8 +130,7 @@
 
     private async void CloseMenu()
     {
-        //Verzoek om shcerm te sluiten
-        MudDialog.Close(DialogResult.Ok("Close"));
+        MudDialog.Close(DialogResult.Cancel);
     }
 
     private void RoomChanche(Room selected)
@@ -139,7 +138,7 @@
         var Room = selected;
     }
 
-    private void DeviceTypeChanche(DeviceType selected)
+    private void DeviceTypeChange(DeviceType selected)
     {
         //Zet de juiste device type in de variable en herlaad de UI voor aparte html voor het type Lamp
         List<DeviceType> list = new List<DeviceType>();

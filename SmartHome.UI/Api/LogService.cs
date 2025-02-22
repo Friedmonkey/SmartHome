@@ -12,6 +12,11 @@ namespace SmartHome.UI.Api
             this._api = api;
         }
 
+        public Task<SuccessResponse> CreateLog(ILogService.CreateLogRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<LogListResponse> GetAllLogs(EmptySmartHomeRequest request)
         {
             return await _api.Get<LogListResponse>(SharedConfig.Urls.Log.GetAllLogs, request);

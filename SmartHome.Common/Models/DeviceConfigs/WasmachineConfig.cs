@@ -1,8 +1,6 @@
-﻿using System;
+﻿namespace SmartHome.Common.Models.Configs;
 
-namespace SmartHome.Common.Models.Configs;
-
-public class WasmachineConfig
+public class WasmachineConfig : DeviceConfig
 {
     public bool Ingeschakeld { get; set; }
     public string Programma { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common;
+using SmartHome.Common.Models.Enums;
 using Device = SmartHome.Common.Models.Entities.Device;
 
 namespace SmartHome.Database.ApiContext;
@@ -17,29 +18,32 @@ public class DeviceContext
     {
         Device existingDevice = await GetDeviceWithAccess(updateDevice.Id, smartUserId);
 
-        await EnforceDeviceNameUnique(smartHomeId, updateDevice.Name);
-        existingDevice.Name = updateDevice.Name;
-        existingDevice.Type = updateDevice.Type;
-        existingDevice.JsonObjectConfig = updateDevice.JsonObjectConfig;
+        if (updateDevice.Name != existingDevice.Name)
+        { 
+            await EnforceDeviceNameUnique(smartHomeId, updateDevice.Name);
+            existingDevice.Name = updateDevice.Name;
+        }
+        if (updateDevice.Type != existingDevice.Type)
+        {
+            EnforceCorrectDeviceType(updateDevice.Type);
+            existingDevice.Type = updateDevice.Type;
+        }
+        if (existingDevice.JsonObjectConfig != updateDevice.JsonObjectConfig)
+        { 
+            //maby do json parsing later
+            existingDevice.JsonObjectConfig = updateDevice.JsonObjectConfig;
+        }
+        if (existingDevice.RoomId != updateDevice.RoomId)
+        {   //do we have access to the new room?
+            if (!await IsRoomInSmartHome(smartHomeId, updateDevice.RoomId))
+                throw new ApiError("The new room does not exist on the smarthome");
 
-        //so if you rename multiple the unique name still works
+            existingDevice.RoomId = updateDevice.RoomId;
+        }
+
         await _dbContext.SaveChangesAsync();
     }
 
-    ////we know this is the correct device and we know we have access to it
-
-    ////check if device with name excists
-    ////check room
-    ////check smarthome
-    ////name only needs to be unique between smarthome itself i thnik
-    //bool nameIsUsed = true;// await _dbContext.Devices.AnyAsync(d => (d.) && d.Name == );
-    //    if (nameIsUsed)
-    //        throw new ApiError($"Device with name {updateDevice.Name} already exists!");
-    ////DbContext.Devices.ExecuteUpdateAsync(idk => updateDevice);
-    //public async Task<Device> GetDevicesFromSmartHome(Guid smartHomeId)
-    //{ 
-    //    _dbContext.Rooms
-    //}
     public async Task EnforceDeviceNameUnique(Guid smartHomeId, string? deviceName)
     {
         if (string.IsNullOrEmpty(deviceName))
@@ -54,6 +58,11 @@ public class DeviceContext
 
         if (alreadyExists)
             throw new ApiError("There is already a device with the same name!!");
+    }
+    public void EnforceCorrectDeviceType(DeviceType deviceType)
+    {
+        if (!Enum.IsDefined(typeof(DeviceType), deviceType))
+            throw new ApiError("Unknown deviceType: " + deviceType);
     }
     public async Task<bool> IsRoomInSmartHome(Guid smartHomeId, Guid roomId)
     {
