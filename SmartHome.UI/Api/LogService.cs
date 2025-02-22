@@ -1,25 +1,24 @@
 ﻿using SmartHome.Common.Api;
 using SmartHome.Common;
 
-namespace SmartHome.UI.Api
+namespace SmartHome.UI.Api;
+
+public class LogService : ILogService
 {
-    public class LogService : ILogService
+    private readonly ApiService _api;
+
+    public LogService(ApiService api)
     {
-        private readonly ApiService _api;
+        this._api = api;
+    }
 
-        public LogService(ApiService api)
-        {
-            this._api = api;
-        }
+    public Task<SuccessResponse> CreateLog(ILogService.CreateLogRequest request)
+    {
+        throw new NotImplementedException();
+    }
 
-        public Task<SuccessResponse> CreateLog(ILogService.CreateLogRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<LogListResponse> GetAllLogs(EmptySmartHomeRequest request)
-        {
-            return await _api.Get<LogListResponse>(SharedConfig.Urls.Log.GetAllLogs, request);
-        }
+    public async Task<LogListResponse> GetAllLogs(EmptySmartHomeRequest request)
+    {
+        return await _api.Get<LogListResponse>(SharedConfig.Urls.Log.GetAllLogs, request);
     }
 }

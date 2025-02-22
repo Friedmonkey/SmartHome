@@ -1,7 +1,4 @@
-﻿@using SmartHome.Common.Models.Configs;
-@inject IDeviceService deviceService;
-
-<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+﻿<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
 <MudSelect @bind-Value="@Config.Programma" Label="Programma" Variant="Variant.Outlined">
     @foreach (string Programma in ProgrammaList.Keys) 
     {

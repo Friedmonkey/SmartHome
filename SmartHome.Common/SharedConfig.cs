@@ -22,7 +22,7 @@ public class SharedConfig
             public const string UpdateDevicesRange = DeviceBase + "UpdateDevicesRange";
             public const string UpdateDevice = DeviceBase + "UpdateDevice";
             public const string DeleteDevice = DeviceBase + "DeleteDevice";
-            public const string CreaateDevice = DeviceBase + "CreateDevice";
+            public const string CreateDevice = DeviceBase + "CreateDevice";
             public const string GetAllRooms = DeviceBase + "GetAllRooms";
             public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
         }

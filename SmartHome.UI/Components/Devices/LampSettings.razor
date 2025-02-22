@@ -1,7 +1,4 @@
-﻿@inject IDeviceService deviceService;
-
-
-<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+﻿<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
 @if (Config.Helderheid != -1)
 {
     <MudSlider Style="width: 90%" Size="Size.Large" @bind-Value="Config.Helderheid"></MudSlider>

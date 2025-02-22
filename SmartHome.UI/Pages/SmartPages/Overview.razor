@@ -13,10 +13,8 @@
 @foreach (Room room in roomList)
 {
     List<Device> roomDeviceslist = deviceList.Where(d => d.RoomId == room.Id).ToList();
-    //Ga door all rooms in de roomLists
     @if (roomDeviceslist.Count > 0)
     {
-        //Zet room name op het scherm
         <MudText Typo="Typo.h3" Align="Align.Center">@room.Name</MudText>
         <MudDivider DividerType='DividerType.Middle' Class='my-6' />
         <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4" Style="width: 100%; background-color: transparent;" Elevation="0">

@@ -1,0 +1,146 @@
+﻿@inject IRoomService roomService;
+@inject IDeviceService deviceSerice;
+@inject ISnackbar snackBar;
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h4">Device Name</MudText>
+        <MudTextField @bind-Value="@NewDevice.Name" Label="Name" Variant="Variant.Outlined" />
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
+            <MudText Class="mb-4" Typo="Typo.h4">Room</MudText>
+            @if (Rooms.Count == 0)
+            {
+                <MudText Color="Color.Error">There are no rooms, create a room first!</MudText>
+            }
+            else
+            { 
+                <MudSelect @bind-Value="@NewDevice.RoomId" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
+                    @foreach (Room room in Rooms)
+                    {
+                        <MudSelectItem Value="@room.Id">@room.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+        </MudPaper>
+
+        <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
+            <MudText Class="mb-4" Typo="Typo.h4">Type</MudText>
+            <MudSelect Class="mb-4" T="DeviceType" @bind-Value="@NewDevice.Type" Label="Select Type" Variant="Variant.Outlined">
+                @foreach (DeviceType deviceType in Enum.GetValues<DeviceType>())
+                {
+                    <MudSelectItem Value="@deviceType">
+                        <img src="@deviceType.GetImage()" height="14" class="mr-1" /> @deviceType.ToString()
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudPaper>
+        @*         @if (_DeviceType.ToList().ToList().First() == DeviceType.Lamp)
+        {
+                    //Extra UI opties voor het type Lamp
+            <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
+                <MudText Class="mb-4" Typo="Typo.h4">ConfigType</MudText>
+                <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 mb-4" Elevation="0">
+                    <MudCheckBox @bind-Value="@BrightnessEnable" Label="Enable Brightness"></MudCheckBox>
+                    <MudCheckBox @bind-Value="@ColorEnabled" Label="Enable Color"></MudCheckBox>
+                </MudPaper>
+            </MudPaper>
+        } *@
+    </DialogContent>
+    <DialogActions>
+        <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
+            <MudButton Onclick="Close" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Cancel</MudButton>
+            <MudSpacer />
+            @if (IsNewDevice)
+            {
+                <MudButton @onclick="CreateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Create new device</MudButton>
+            }
+            else
+            {
+                <MudButton @onclick="UpdateDevice" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Update Device</MudButton>
+            }
+        </MudPaper>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    IMudDialogInstance? MudDialog { get; set; }
+
+    [Parameter]
+    public List<Room> Rooms { get; set; }
+
+    [Parameter]
+    public Device NewDevice { get; set; }
+
+    [Parameter]
+    public bool IsNewDevice { get; set; }
+
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var result = await roomService.GetAllRooms(new());
+    //     if (result.EnsureSuccess(snackBar))
+    //         Rooms = result.Rooms;
+    // }
+
+    private async Task UpdateDevice()
+    {
+        if (!Validate())
+            return;
+
+        NewDevice.SaveDeviceConfig();
+        var result = await deviceSerice.UpdateDevice(new(NewDevice));
+
+        if (result.EnsureSuccess(snackBar))
+        {
+            snackBar.Add("Device is succesfully updated!", Severity.Success);
+            Close();
+        }
+    }
+
+    private async Task CreateDevice()
+    {
+        NewDevice.JsonObjectConfig = DeviceConfig.MakeNewDevice;
+        if (!Validate())
+            return;
+        NewDevice.LoadDeviceConfig(); //loads new config for the type
+
+
+        NewDevice.SaveDeviceConfig();
+        var result = await deviceSerice.CreateDevice(new(NewDevice));
+        if (result.WasSuccessAndShow(snackBar, "Device is succesfully created!", Severity.Success))
+        {
+            NewDevice.Id = result.Id;
+            Close();
+        }
+    }
+
+    private bool Validate()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(NewDevice.Name))
+                throw new Exception("Device name is required.");
+
+            if (!Enum.IsDefined(NewDevice.Type))
+                throw new Exception("Device type is not defined.");
+
+            if (string.IsNullOrWhiteSpace(NewDevice.JsonObjectConfig))
+                throw new Exception("Device config is required.");
+
+            if (NewDevice.RoomId == Guid.Empty)
+                throw new Exception("Device room is required.");
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            snackBar.Add(ex.Message, Severity.Error);
+            return false;
+        }
+    }
+
+    public void Close() => MudDialog?.Close();
+}

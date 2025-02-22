@@ -21,5 +21,6 @@ public class Device : Entity
 
     public Room Room { get; set; }
 
+    [NotMapped,  Newtonsoft.Json.JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
     public DeviceConfig Config { get; set; }
 }

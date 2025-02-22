@@ -6,8 +6,8 @@ namespace SmartHome.Common.Models.Configs;
 
 // Base config class
 public abstract class DeviceConfig
-{ 
-
+{
+    public const string MakeNewDevice = "makeNewDevice";
 }
 
 public static class DeviceExtensions
@@ -39,22 +39,29 @@ public static class DeviceExtensions
 
     public static string GetImage(this Device device)
     {
-        return device.Type switch
-        {
-            DeviceType.Lamp => GetLampImage(device),
-            DeviceType.Televisie => "Afbeeldingen/televisie.png",
-            DeviceType.Wasmachine => "Afbeeldingen/wasmachine.png",
-            DeviceType.Router => "Afbeeldingen/router.png",
-            _ => throw new NotImplementedException($"Unsupported device type: {device.Type}")
-        };
+        if (device.Type == DeviceType.Lamp)
+            return GetLampImage(device);
+        else
+            return device.Type.GetImage();
     }
-
     private static string GetLampImage(Device device)
     {
         var lampConfig = device.GetConfig<LampConfig>();
         return lampConfig.Ingeschakeld
             ? "Afbeeldingen/licht-aan.png"
-            : "Afbeeldingen/licht-uit.png";
+            : GetImage(DeviceType.Lamp); //on image
+    }
+
+    public static string GetImage(this DeviceType deviceType)
+    {
+        return deviceType switch
+        {
+            DeviceType.Lamp => "Afbeeldingen/licht-uit.png",
+            DeviceType.Televisie => "Afbeeldingen/televisie.png",
+            DeviceType.Wasmachine => "Afbeeldingen/wasmachine.png",
+            DeviceType.Router => "Afbeeldingen/router.png",
+            _ => throw new NotImplementedException($"Unsupported device type for image: {deviceType}")
+        };
     }
     public static void LoadMultipleDeviceConfigs(this IEnumerable<Device> devices)
     {
@@ -82,8 +89,11 @@ public static class DeviceExtensions
         device.JsonObjectConfig = JsonSerializer.Serialize(device.Config);
     }
 
-    private static T DeserializeConfig<T>(Device device) where T : DeviceConfig
+    private static T DeserializeConfig<T>(Device device) where T : DeviceConfig, new()
     {
+        if (device.JsonObjectConfig == DeviceConfig.MakeNewDevice)
+            return new T();
+
         return JsonSerializer.Deserialize<T>(device.JsonObjectConfig)
             ?? throw new Exception($"Invalid config for {device.Type}");
     }

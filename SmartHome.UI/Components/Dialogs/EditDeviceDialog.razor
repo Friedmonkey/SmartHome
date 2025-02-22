@@ -4,7 +4,7 @@
 <MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">
     <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
         <MudText Typo="Typo.h4">Device Name</MudText>
-        <MudTextField @bind-Value="@DeviceName" Label="Name" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField @bind-Value="@DeviceName" Label="Name" Variant="Variant.Outlined" />
     </MudPaper>
 
     <MudPaper Class="d-flex flex-column flex-grow-0 gap-0" Style="min-width: 370px; width: 45%" Elevation="0">
@@ -12,7 +12,6 @@
         <MudSelect @bind-Value="@RoomName" Class="mb-4" Label="Select Room" Variant="Variant.Outlined">
             @foreach (Room room in _Rooms)
             {
-                //Zet alle rooms in het dropdown menu
                 <MudSelectItem Value="@room.Name"></MudSelectItem>
             }
         </MudSelect>
@@ -63,6 +62,7 @@
 @code {
     private string DeviceName = "";
     private string RoomName = "";
+
     private IEnumerable<DeviceType> _DeviceType;
     private bool BrightnessEnable = false;
     private bool ColorEnabled = false;
