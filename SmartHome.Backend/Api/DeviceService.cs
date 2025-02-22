@@ -60,7 +60,6 @@ public class DeviceService : IDeviceService
                 {
                     Id = rooms.Where(x => x.Id == d.RoomId).FirstOrDefault().Id,
                     Name = rooms.Where(x => x.Id == d.RoomId).FirstOrDefault().Name,
-                    
                 };
             }
             return d;
