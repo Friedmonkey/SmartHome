@@ -32,9 +32,9 @@ public static class DeviceExtensions
         device.Config = device.Type switch
         {
             DeviceType.Lamp => DeserializeConfig<LampConfig>(device),
-            DeviceType.Televisie => DeserializeConfig<TelevisieConfig>(device),
+            DeviceType.Televisie => DeserializeConfig<TelevisionConfig>(device),
             DeviceType.Router => DeserializeConfig<RouterConfig>(device),
-            DeviceType.Wasmachine => DeserializeConfig<WasmachineConfig>(device),
+            DeviceType.Wasmachine => DeserializeConfig<WashingmachineConfig>(device),
             _ => throw new ArgumentException($"Unsupported device type: {device.Type}")
         };
     }
@@ -49,7 +49,7 @@ public static class DeviceExtensions
     private static string GetLampImage(Device device)
     {
         var lampConfig = device.GetConfig<LampConfig>();
-        return lampConfig.Ingeschakeld
+        return lampConfig.Enabled
             ? "Afbeeldingen/licht-aan.png"
             : GetImage(DeviceType.Lamp); //on image
     }

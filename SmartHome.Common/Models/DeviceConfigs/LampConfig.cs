@@ -2,9 +2,9 @@
 
 public class LampConfig : DeviceConfig
 {
-    public bool Ingeschakeld { get; set; }
+    public bool Enabled { get; set; }
 
-    public int Helderheid { get; set; }
+    public int Brightness { get; set; }
 
-    public string Kleur { get; set; }
+    public string Color { get; set; }
 }
