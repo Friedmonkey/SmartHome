@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager navManager;
 @inject ISmartHomeService smartHomeService;
+@inject SelectedSmartHomeService selectedSmartHomeService;
 
 @if (CurrentSmartHome is not null)
 { 
@@ -27,7 +28,8 @@
         else
         {
             CurrentSmartHome = newSelected;
-            NavMenu.ReloadPage(navManager, $"/smarthome/{newSelected.Id}/overview");
+            string newUrl = selectedSmartHomeService.GetUrlWithDiffrentSmartHomeId(newSelected.Id);
+            NavMenu.ReloadPage(navManager, newUrl);
         }
     }
 

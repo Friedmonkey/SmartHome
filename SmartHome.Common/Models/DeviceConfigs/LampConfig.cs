@@ -1,6 +1,6 @@
 ﻿namespace SmartHome.Common.Models.Configs;
 
-public class LampConfig
+public class LampConfig : DeviceConfig
 {
     public bool Ingeschakeld { get; set; }
 

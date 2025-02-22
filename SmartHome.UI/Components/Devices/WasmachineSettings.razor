@@ -1,0 +1,34 @@
+﻿<MudSwitch @bind-Value="@Config.Ingeschakeld" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+<MudSelect @bind-Value="@Config.Programma" Label="Programma" Variant="Variant.Outlined">
+    @foreach (string Programma in ProgrammaList.Keys) 
+    {
+        <MudSelectItem Value="@(Programma)" />
+    }
+</MudSelect>
+<MudButton Variant="Variant.Filled" Color="Color.Primary">Starten</MudButton>
+
+@code {
+    [Parameter]
+    public Device Device { get; set; }
+
+    private WasmachineConfig Config;
+    private Dictionary<string, int> ProgrammaList = new();
+
+    protected override void OnInitialized()
+    {
+        Config = Device.GetConfig<WasmachineConfig>();
+
+        ProgrammaList.Add("Gekleurde was (1 Uur)", 60);
+        ProgrammaList.Add("Katoen (1,5 Uur)", 90);
+        ProgrammaList.Add("Spijker Broeken (45 Minuten)", 45);
+        DateTime EindTime = Config.ProgrammaStart.AddMinutes(Config.ProgrammaDuur);
+        //Controlleer of het programma klaar is
+        if (Config.ProgrammaStart >= EindTime) {
+            Config.Programma = "";
+            Config.ProgrammaDuur = 0;
+        }
+        base.OnInitialized();
+    }
+
+    private string StatusText => Config.Ingeschakeld ? "Ingeschakeld" : "Uitgeschakeld";
+}

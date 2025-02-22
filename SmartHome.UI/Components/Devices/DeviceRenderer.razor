@@ -1,0 +1,58 @@
+﻿@inject IDeviceService deviceSerice;
+@inject ISnackbar snackBar;
+@inject MemoryCacheService cacheService;
+
+@if (Device is not null)
+{
+    <MudPaper Class="d-flex flex-row flex-grow-0 gap-0 align-center Container" Style="min-width: 370px; background-color: lightslategray; width: 45%" Elevation="0">
+        <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-4" Style="background-color: transparent; box-shadow: none" Elevation="0">
+            <MudImage Width="150" Height="150" Src="@Device.GetImage()" Style="margin: 10px" Elevation="25" Class="ObjectPosition.Center" />
+            <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@Device.Name</MudText>
+        </MudPaper>
+        <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Elevation="0">
+            @switch (Device.Type)
+            {
+                case DeviceType.Lamp:
+                    <LampSettings Device="@Device" />
+                    break;
+                case DeviceType.Televisie:
+                    <TelevisieSettings Device="@Device" />
+                    break;
+                case DeviceType.Wasmachine:
+                    <WasmachineSettings Device="@Device" />
+                    break;
+                case DeviceType.Router:
+                    <Wifi_RouterSettings Device="@Device" />
+                    break;
+            }
+        </MudPaper>
+        <MudPaper>
+            <MudButton OnClick="Save">Save</MudButton>
+        </MudPaper>
+    </MudPaper>
+}
+
+@code {
+    [Parameter]
+    public Device? Device { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Device is null)
+            throw new ArgumentException();
+
+        Device.LoadDeviceConfig();
+        base.OnInitialized();
+    }
+
+    private async Task Save()
+    {
+        if (Device is null)
+            throw new ArgumentException();
+
+        Device.SaveDeviceConfig();
+        var result = await deviceSerice.UpdateDevice(new(Device));
+        if (result.WasSuccessAndShow(snackBar, "Device updated!", Severity.Success))
+            cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.Device.GetAllDevices);
+    }
+}
