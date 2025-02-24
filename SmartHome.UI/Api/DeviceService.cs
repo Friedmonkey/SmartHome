@@ -51,4 +51,16 @@ public class DeviceService : IDeviceService
         TimeSpan cacheTime = TimeSpan.FromMinutes(1);
         return await _api.GetWithCache<UserDevicesAccessAdminResponse>(cacheKey, SharedConfig.Urls.Device.GetUserDevicesAccessAdmin, request, cacheTime);
     }
+    public async Task<SuccessResponse> GiveDevicesAccessAdmin(DeviceAccessRequest request)
+    {
+        if (request.deviceIds.Count == 0) //there is no point in making this request if we're not going to do anything
+            return SuccessResponse.Success();
+        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.GiveDeviceAccessAdmin, request);
+    }
+    public async Task<SuccessResponse> RevokeDevicesAccessAdmin(DeviceAccessRequest request)
+    {
+        if (request.deviceIds.Count == 0) //there is no point in making this request if we're not going to do anything
+            return SuccessResponse.Success();
+        return await _api.Delete<SuccessResponse>(SharedConfig.Urls.Device.RevokeDeviceAccessAdmin, request);
+    }
 }

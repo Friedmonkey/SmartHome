@@ -1,13 +1,35 @@
 ﻿using Microsoft.AspNetCore.Components;
+using MudBlazor;
+using SmartHome.Common.Api;
+using SmartHome.Common;
 
 namespace SmartHome.UI.Layout;
 
 public class SelectedSmartHomeService
 {
     private readonly NavigationManager _navigationManager;
-    public SelectedSmartHomeService(NavigationManager navigationManager)
+    private readonly ISnackbar _snackbarService;
+    public SelectedSmartHomeService(NavigationManager navigationManager, ISnackbar snackbarService)
     {
         this._navigationManager = navigationManager;
+        this._snackbarService = snackbarService;
+    }
+
+    public (Guid, SmartHomeRequest?) TryGetCurrentSmartHomeGuid(ref object data)
+    {
+        if (data is SmartHomeRequest req)
+        {
+            Guid? smartHomeGuid = GetCurrentSmartHomeGuid();
+            if (smartHomeGuid is null)
+                throw new ApiError("Unable to resolve SmartHome Guid from state.", fatal: true);
+
+            if (req.smartHome != Guid.Empty)
+                _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
+
+            //update the smartHome guid using record with syntax
+            return ((Guid)smartHomeGuid, req);
+        }
+        return (Guid.Empty, null);
     }
     public Guid? GetCurrentSmartHomeGuid()
     {

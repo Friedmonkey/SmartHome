@@ -136,11 +136,11 @@ public class DeviceService : IDeviceService
 
         return SuccessResponse.Success();
     }
-
     public async Task<UserDevicesAccessAdminResponse> GetUserDevicesAccessAdmin(SmartHomeGuidRequest request)
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
+        //TODO: make authcontext got getting smartuser by smartuser.id instead of this custom stuff
         var user = await _ctx.DbContext.SmartUsers.FirstOrDefaultAsync(sm => sm.Id == request.Id && sm.SmartHomeId == request.smartHome);
         if (user is null)
             return UserDevicesAccessAdminResponse.Failed("User with guid does not exist in the smarthome");
@@ -154,7 +154,45 @@ public class DeviceService : IDeviceService
         //get devices for the user we requested, NOT the logged in user
         var devices = await GetUserDevicesWithAccess(request.smartHome, user);
 
-
         return new UserDevicesAccessAdminResponse(user, devices);
+    }
+    public async Task<SuccessResponse> GiveDevicesAccessAdmin(DeviceAccessRequest request)
+    {
+        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        await _ctx.Auth.EnforceUserIsPartOfSmartHome(request.smartHome, request.userId);
+
+        //TODO: check if the logged in smartuser isnt equal to the one we are requesting
+        //var user = await _ctx.Auth.GetSmartUser();
+        //if (_ctx.Auth.GetLoggedInId)
+
+        foreach (Guid deviceId in request.deviceIds)
+        {
+            await _ctx.Device.EnforceDeviceInSmartHome(request.smartHome, deviceId);
+
+            var deviceAccess = new DeviceAccess() 
+            {
+                DeviceId = deviceId,
+                SmartUserId = request.userId,
+            };
+
+            _ctx.DbContext.DeviceAccesses.Add(deviceAccess);
+        }
+        await _ctx.DbContext.SaveChangesAsync();
+
+        return SuccessResponse.Success();
+    }
+    public async Task<SuccessResponse> RevokeDevicesAccessAdmin(DeviceAccessRequest request)
+    {
+        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        await _ctx.Auth.EnforceUserIsPartOfSmartHome(request.smartHome, request.userId);
+        foreach (Guid deviceId in request.deviceIds)
+        { 
+            await _ctx.Device.EnforceDeviceInSmartHome(request.smartHome, deviceId);
+
+            await _ctx.DbContext.DeviceAccesses
+                .Where(da => da.DeviceId == deviceId && da.SmartUserId == request.userId).ExecuteDeleteAsync();
+        }
+
+        return SuccessResponse.Success();
     }
 }

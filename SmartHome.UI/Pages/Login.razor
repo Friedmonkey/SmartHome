@@ -107,10 +107,7 @@ else
     { 
         var result = await accountService.Login(new (email, password));
         if (result.CheckSuccess(snackBar, onError: UserManagerErrorHandeler))
-        {
-            snackBar.Add("Login success!", Severity.Success);
             NavMenu.Redirect(navManager, base64, "/smarthome");
-        }
     }
     private async Task ForgotPassword()
     {

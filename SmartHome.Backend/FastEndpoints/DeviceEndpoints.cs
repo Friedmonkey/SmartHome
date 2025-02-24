@@ -115,6 +115,28 @@ public class CreateDeviceEndpoint : BasicEndpointBase<DeviceRequest, GuidRespons
     }
 }
 
+public class UpdateDivicesConfigEndpoint : BasicEndpointBase<UpdateDeviceConfigRequest, SuccessResponse>
+{
+    public required IDeviceService Service { get; set; }
+    public override void Configure()
+    {
+        Post(SharedConfig.Urls.Device.UpdateDeviceConfig);
+        SecureJwtEndpoint();
+    }
+
+    public override async Task HandleAsync(UpdateDeviceConfigRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await SendAsync(await Service.UpdateDeviceConfig(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
+    }
+}
+
 public class GetUserDevicesAccessAdminEndpoint : BasicEndpointBase<SmartHomeGuidRequest, UserDevicesAccessAdminResponse>
 {
     public required IDeviceService Service { get; set; }
@@ -137,20 +159,42 @@ public class GetUserDevicesAccessAdminEndpoint : BasicEndpointBase<SmartHomeGuid
     }
 }
 
-public class UpdateDivicesConfigEndpoint : BasicEndpointBase<UpdateDeviceConfigRequest, SuccessResponse>
+public class GiveDevicesAccessAdminEndpoint : BasicEndpointBase<DeviceAccessRequest, SuccessResponse>
 {
     public required IDeviceService Service { get; set; }
     public override void Configure()
     {
-        Post(SharedConfig.Urls.Device.UpdateDeviceConfig);
+        Post(SharedConfig.Urls.Device.GiveDeviceAccessAdmin);
         SecureJwtEndpoint();
     }
 
-    public override async Task HandleAsync(UpdateDeviceConfigRequest request, CancellationToken ct)
+    public override async Task HandleAsync(DeviceAccessRequest request, CancellationToken ct)
     {
         try
         {
-            await SendAsync(await Service.UpdateDeviceConfig(request));
+            await SendAsync(await Service.GiveDevicesAccessAdmin(request));
+        }
+        catch (Exception ex)
+        {
+            await SendAsync(SuccessResponse.Error(ex));
+        }
+    }
+}
+
+public class RevokeDevicesAccessAdminEndpoint : BasicEndpointBase<DeviceAccessRequest, SuccessResponse>
+{
+    public required IDeviceService Service { get; set; }
+    public override void Configure()
+    {
+        Delete(SharedConfig.Urls.Device.RevokeDeviceAccessAdmin);
+        SecureJwtEndpoint();
+    }
+
+    public override async Task HandleAsync(DeviceAccessRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await SendAsync(await Service.RevokeDevicesAccessAdmin(request));
         }
         catch (Exception ex)
         {
