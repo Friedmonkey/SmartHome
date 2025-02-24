@@ -1,7 +1,6 @@
 ﻿using SmartHome.Common;
 using SmartHome.Common.Api;
 using static SmartHome.Common.Api.IDeviceService;
-using static SmartHome.Common.Api.ISmartHomeService;
 
 namespace SmartHome.UI.Api;
 
@@ -44,5 +43,12 @@ public class DeviceService : IDeviceService
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.UpdateDeviceConfig, request);
+    }
+
+    public async Task<UserDevicesAccessAdminResponse> GetUserDevicesAccessAdmin(SmartHomeGuidRequest request)
+    {
+        object cacheKey = new { smartUserId=request.Id };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(1);
+        return await _api.GetWithCache<UserDevicesAccessAdminResponse>(cacheKey, SharedConfig.Urls.Device.GetUserDevicesAccessAdmin, request, cacheTime);
     }
 }

@@ -3,9 +3,7 @@ using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
-using System.Security.Cryptography.Xml;
 using static SmartHome.Common.Api.IDeviceService;
-//using static SmartHome.Common.SharedConfig.Urls;
 
 namespace SmartHome.Backend.Api;
 
@@ -24,31 +22,7 @@ public class DeviceService : IDeviceService
         
         //_ctx.CreateLog("User", request, LogType.Action);
 
-        List<Device>? deviceList = null;
-        if (smartUser.Role == UserRole.Admin)
-        {   //get all no checking exept for smarthome
-            deviceList = await _ctx.DbContext.Devices
-                .Where(d =>
-                    _ctx.DbContext.Rooms
-                        .Where(r => r.SmartHomeId == request.smartHome)
-                        .Select(r => r.Id)
-                        .Contains(d.RoomId)
-                ).ToListAsync();
-        }
-        else
-        {   // Get all devices with access and stuff
-            deviceList = await _ctx.DbContext.Devices
-                .Where(d =>
-                    _ctx.DbContext.Rooms
-                        .Where(r => r.SmartHomeId == request.smartHome)
-                        .Select(r => r.Id)
-                        .Contains(d.RoomId) && // Device belongs to the Smart Home
-                    _ctx.DbContext.DeviceAccesses
-                        .Where(a => a.SmartUserId == smartUser.Id)
-                        .Select(a => a.DeviceId)
-                        .Contains(d.Id) // User has access to the device
-                ).ToListAsync();
-        }
+        List<Device> deviceList = await GetUserDevicesWithAccess(request.smartHome, smartUser);
 
         Dictionary<Guid, Room> Rooms = new Dictionary<Guid, Room>();
         foreach (var device in deviceList)
@@ -62,9 +36,39 @@ public class DeviceService : IDeviceService
             device.Room = room;
         }
 
-        if (deviceList is null)
-            return DeviceListResponse.Failed("deviceList was null, unhandled role?");
         return new DeviceListResponse(deviceList);
+    }
+
+    private async Task<List<Device>> GetUserDevicesWithAccess(Guid smartHomeId, SmartUserModel smartUser)
+    {
+        List<Device>? deviceList = null;
+        if (smartUser.Role == UserRole.Admin)
+        {   //get all no checking exept for smarthome
+            deviceList = await _ctx.DbContext.Devices
+                .Where(d =>
+                    _ctx.DbContext.Rooms
+                        .Where(r => r.SmartHomeId == smartHomeId)
+                        .Select(r => r.Id)
+                        .Contains(d.RoomId)
+                ).ToListAsync();
+        }
+        else
+        {   // Get all devices with access and stuff
+            deviceList = await _ctx.DbContext.Devices
+            .Where(d =>
+                _ctx.DbContext.Rooms
+                    .Where(r => r.SmartHomeId == smartHomeId)
+                    .Select(r => r.Id)
+                    .Contains(d.RoomId) && // Device belongs to the Smart Home
+            _ctx.DbContext.DeviceAccesses
+                    .Where(a => a.SmartUserId == smartUser.Id)
+                    .Select(a => a.DeviceId)
+                    .Contains(d.Id) // User has access to the device
+            ).ToListAsync();
+        }
+        if (deviceList is null)
+            throw new ApiError("deviceList was null, unhandled role?");
+        return deviceList;
     }
 
     public async Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request)
@@ -131,5 +135,26 @@ public class DeviceService : IDeviceService
         await _ctx.DbContext.SaveChangesAsync();
 
         return SuccessResponse.Success();
+    }
+
+    public async Task<UserDevicesAccessAdminResponse> GetUserDevicesAccessAdmin(SmartHomeGuidRequest request)
+    {
+        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+
+        var user = await _ctx.DbContext.SmartUsers.FirstOrDefaultAsync(sm => sm.Id == request.Id && sm.SmartHomeId == request.smartHome);
+        if (user is null)
+            return UserDevicesAccessAdminResponse.Failed("User with guid does not exist in the smarthome");
+
+        var acc = await _ctx.UserManager.Users.FirstOrDefaultAsync(a => a.Id == user.AccountId);
+        if (acc is null)
+            return UserDevicesAccessAdminResponse.Failed("Failed to get account from user!");
+
+        user.Account = acc;
+
+        //get devices for the user we requested, NOT the logged in user
+        var devices = await GetUserDevicesWithAccess(request.smartHome, user);
+
+
+        return new UserDevicesAccessAdminResponse(user, devices);
     }
 }
