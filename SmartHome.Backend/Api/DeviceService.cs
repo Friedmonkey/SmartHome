@@ -20,8 +20,6 @@ public class DeviceService : IDeviceService
     public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
         var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
-        
-        //_ctx.CreateLog("User", request, LogType.Action);
 
         List<Device>? deviceList = null;
         if (smartUser.Role == UserRole.Admin)
@@ -53,7 +51,8 @@ public class DeviceService : IDeviceService
         rooms = await _ctx.DbContext.Rooms.Where(x => x.SmartHomeId == request.smartHome).ToListAsync();
 
         //Zet de room obejct in de devices
-        deviceList = deviceList.Select(d => {
+        deviceList = deviceList.Select(d =>
+        {
             {
                 d.Room =
                 new Room
@@ -78,6 +77,9 @@ public class DeviceService : IDeviceService
             await _ctx.DbContext.Devices.Where(d => d.Id == device.Id).ExecuteUpdateAsync(setters => setters.SetProperty(d => d.RoomId, device.Room.Id));
         }
 
+        //Maak een log in de database
+        await _ctx.CreateLog($"[user] chanched the deivces in each room", request, LogType.Action);
+
         return SuccessResponse.Success();
     }
 
@@ -96,11 +98,15 @@ public class DeviceService : IDeviceService
             .SetProperty(d => d.Type, request.device.Type)
             );
 
+            //Maak een log in de database
+            await _ctx.CreateLog($"Device proppertie of {request.device.Name} are chanche by [user]", request, LogType.Action);
+
             return SuccessResponse.Success();
-        } else
+        }
+        else
         {
             return SuccessResponse.Failed("Device naam bestaat al");
-        }        
+        }
     }
     public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
     {
@@ -108,6 +114,10 @@ public class DeviceService : IDeviceService
         await _ctx.Device.EnforceDeviceInSmartHome(request.smartHome, request.DeviceGuid);
 
         await _ctx.DbContext.Devices.Where(d => d.Id == request.DeviceGuid).ExecuteDeleteAsync();
+
+        //Maak een log in de database
+        await _ctx.CreateLog($"Device is deleted by [user]", request, LogType.Action);
+
         return SuccessResponse.Success();
     }
     public async Task<GuidResponse> CreateDevice(DeviceRequest request)
@@ -123,7 +133,7 @@ public class DeviceService : IDeviceService
         await _ctx.Device.EnforceDeviceNameUnique(request.smartHome, request.device.Name);
 
 
-        Device newDevice = new Device() 
+        Device newDevice = new Device()
         {
             Name = request.device.Name,
             RoomId = request.device.RoomId,
@@ -135,7 +145,7 @@ public class DeviceService : IDeviceService
 
         var SmartUserIdList = await _ctx.DbContext.SmartUsers.Where(d => d.SmartHomeId == request.smartHome).Select(d => d.Id).ToListAsync();
 
-        foreach(Guid SmartUserId in SmartUserIdList)
+        foreach (Guid SmartUserId in SmartUserIdList)
         {
             DeviceAccess deviceAccess = new DeviceAccess();
             deviceAccess.DeviceId = newDevice.Id;
@@ -145,6 +155,9 @@ public class DeviceService : IDeviceService
         }
 
         await _ctx.DbContext.SaveChangesAsync();
+
+        //Maak een log in de database
+        await _ctx.CreateLog($"Device created widht the type {newDevice.Type} named {newDevice.Name} made by [user]", request, LogType.Action);
 
         return new GuidResponse(result.Entity.Id);
     }
@@ -156,6 +169,9 @@ public class DeviceService : IDeviceService
         var result = await _ctx.DbContext.Devices
             .Where(d => d.Id == request.DeviceId)
             .ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JsonObjectConfig, request.ConfigJson));
+
+        //Maak een log in de database
+        await _ctx.CreateLog($"Device is used by [user]", request, LogType.Action);
 
         return SuccessResponse.Success();
     }

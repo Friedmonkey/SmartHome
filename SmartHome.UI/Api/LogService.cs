@@ -16,5 +16,10 @@ namespace SmartHome.UI.Api
         {
             return await _api.Get<LogListResponse>(SharedConfig.Urls.Log.GetAllLogs, request);
         }
+
+        public async Task<SuccessResponse> CreateLog(LogRequest request)
+        {
+            return await _api.Post<SuccessResponse>(SharedConfig.Urls.Log.CreateLog, request);
+        }
     }
 }

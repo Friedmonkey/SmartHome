@@ -28,20 +28,20 @@ namespace SmartHome.Backend.FastEndpoints
             }
         }
 
-        public class CreateLogEndpoint : BasicEndpointBase<EmptySmartHomeRequest, SuccessResponse>
+        public class CreateLogEndpoint : BasicEndpointBase<LogRequest, SuccessResponse>
         {
             public required ILogService Service { get; set; }
             public override void Configure()
             {
-                Post(SharedConfig.Urls.Log.GetAllLogs);
+                Post(SharedConfig.Urls.Log.CreateLog);
                 SecureJwtEndpoint();
             }
 
-            public override async Task HandleAsync(EmptySmartHomeRequest request, CancellationToken ct)
+            public override async Task HandleAsync(LogRequest request, CancellationToken ct)
             {
                 try
                 {
-                   // await SendAsync(await Service.GetAllLogs(request));
+                    await SendAsync(await Service.CreateLog(request));
                 }
                 catch (Exception ex)
                 {

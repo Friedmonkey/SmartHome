@@ -6,6 +6,7 @@ using SmartHome.Common.Api;
 using SmartHome.Common.Models.Enums;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace SmartHome.Backend.Api;
 
@@ -52,17 +53,28 @@ public class ApiContext
 
     public async Task CreateLog(string Action, SmartHomeRequest request, LogType type)
     {
-        //Haal de ingelogde smartuser op voor primary key smaruser in de log
-        var smartUser = await Auth.GetLoggedInSmartUser(request.smartHome);
+        //Haal de logService op
+        LogService logService = new LogService(this);
+        EmptySmartHomeRequest smartHomeRequest = new EmptySmartHomeRequest
+        {
+            smartHome = request.smartHome
+        };
 
-        //Zet de log in de database
-        var result = await DbContext.Logs.AddAsync(new Log
+        //Haal de smartuser uit de database en verander de {user} parameter naar de user naam
+        var user = await Auth.GetLoggedInAccount();
+        Action = Action.Replace("[user]", user.UserName);
+
+        Log newLog = new Log
         {
             Action = Action,
             Type = type,
             CreateOn = DateTime.Now,
-            SmartUserId = smartUser.Id,
+            SmartUserId = user.Id,
             SmartHomeId = request.smartHome
-        });
+        };
+
+        //Zet de log in de database
+        await logService.CreateLog(new(newLog));
+
     }
 }

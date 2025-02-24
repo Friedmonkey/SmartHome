@@ -8,41 +8,49 @@
     _LogList = logList;
 }
 
-<MudPaper Class="justify-center" Style="width: 100%; height: 100%;">
-    <MudPaper Class="rounded-lg " Style="background-color: slategray;">
-        @foreach (Log log in _LogList) {
-            <MudText Typo="Typo.subtitle2">
-                @log.CreateOn.Day + 
-                "-" + 
-                @log.CreateOn.Month + 
-                "-" + 
-                @log.CreateOn.Year + 
-                " " + 
-                @log.CreateOn.Hour + 
-                ":" + 
-                @log.CreateOn.Minute + 
-                ":" 
-                @log.CreateOn.Second + 
-                " > " + 
-                @log.Action +
-                " > " +
-                @log.Type
-            </MudText>
+<MudPaper Class="rounded-lg " Style="background-color: slategray; width: 100%; height: calc(100vh - var(--mud-appbar-height) - 45px);">
+    @foreach (Log log in _LogList)
+    {
+        string TextColor = Colors.Shades.Black;
+
+        //Zet de text kleur naar de bij behorende type
+        switch (log.Type)
+        {
+            case LogType.None:
+                TextColor = Colors.Shades.Black;
+                break;
+            case LogType.Error:
+                TextColor = Colors.Red.Default;
+                break;
+            case LogType.Routine:
+                TextColor = Colors.Indigo.Default;
+                break;
+            case LogType.Action:
+                TextColor = Colors.Shades.Black;
+                break;
         }
-    </MudPaper>
+
+        <MudText Typo="Typo.subtitle2" Class="ms-3 mt-1" Style="@($"color:{TextColor};")">
+            @log.CreateOn.Day-@log.CreateOn.Month-@log.CreateOn.Year
+            @log.CreateOn.Hour:@log.CreateOn.Minute:@log.CreateOn.Second >
+            @log.Action>
+        </MudText>
+    }
 </MudPaper>
+
 
 @code {
     List<Log> logList = new List<Log>();
 
     protected override async Task OnInitializedAsync()
     {
+        //Haal de logs op ui de database
         var result = await logService.GetAllLogs(new());
 
-        if (result.EnsureSuccess(snackBar)) {
+        if (result.EnsureSuccess(snackBar))
+        {
             logList = result.Logs;
             StateHasChanged();
         }
-       // var result = await logService.GetAllLogs(new());
     }
 }

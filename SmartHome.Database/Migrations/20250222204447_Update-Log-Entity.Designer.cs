@@ -12,8 +12,8 @@ using SmartHome.Database;
 namespace SmartHome.Database.Migrations
 {
     [DbContext(typeof(SmartHomeContext))]
-    [Migration("20250221100342_update-log-entity")]
-    partial class updatelogentity
+    [Migration("20250222204447_Update-Log-Entity")]
+    partial class UpdateLogEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

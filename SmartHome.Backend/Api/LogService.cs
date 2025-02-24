@@ -15,9 +15,16 @@ namespace SmartHome.Backend.Api
         }
         public async Task<LogListResponse> GetAllLogs(EmptySmartHomeRequest request)
         {
-            List<Log> logsList =  await _ctx.DbContext.Logs.Where(l => l.SmartHomeId == request.smartHome).ToListAsync();
+            var result =  await _ctx.DbContext.Logs.Where(l => l.SmartHomeId == request.smartHome).ToListAsync();
+            return new LogListResponse(result);
+        }
 
-            return new LogListResponse(logsList);
+        public async Task<SuccessResponse> CreateLog(LogRequest request)
+        {
+            var result = await _ctx.DbContext.Logs.AddAsync(request.Log);
+
+            await _ctx.DbContext.SaveChangesAsync();
+            return SuccessResponse.Success();
         }
     }
 }
