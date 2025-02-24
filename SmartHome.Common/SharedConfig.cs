@@ -25,6 +25,8 @@ public class SharedConfig
             public const string CreateDevice = DeviceBase + "CreateDevice";
             public const string GetAllRooms = DeviceBase + "GetAllRooms";
             public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
+
+            public const string GetUserDevicesAccessAdmin = DeviceBase + "GetUserDevicesAccessAdmin";
         }
         
         private const string RoutineBase = ApiBase + "Routine/";
