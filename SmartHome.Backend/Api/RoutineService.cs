@@ -19,7 +19,7 @@ public class RoutineService : IRoutineService
     public async Task<GuidResponse> CreateRoutine(RoutineRequest request)
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
-        await _ctx.Routine.EnforceRoutineNameUnique(request.smartHome, request.routine.Name);
+        await _ctx.Routine.EnforceRoutineNameUnique(request.smartHome, null , request.routine.Name);
 
         var routine = new Routine() 
         { 
@@ -55,7 +55,7 @@ public class RoutineService : IRoutineService
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.routine.Id);
-        await _ctx.Routine.EnforceRoutineNameUnique(request.smartHome, request.routine.Name);
+        await _ctx.Routine.EnforceRoutineNameUnique(request.smartHome, request.routine.Id, request.routine.Name);
 
         var routine = await _ctx.DbContext.Routines.FirstOrDefaultAsync(r => r.Id == request.routine.Id && r.SmartHomeId == request.smartHome);
         if (routine is null)
@@ -82,7 +82,7 @@ public class RoutineService : IRoutineService
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.action.RoutineId);
-        await _ctx.Routine.EnforceDeviceActionNameUnique(request.action.RoutineId, request.action.Name);
+        await _ctx.Routine.EnforceDeviceActionNameUnique(request.action.RoutineId, null , request.action.Name);
 
         var deviceAction = new DeviceAction()
         {
@@ -101,6 +101,8 @@ public class RoutineService : IRoutineService
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.action.RoutineId);
         await _ctx.Routine.EnforceDeviceActionInRoutine(request.action.RoutineId, request.action.Id);
+        await _ctx.Routine.EnforceDeviceActionNameUnique(request.action.RoutineId, request.action.Id, request.action.Name);
+
 
         var deviceAction = new DeviceAction()
         {

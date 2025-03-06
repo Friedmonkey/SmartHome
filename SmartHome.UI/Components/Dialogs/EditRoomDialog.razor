@@ -7,7 +7,7 @@
         <MudTextField @bind-Value="@roomName" Label="Name" Variant="Variant.Outlined"></MudTextField>
     </MudPaper>
 
-    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
+    <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="min-width:700px;" Elevation="0">
         <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
         <MudSpacer />
         @if (IsNewRoom)

@@ -1,13 +1,30 @@
-﻿@inject IRoutineService routineService;
+﻿@using SmartHome.Common.Models.Enums;
+@inject IRoutineService routineService;
 @inject ISnackbar snackBar;
 
 <MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">CreateRoutine
     <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
         <MudText Typo="Typo.h4">Routine Name</MudText>
         <MudTextField @bind-Value="@RoutineName" Label="Name" Variant="Variant.Outlined"></MudTextField>
-        @* <MudTextField @bind-Value="@RoutineDate" Label="Start Date" Variant="Variant.Outlined"></MudTextField> *@
+        <MudTimePicker Label="Start Routine (24 hours)" @bind-Time="_time"></MudTimePicker>
+        <MudSelect @bind-Value="selectedDay" Label="Selecteer een dag" AnchorOrigin="Origin.TopCenter">
+            @foreach (var day in Enum.GetValues<RoutineRepeat>().Where(d => d != RoutineRepeat.None))
+            {
+                <MudSelectItem Value="day">@day</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudButton OnClick="AddDay" Variant="Variant.Filled" Color="Color.Primary">Toevoegen</MudButton>
+
+        <MudChipSet T="RoutineRepeat">
+            @foreach (var day in SelectedDays)
+            {
+                <MudChip T="RoutineRepeat" Color="Color.Primary" OnClose="@(() => RemoveDay(day))">@day</MudChip>
+            }
+        </MudChipSet>
+
     </MudPaper>
-    
+
     <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
         <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
         <MudSpacer />
@@ -23,10 +40,25 @@
 </MudPaper>
 
 @code {
+    private RoutineRepeat selectedDays = RoutineRepeat.None;
+    private RoutineRepeat selectedDay = RoutineRepeat.None;
+    private TimeSpan? _time;
     bool IsNewRoutine = false;
     string RoutineName = "";
-    TimeOnly RoutineDate;
     private Routine _Routine;
+
+    private IEnumerable<RoutineRepeat> SelectedDays => Enum.GetValues<RoutineRepeat>()
+        .Where(day => day != RoutineRepeat.None && selectedDays.Has(day));
+
+    private void AddDay()
+    {
+        selectedDays = selectedDays.Add(selectedDay);
+    }
+
+    private void RemoveDay(RoutineRepeat day)
+    {
+        selectedDays = selectedDays.Remove(day);
+    }
 
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
@@ -39,16 +71,11 @@
 
     private async Task CreateRoutine()
     {
-        if (RoutineName == string.Empty)
-        {
-            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
-            return;
-        }
-
         //Als alle waarden zijn ingevuld in de UI
         Routine newRoutine = new Routine();
         newRoutine.Name = RoutineName;
-        newRoutine.Start = RoutineDate;
+        newRoutine.Start = new TimeOnly(_time.Value.Ticks);
+        newRoutine.RepeatDays = (byte)selectedDays;
         //newRoutine.SmartHomeId = _smartHomeId;
 
         //Maar een nieuwe Routine aan in de database met de api
@@ -63,34 +90,40 @@
 
     private async Task UpdateRoutine()
     {
-        if (RoutineName == _Routine.Name)
-        {
-            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
-            return;
-        }
-        if (RoutineName == string.Empty)
-        {
-            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
-            return;
-        }
-        if (RoutineDate == _Routine.Start)
-        {
-            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
-            return;
-        }
+        TimeOnly timeOnly = new TimeOnly(_time.Value.Ticks);
 
         //Als er 1 of meer waarden verandert zijn in de UI
-        Routine newRoutine = _Routine;
-        newRoutine.Name = RoutineName;
-        newRoutine.Start = RoutineDate;
-
-        //Update Routine naar database met de api
-        var result = await routineService.UpdateRoutine(new(newRoutine));
-        result.Show(snackBar, "Routine is succesfully updated!", Severity.Success);
-
-        if (result.WasSuccess())
+        Routine newRoutine = new Routine()
         {
-            MudDialog.Close(DialogResult.Ok(newRoutine));
+            Id = _Routine.Id,
+            Name = _Routine.Name,
+            SmartHomeId = _Routine.SmartHomeId,
+            DeviceActions = _Routine.DeviceActions,
+            RepeatDays = _Routine.RepeatDays,
+            Start = _Routine.Start
+        };
+
+        newRoutine.Name = RoutineName;
+        newRoutine.Start = timeOnly;
+        newRoutine.RepeatDays = (byte)selectedDays;
+
+        if (Routine.Name == newRoutine.Name && Routine.Start == newRoutine.Start && Routine.RepeatDays == newRoutine.RepeatDays)
+        {
+            new SuccessResponse().Show(snackBar, "There are no changes", Severity.Warning);
+        }
+        else{
+            //Update Routine naar database met de api
+            var result = await routineService.UpdateRoutine(new(newRoutine));
+
+            if (result.WasSuccess())
+            {
+                result.Show(snackBar, "Routine is succesfully updated!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(newRoutine));
+                StateHasChanged();
+            }
+            else{
+                result.Show(snackBar, result._RequestMessage, Severity.Warning);
+            }
         }
     }
 
@@ -104,6 +137,8 @@
             {
                 _Routine = value;
                 RoutineName = value.Name;
+                _time = new TimeSpan(value.Start.Ticks);
+                selectedDays = (RoutineRepeat)value.RepeatDays;
             }
             else
             {
