@@ -1,0 +1,24 @@
+﻿<MudSwitch @bind-Value="@Config.Enabled" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+@if (Config.Brightness != -1)
+{
+    <MudSlider Style="width: 90%" Size="Size.Large" @bind-Value="Config.Brightness"></MudSlider>
+}
+@if (Config.Color != "")
+{
+    <MudColorPicker Label="Kleur" @bind-Text="Config.Color" ColorPickerView="ColorPickerView.Palette" />
+}
+
+@code {
+    [Parameter]
+    public Device Device { get; set; }
+
+    private LampConfig Config;
+
+    protected override void OnInitialized()
+    {
+        Config = Device.GetConfig<LampConfig>();
+        base.OnInitialized();
+    }
+
+    private string StatusText => Config.Enabled ? "Ingeschakeld" : "Uitgeschakeld";
+}

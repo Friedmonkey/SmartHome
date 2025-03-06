@@ -13,32 +13,15 @@
 @foreach (Room room in roomList)
 {
     List<Device> roomDeviceslist = deviceList.Where(d => d.RoomId == room.Id).ToList();
-    //Ga door all rooms in de roomLists
     @if (roomDeviceslist.Count > 0)
     {
-        //Zet room name op het scherm
         <MudText Typo="Typo.h3" Align="Align.Center">@room.Name</MudText>
         <MudDivider DividerType='DividerType.Middle' Class='my-6' />
         <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4" Style="width: 100%; background-color: transparent;" Elevation="0">
             <MudPaper class="d-flex flex-wrap align-center gap-12 justify-space-between Apparaat-Container" Style="width: 90%; background-color: transparent;" Elevation="0">
-                @for (int d = 0; d < roomDeviceslist.Count; d++)
+                @foreach (var device in roomDeviceslist)
                 {
-                    //Zet de apparaten op het scherm bij de room
-                    switch (roomDeviceslist[d].Type)
-                    {
-                        case DeviceType.Lamp:
-                            <Lamp Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" config="@roomDeviceslist[d].JsonObjectConfig"></Lamp>
-                            break;
-                        case DeviceType.Televisie:
-                            <Televisie Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Televisie>
-                            break;
-                        case DeviceType.Wasmachine:
-                            <Wasmachine Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wasmachine>
-                            break;
-                        case DeviceType.Router:
-                            <Wifi_Router Id="@roomDeviceslist[d].Id" Name="@roomDeviceslist[d].Name" Config="@roomDeviceslist[d].JsonObjectConfig"></Wifi_Router>
-                            break;
-                    }
+                    <DeviceRenderer Device="device"/>
                 }
             </MudPaper>
         </MudPaper>
@@ -53,7 +36,10 @@
     {
         var devices = await deviceService.GetAllDevices(new());
         if (devices.EnsureSuccess(snackBar))
+        { 
             deviceList = devices.Devices;
+            deviceList.LoadMultipleDeviceConfigs();
+        }
 
         var rooms = await roomService.GetAllRooms(new());
         if (rooms.EnsureSuccess(snackBar))

@@ -38,7 +38,7 @@ public class DeviceService : IDeviceService
 
     public async Task<GuidResponse> CreateDevice(DeviceRequest request)
     {
-        return await _api.Post<GuidResponse>(SharedConfig.Urls.Device.CreaateDevice, request);
+        return await _api.Post<GuidResponse>(SharedConfig.Urls.Device.CreateDevice, request);
     }
 
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
