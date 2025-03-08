@@ -2,7 +2,7 @@
 @inherits SmartHomeGuidPage
 
 @inject IDeviceService deviceService;
-@inject IRoomService roomService;
+@* @inject IRoomService roomService; *@
 @inject ISnackbar snackBar;
 
 @if (deviceList.Count <= 0)
@@ -29,8 +29,8 @@
 }
 
 @code {
-    List<Device> deviceList = new List<Device>();
-    List<Room> roomList = new List<Room>();
+    public List<Device> deviceList = new List<Device>();
+    public List<Room> roomList = new List<Room>();
 
     protected override async Task OnInitializedAsync()
     {
