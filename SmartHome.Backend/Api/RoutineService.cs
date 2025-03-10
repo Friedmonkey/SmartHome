@@ -4,6 +4,7 @@ using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
 using static SmartHome.Common.Api.IRoutineService;
+using static SmartHome.Common.SharedConfig.Urls;
 
 namespace SmartHome.Backend.Api;
 
@@ -21,7 +22,7 @@ public class RoutineService : IRoutineService
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineNameUnique(request.smartHome, null , request.routine.Name);
 
-        var routine = new Routine() 
+        var routine = new Common.Models.Entities.Routine() 
         { 
             SmartHomeId = request.smartHome,
             Name = request.routine.Name,   
@@ -41,13 +42,13 @@ public class RoutineService : IRoutineService
         .Where(rs => rs.SmartHomeId == request.smartHome)
         .ToListAsync();
 
-        //foreach (var routine in listOfRoutine)
-        //{
-        //    await _ctx.DbContext.Entry(routine)
-        //        .Collection(r => r.DeviceActions)
-        //        .LoadAsync();
-        //    routine.DeviceActions ??= [];
-        //}
+        foreach (var routine in listOfRoutine)
+        {
+            await _ctx.DbContext.Entry(routine)
+                .Collection(r => r.DeviceActions)
+                .LoadAsync();
+            routine.DeviceActions ??= [];
+        }
 
         return new RoutineListResponse(listOfRoutine);
     }
@@ -82,16 +83,13 @@ public class RoutineService : IRoutineService
     {
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.action.RoutineId);
-        await _ctx.Routine.EnforceDeviceActionNameUnique(request.action.RoutineId, null , request.action.Name);
-
+        await _ctx.Routine.EnforceDeviceActionInRoutine(request.smartHome, request.action.DeviceId);
         var deviceAction = new DeviceAction()
         {
-            Name = request.action.Name,
             JsonObjectConfig = request.action.JsonObjectConfig,
             DeviceId = request.action.DeviceId,
             RoutineId = request.action.RoutineId,
         };
-
         var result = await _ctx.DbContext.DeviceActions.AddAsync(deviceAction);
         await _ctx.DbContext.SaveChangesAsync();
         return new GuidResponse(result.Entity.Id);
@@ -101,13 +99,10 @@ public class RoutineService : IRoutineService
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.action.RoutineId);
         await _ctx.Routine.EnforceDeviceActionInRoutine(request.action.RoutineId, request.action.Id);
-        await _ctx.Routine.EnforceDeviceActionNameUnique(request.action.RoutineId, request.action.Id, request.action.Name);
-
 
         var deviceAction = new DeviceAction()
         {
             Id = request.action.Id,
-            Name = request.action.Name,
             JsonObjectConfig = request.action.JsonObjectConfig,
             DeviceId = request.action.DeviceId,
             RoutineId = request.action.RoutineId,

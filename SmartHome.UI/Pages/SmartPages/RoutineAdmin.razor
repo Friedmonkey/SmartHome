@@ -34,7 +34,9 @@
         if (result.EnsureSuccess(snackBar))
             routineList = result.Routines;
     }
-
+    private async void GoToRoutineActions(Routine _routineToEditOrCreate)
+    { 
+    }
     private async void OpenroutineEditDialog(Routine _routineToEditOrCreate)
     {
         bool IsNewroutine = true;
@@ -55,17 +57,14 @@
         var dialog = await DialogService.ShowAsync<EditRoutineDialog>(Title, dialogParameter);
         var result = await dialog.Result;
 
-        if (result.Data != "Close")
+        if (result.Data != "Close" && result.Data != null)
         {
             //Update de routinelist nadat er een routine is bewerkt of toegevoegd
-            if (IsNewroutine)
+            if (!IsNewroutine)
             {
-                routineList.Add(result.Data as Routine);
+                routineList.RemoveAll(d => d.Id == (result.Data as Routine).Id);
             }
-            else
-            {
-                routineList.Where(r => r.Id == (result.Data as Routine).Id).ToList().First().Name = (result.Data as Routine).Name;
-            }
+            routineList.Add(result.Data as Routine);
             StateHasChanged();
         }
     }

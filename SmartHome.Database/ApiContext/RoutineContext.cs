@@ -41,17 +41,4 @@ public class RoutineContext
         if (alreadyExists)
             throw new ApiError("There is already a routine with the same name!!");
     }
-
-    public async Task EnforceDeviceActionNameUnique(Guid routineId, Guid? deviceActionId, string? DeviceActionName)
-    {
-        if (string.IsNullOrEmpty(DeviceActionName))
-            throw new ApiError("Device action name cannot be empty!");
-
-        bool alreadyExists = await _dbContext.DeviceActions
-            .Where(r => r.RoutineId == routineId && r.Id != deviceActionId)
-            .AnyAsync(d => d.Name == DeviceActionName);
-
-        if (alreadyExists)
-            throw new ApiError("There is already a device action with the same name!!");
-    }
 }

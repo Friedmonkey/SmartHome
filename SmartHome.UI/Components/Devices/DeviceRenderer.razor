@@ -26,15 +26,19 @@
                     break;
             }
         </MudPaper>
-        <MudPaper>
-            <MudButton OnClick="Save">Save</MudButton>
-        </MudPaper>
+        @if (DeviceSaveable){
+            <MudPaper>
+                <MudButton OnClick="Save">Save</MudButton>
+            </MudPaper>
+        }
     </MudPaper>
 }
 
 @code {
     [Parameter]
     public Device? Device { get; set; }
+    [Parameter]
+    public bool DeviceSaveable { get; set; } = true;
 
     protected override void OnInitialized()
     {
