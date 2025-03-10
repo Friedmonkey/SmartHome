@@ -9,14 +9,20 @@ using SmartHome.Common.Api;
 using SmartHome.Database;
 using SmartHome.Database.ApiContext;
 using SmartHome.Database.Auth;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Xunit.Abstractions;
 using static SmartHome.Common.SharedConfig.Urls;
+
+[CollectionDefinition("SmartHomeServiceCollection")]
+public class SmartHomeServiceCollection : ICollectionFixture<SmartHomeServiceFixtureSetupLogic> { }
 
 public class SmartHomeServiceFixtureSetupLogic : IDisposable
 {
-    public DeviceContext TestDeviceContext { get; }
-    public AuthContext TestAuthContext { get; }
-    public RoomContext TestRoomContext { get; }
-    public RoutineContext TestRoutineContext { get; }
+    //public DeviceContext TestDeviceContext { get; }
+    //public AuthContext TestAuthContext { get; }
+    //public RoomContext TestRoomContext { get; }
+    //public RoutineContext TestRoutineContext { get; }
     public ApiContext TestApiContext { get; }
 
     public IAccountService TestAccountService { get; }
@@ -25,11 +31,15 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
     public IRoutineService TestRoutineService { get; }
     public IDeviceService TestDeviceService { get; }
     public ISmartHomeService TestSmartHomeService { get; }
+    //public ITestOutputHelper TestConsole { get; }
 
     private readonly ServiceProvider _serviceProvider;
+    private readonly IHttpContextAccessor TestHttpContextAccessor;
 
-    public SmartHomeServiceFixtureSetupLogic()
+
+    public SmartHomeServiceFixtureSetupLogic()//(ITestOutputHelper testConsole)
     {
+        //TestConsole = testConsole;
         var builder = WebApplication.CreateBuilder([]);
         var config = new BackendConfig(builder.Configuration);
 
@@ -68,8 +78,11 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
         services.AddScoped<IDeviceService, DeviceService>();
         services.AddScoped<ISmartHomeService, SmartHomeService>();
 
-        var scopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
-        using (var scope = scopeFactory.CreateScope())
+        // Now build the ServiceProvider
+        _serviceProvider = services.BuildServiceProvider();
+
+        // Use a proper service scope for initialization
+        using (var scope = _serviceProvider.CreateScope())
         {
             var SmartDB = scope.ServiceProvider.GetRequiredService<SmartHomeContext>();
             if (SmartDB.Database.EnsureCreated())
@@ -78,33 +91,34 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
             }
         }
 
-        _serviceProvider = services.BuildServiceProvider();
-
-        // Resolve services and store them in the fixture
-        TestDeviceContext = _serviceProvider.GetRequiredService<DeviceContext>();
-        TestAuthContext = _serviceProvider.GetRequiredService<AuthContext>();
-        TestRoomContext = _serviceProvider.GetRequiredService<RoomContext>();
-        TestRoutineContext = _serviceProvider.GetRequiredService<RoutineContext>();
+        // Resolve services after provider is fully built
         TestApiContext = _serviceProvider.GetRequiredService<ApiContext>();
-
         TestAccountService = _serviceProvider.GetRequiredService<IAccountService>();
         TestRoomService = _serviceProvider.GetRequiredService<IRoomService>();
         TestLogService = _serviceProvider.GetRequiredService<ILogService>();
         TestRoutineService = _serviceProvider.GetRequiredService<IRoutineService>();
         TestDeviceService = _serviceProvider.GetRequiredService<IDeviceService>();
         TestSmartHomeService = _serviceProvider.GetRequiredService<ISmartHomeService>();
+        TestHttpContextAccessor = _serviceProvider.GetRequiredService<IHttpContextAccessor>();
     }
 
-    public async Task Initialize(SmartHomeContext SmartDB) 
+
+    public async Task Initialize(SmartHomeContext SmartDB)
     {
         //todo:make this stuff
     }
 
-    public void Login(Guid guid)
+
+    public void ApiLogin(string jwtStr)
     {
-        var accessor = _serviceProvider.GetRequiredService<IHttpContextAccessor>();
-        accessor.HttpContext.User = new();
+        var jwt = new JwtSecurityToken(jwtStr);
+        var identity = new ClaimsIdentity(jwt.Claims, "jwt");
+        var user = new ClaimsPrincipal(identity);
+
+        TestHttpContextAccessor.HttpContext ??= new DefaultHttpContext();
+        TestHttpContextAccessor.HttpContext.User = user;
     }
+
 
     public void Dispose()
     {
