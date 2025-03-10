@@ -2,26 +2,32 @@
 @inherits SmartHomeGuidPage
 
 @inject IDeviceService deviceService;
-@* @inject IRoomService roomService; *@
+@inject IRoomService roomService;
 @inject ISnackbar snackBar;
 
 @if (deviceList.Count <= 0)
 {
     <MudText>You have no devices</MudText>
+
 }
+
+<p class="mud-typography mud-typography-body1">You have no devices</p>
 
 @foreach (Room room in roomList)
 {
+   
     List<Device> roomDeviceslist = deviceList.Where(d => d.RoomId == room.Id).ToList();
+
     @if (roomDeviceslist.Count > 0)
     {
+        
         <MudText Typo="Typo.h3" Align="Align.Center">@room.Name</MudText>
         <MudDivider DividerType='DividerType.Middle' Class='my-6' />
         <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4" Style="width: 100%; background-color: transparent;" Elevation="0">
             <MudPaper class="d-flex flex-wrap align-center gap-12 justify-space-between Apparaat-Container" Style="width: 90%; background-color: transparent;" Elevation="0">
                 @foreach (var device in roomDeviceslist)
                 {
-                    <DeviceRenderer Device="device"/>
+                    <DeviceRenderer Device="device" />
                 }
             </MudPaper>
         </MudPaper>
@@ -29,14 +35,18 @@
 }
 
 @code {
-    public List<Device> deviceList = new List<Device>();
-    public List<Room> roomList = new List<Room>();
+    [Parameter]
+    public List<Device> deviceList { get; set; }
+
+    [Parameter]
+    public List<Room> roomList { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
         var devices = await deviceService.GetAllDevices(new());
         if (devices.EnsureSuccess(snackBar))
-        { 
+        {
             deviceList = devices.Devices;
             deviceList.LoadMultipleDeviceConfigs();
         }

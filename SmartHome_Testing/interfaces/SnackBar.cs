@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SmartHome_Testing.interfaces
 {
-    public class SnackBar : ISnackbar
+    public class SnackBarTest : ISnackbar
     {
         public IEnumerable<Snackbar> ShownSnackbars { get; }
         public SnackbarConfiguration Configuration { get; }
@@ -56,6 +56,6 @@ namespace SmartHome_Testing.interfaces
 
         
 
-        //public OnSnackbarsUpdated { get; set; }
+        public event Action? OnSnackbarsUpdated;
     }
 }

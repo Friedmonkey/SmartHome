@@ -1,6 +1,6 @@
-﻿@inject IDeviceService deviceSerice;
+﻿@* @inject IDeviceService deviceSerice;
 @inject ISnackbar snackBar;
-@inject MemoryCacheService cacheService;
+@inject MemoryCacheService cacheService; *@
 
 @if (Device is not null)
 {
@@ -12,7 +12,8 @@
         <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Elevation="0">
             @switch (Device.Type)
             {
-                case DeviceType.Lamp:
+
+                @* case DeviceType.Lamp:
                     <LampSettings Device="@Device" />
                     break;
                 case DeviceType.Televisie:
@@ -23,7 +24,7 @@
                     break;
                 case DeviceType.Router:
                     <Wifi_RouterSettings Device="@Device" />
-                    break;
+                    break; *@
             }
         </MudPaper>
         <MudPaper>
@@ -50,9 +51,9 @@
         if (Device is null)
             throw new ArgumentException();
 
-        Device.SaveDeviceConfig();
-        var result = await deviceSerice.UpdateDevice(new(Device));
-        if (result.WasSuccessAndShow(snackBar, "Device updated!", Severity.Success))
-            cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.Device.GetAllDevices);
+         Device.SaveDeviceConfig();
+        // var result = await deviceSerice.UpdateDevice(new(Device));
+        // if (result.WasSuccessAndShow(snackBar, "Device updated!", Severity.Success))
+        //     cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.Device.GetAllDevices);
     }
 }

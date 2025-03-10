@@ -1,18 +1,27 @@
-﻿using SmartHome.Common.Api;
+﻿using Newtonsoft.Json;
+using SmartHome.Common.Api;
+using SmartHome.Common.Models;
+using SmartHome.Common.Models.Configs;
+using SmartHome.Common.Models.Entities;
+using SmartHome.Common.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static SmartHome.Common.Api.IDeviceService;
+//using static SmartHome.Common.SharedConfig.Urls;
 
 namespace SmartHome_Testing.interfaces
 {
     public class DeviceServiceTest : IDeviceService
     {
-        public Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
+        public List<Device> TestDevices = new List<Device>();
+
+        public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
         {
-            return null;
+            
+            return new DeviceListResponse(TestDevices);
         }
 
         public Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request)
