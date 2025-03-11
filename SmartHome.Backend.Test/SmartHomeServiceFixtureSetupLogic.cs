@@ -13,10 +13,8 @@ using SmartHome.Common.Models.Enums;
 using SmartHome.Database;
 using SmartHome.Database.ApiContext;
 using SmartHome.Database.Auth;
-using SmartHome.UI.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Xunit.Abstractions;
 using static SmartHome.Common.Api.IAccountService;
 
 [CollectionDefinition("SmartHomeServiceCollection")]
@@ -36,7 +34,6 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
     public IRoutineService TestRoutineService { get; }
     public IDeviceService TestDeviceService { get; }
     public ISmartHomeService TestSmartHomeService { get; }
-    public IJwtStoreService _jwtStoreService { get; }
     public Guid AccoutId { get; set; }
     public Guid SmartUserId { get; set; } = Guid.NewGuid();
     public Guid SmartHomeId { get; set; } = Guid.NewGuid();
