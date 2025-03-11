@@ -20,8 +20,8 @@ public class AccountServiceTest
     }
 
     [Theory]
-    [InlineData("hello@mail", "name", "password1", "password2", false)]
-    [InlineData("hello@mail", "name", "Password@01Long", "Password@01Long", true)]
+    [InlineData("hello@gmail", "name", "password1", "password2", false)]
+    [InlineData("hello@gmail.com", "name", "Password@01Long", "Password@01Long", true)]
     public async Task CreateAccountTest(string Email, string Username, string Password, string PasswordConfirm, bool expected)
     {
         var request = new RegisterRequest(Email, Username, Password, PasswordConfirm);
@@ -33,8 +33,9 @@ public class AccountServiceTest
     }
 
     [Theory]
-    [InlineData("hello@mail", "password1", false)]
-    [InlineData("hello@mail", "Password@01Long", true)]
+    [InlineData("Admin@gmail.com", "Password1!", true)]
+    [InlineData("hello@gmail.com", "password1", false)]
+    [InlineData("hello@gmail.com", "Password@01Long@01Long", false)]
     public async Task LoginTest(string Email, string Password, bool expected)
     {
         var request = new LoginRequest(Email, Password);
@@ -43,7 +44,7 @@ public class AccountServiceTest
             _fixture.ApiLogin(result.JWT);
         else
             TestConsole.WriteLine(result._RequestMessage);
-
+       
         Assert.Equal(expected, result._RequestSuccess);
     }
 
