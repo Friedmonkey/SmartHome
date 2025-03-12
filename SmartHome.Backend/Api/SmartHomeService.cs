@@ -58,6 +58,9 @@ namespace SmartHome.Backend.Api
             var result = await _ctx.DbContext.SmartUsers.AddAsync(smartUser);
             if (result is null)
                 return SuccessResponse.Failed("Failed to send invitation");
+
+            await _ctx.CreateLog($"[user] invited new smartuser {request.email}", request, LogType.Action);
+
             return SuccessResponse.Success();
         }
         public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
@@ -67,6 +70,9 @@ namespace SmartHome.Backend.Api
             smartUserInvite.Role = UserRole.User;
 
             await _ctx.DbContext.SaveChangesAsync();
+
+            await _ctx.CreateLog($"{smartUserInvite.Account.UserName} joned the smarthome", request, LogType.Action);
+
             return SuccessResponse.Success();
         }
         public async Task<SmartHomeListResponse> GetJoinedSmartHomes(EmptyRequest request)

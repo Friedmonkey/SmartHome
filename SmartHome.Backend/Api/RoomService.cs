@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
+using SmartHome.Common.Models.Enums;
 
 namespace SmartHome.Backend.Api;
 
@@ -25,12 +26,16 @@ public class RoomService : IRoomService
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
         await _ctx.Room.EnforceRoomNameUnique(request.smartHome, request.room?.Name);
+
+        await _ctx.CreateLog($"[user] chanchged [room_name] to {request.room.Name}", request, LogType.Action, RoomId: request.room.Id);
         //Controleer of er al een room  met dezelfde naam in de database is
         await _ctx.DbContext.Rooms
             .Where(d => d.Id == request.room.Id)
                 .ExecuteUpdateAsync(u => u
                 .SetProperty(p => p.Name, request.room.Name)
             );
+
+       
 
         return SuccessResponse.Success();
     }
@@ -48,16 +53,22 @@ public class RoomService : IRoomService
         var result = await _ctx.DbContext.Rooms.AddAsync(newRoom);
         await _ctx.DbContext.SaveChangesAsync();
 
+        await _ctx.CreateLog($"[user] created room with name {request.room.Name}", request, LogType.Action);
+
         return new GuidResponse(result.Entity.Id);
     }
 
     public async Task<SuccessResponse> DeleteRoom(SmartHomeGuidRequest request)
     {
+
+
         bool test = await _ctx.DbContext.Devices.AnyAsync(x => x.RoomId == request.Id);
 
         //Controleer of er geen apparaten in de room bevinden
         if (!test)
         {
+            await _ctx.CreateLog($"[user] try to delete [room_name]", request, LogType.Action, RoomId: request.Id);
+
             //Verwijder room uit de database met guid
             await _ctx.DbContext.Rooms.Where(d => d.Id == request.Id).ExecuteDeleteAsync();
             return SuccessResponse.Success();

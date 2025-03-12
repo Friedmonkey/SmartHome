@@ -3,6 +3,7 @@ using Namotion.Reflection;
 using SmartHome.Common;
 using SmartHome.Common.Api;
 using SmartHome.Common.Models.Entities;
+using SmartHome.Common.Models.Enums;
 using static SmartHome.Common.Api.IRoutineService;
 
 namespace SmartHome.Backend.Api;
@@ -29,6 +30,9 @@ public class RoutineService : IRoutineService
 
         var result = await _ctx.DbContext.Routines.AddAsync(routine);
         await _ctx.DbContext.SaveChangesAsync();
+
+        await _ctx.CreateLog($"[user] created a new routing with name {request.routine.Name}", request, LogType.Action);
+
         return new GuidResponse(result.Entity.Id);
     }
     public async Task<RoutineListResponse> GetAllRoutines(EmptySmartHomeRequest request)
@@ -65,6 +69,9 @@ public class RoutineService : IRoutineService
         routine.RepeatDays = request.routine.RepeatDays;
 
         await _ctx.DbContext.SaveChangesAsync();
+
+        await _ctx.CreateLog($"[user] updated stuff in {request.routine.Name}", request, LogType.Action);
+
         return SuccessResponse.Success();
     }
     public async  Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request)
@@ -72,7 +79,11 @@ public class RoutineService : IRoutineService
         await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Routine.EnforceRoutineInSmartHome(request.smartHome, request.Id);
 
+
+        await _ctx.CreateLog($"[user] deleted routine with name [routine_name]", request, LogType.Action, RoutineId: request.Id);
+
         await _ctx.DbContext.Routines.Where(r => r.Id == request.Id).ExecuteDeleteAsync();
+
 
         return SuccessResponse.Success();
     }
@@ -99,6 +110,9 @@ public class RoutineService : IRoutineService
 
         var result = await _ctx.DbContext.DeviceActions.AddAsync(deviceAction);
         await _ctx.DbContext.SaveChangesAsync();
+
+        await _ctx.CreateLog($"[user] added new action {request.action.Name} to [routine_name]", request, LogType.Action, RoutineId: request.action.RoutineId);
+
         return new GuidResponse(result.Entity.Id);
     }
     public async Task<SuccessResponse> UpdateDeviceAction(DeviceActionRequest request)
@@ -123,6 +137,9 @@ public class RoutineService : IRoutineService
 
         _ctx.DbContext.DeviceActions.Update(deviceAction);
         await _ctx.DbContext.SaveChangesAsync();
+
+        await _ctx.CreateLog($"[user] updated routine with name [routine_name] to {request.action.Name}", request, LogType.Action, RoutineId: request.action.RoutineId);
+
         return SuccessResponse.Success();
     }
     public async Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request)
@@ -138,8 +155,13 @@ public class RoutineService : IRoutineService
         {
             return SuccessResponse.Failed("Does not exist");
         }
+
+        await _ctx.CreateLog($"[user] deleted action", request, LogType.Action);
+
         _ctx.DbContext.DeviceActions.Remove(toDelete!);
         await _ctx.DbContext.SaveChangesAsync();
+
+        
         return SuccessResponse.Success();
     }
 }

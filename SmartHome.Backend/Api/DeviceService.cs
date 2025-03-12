@@ -78,7 +78,7 @@ public class DeviceService : IDeviceService
         }
 
         //Maak een log in de database
-        await _ctx.CreateLog($"[user] chanched the deivces in each room", request, LogType.Action);
+        await _ctx.CreateLog($"[user] chanched the divces in each room", request, LogType.Action);
 
         return SuccessResponse.Success();
     }
@@ -171,7 +171,7 @@ public class DeviceService : IDeviceService
             .ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JsonObjectConfig, request.ConfigJson));
 
         //Maak een log in de database
-        await _ctx.CreateLog($"Device is used by [user]", request, LogType.Action);
+        await _ctx.CreateLog($"[device_name] is used by [user]", request, LogType.Action, DeviceId: request.DeviceId);
 
         return SuccessResponse.Success();
     }
