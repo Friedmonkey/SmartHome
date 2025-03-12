@@ -39,6 +39,13 @@ public class AuthContext
         if (!isPartOfSmartHome)
             throw new ApiError("You are not part of this SmartHome");
     }
+    public async Task EnforceUserIsPartOfSmartHome(Guid smarthomeId, Guid smartUserId)
+    {
+        var isPartOfSmartHome = await _dbContext.SmartUsers.AnyAsync(sm => sm.Id == smartUserId && sm.SmartHomeId == smarthomeId);
+
+        if (!isPartOfSmartHome)
+            throw new ApiError("You are not part of this SmartHome");
+    }
     public async Task<bool> IsSmartHomeAdmin(Guid smarthomeId)
     {
         var smartUser = await GetLoggedInSmartUser(smarthomeId);

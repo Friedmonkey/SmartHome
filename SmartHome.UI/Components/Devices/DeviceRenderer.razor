@@ -1,6 +1,7 @@
 ﻿@inject IDeviceService deviceSerice;
 @inject ISnackbar snackBar;
 @inject MemoryCacheService cacheService;
+@inject ApiService apiService;
 
 @if (Device is not null)
 {
@@ -57,6 +58,8 @@
         Device.SaveDeviceConfig();
         var result = await deviceSerice.UpdateDevice(new(Device));
         if (result.WasSuccessAndShow(snackBar, "Device updated!", Severity.Success))
-            cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.Device.GetAllDevices);
+        { 
+            apiService.RemoveCommonEmptyCache(SharedConfig.Urls.Device.GetAllDevices);
+        }
     }
 }
