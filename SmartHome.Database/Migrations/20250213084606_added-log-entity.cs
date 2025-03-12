@@ -16,7 +16,8 @@ namespace SmartHome.Database.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Type = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<string>(type: "varchar(60)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Action = table.Column<string>(type: "varchar(20)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateOn = table.Column<DateTime>(type: "datetime(6)", nullable: false),
