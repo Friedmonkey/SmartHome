@@ -210,9 +210,9 @@ namespace SmartHome.Database.Migrations
                     b.Property<Guid>("SmartHomeId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Type")
+                    b.Property<int>("Type")
                         .IsRequired()
-                        .HasColumnType("varchar(60)");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
