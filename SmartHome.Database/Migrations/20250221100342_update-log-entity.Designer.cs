@@ -12,8 +12,8 @@ using SmartHome.Database;
 namespace SmartHome.Database.Migrations
 {
     [DbContext(typeof(SmartHomeContext))]
-    [Migration("20250213213322_NewEndpoint")]
-    partial class NewEndpoint
+    [Migration("20250221100342_update-log-entity")]
+    partial class updatelogentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -137,6 +137,9 @@ namespace SmartHome.Database.Migrations
                     b.Property<Guid>("RoomId")
                         .HasColumnType("char(36)");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RoomId");
@@ -185,11 +188,16 @@ namespace SmartHome.Database.Migrations
                     b.Property<Guid>("RoutineId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("RoutineId1")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceId");
 
                     b.HasIndex("RoutineId");
+
+                    b.HasIndex("RoutineId1");
 
                     b.ToTable("DeviceActions");
                 });
@@ -210,9 +218,11 @@ namespace SmartHome.Database.Migrations
                     b.Property<Guid>("SmartHomeId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("SmartUserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -253,13 +263,13 @@ namespace SmartHome.Database.Migrations
 
                     b.Property<byte[]>("RepeatDays")
                         .IsRequired()
-                        .HasColumnType("binary(7)");
+                        .HasColumnType("binary(8)");
 
                     b.Property<Guid>("SmartHomeId")
                         .HasColumnType("char(36)");
 
-                    b.Property<DateTime>("Start")
-                        .HasColumnType("datetime(6)");
+                    b.Property<TimeOnly>("Start")
+                        .HasColumnType("time");
 
                     b.HasKey("Id");
 
@@ -432,6 +442,10 @@ namespace SmartHome.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SmartHome.Common.Models.Entities.Routine", null)
+                        .WithMany("DeviceActions")
+                        .HasForeignKey("RoutineId1");
+
                     b.Navigation("Device");
 
                     b.Navigation("Routine");
@@ -487,6 +501,11 @@ namespace SmartHome.Database.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("SmartHome");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Routine", b =>
+                {
+                    b.Navigation("DeviceActions");
                 });
 #pragma warning restore 612, 618
         }
