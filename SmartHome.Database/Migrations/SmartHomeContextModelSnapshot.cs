@@ -41,7 +41,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RoleClaims", (string)null);
+                    b.ToTable("RoleClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
@@ -63,7 +63,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserClaims", (string)null);
+                    b.ToTable("UserClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
@@ -82,7 +82,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.ToTable("UserLogins", (string)null);
+                    b.ToTable("UserLogins");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
@@ -95,7 +95,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("UserId", "RoleId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -114,7 +114,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("UserTokens", (string)null);
+                    b.ToTable("UserTokens");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Device", b =>
@@ -141,7 +141,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("Devices", (string)null);
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAccess", b =>
@@ -162,7 +162,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasIndex("SmartUserId");
 
-                    b.ToTable("DeviceAccesses", (string)null);
+                    b.ToTable("DeviceAccesses");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.DeviceAction", b =>
@@ -191,7 +191,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasIndex("RoutineId");
 
-                    b.ToTable("DeviceActions", (string)null);
+                    b.ToTable("DeviceActions");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Log", b =>
@@ -202,7 +202,7 @@ namespace SmartHome.Database.Migrations
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreateOn")
                         .HasColumnType("datetime(6)");
@@ -210,15 +210,17 @@ namespace SmartHome.Database.Migrations
                     b.Property<Guid>("SmartHomeId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("varchar(60)");
+                    b.Property<Guid>("SmartUserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SmartHomeId");
 
-                    b.ToTable("Logs", (string)null);
+                    b.ToTable("Logs");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Room", b =>
@@ -238,7 +240,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasIndex("SmartHomeId");
 
-                    b.ToTable("Rooms", (string)null);
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Routine", b =>
@@ -265,7 +267,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasIndex("SmartHomeId");
 
-                    b.ToTable("Routines", (string)null);
+                    b.ToTable("Routines");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartHomeModel", b =>
@@ -288,7 +290,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SmartHomes", (string)null);
+                    b.ToTable("SmartHomes");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.SmartUserModel", b =>
@@ -312,7 +314,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasIndex("SmartHomeId");
 
-                    b.ToTable("SmartUsers", (string)null);
+                    b.ToTable("SmartUsers");
                 });
 
             modelBuilder.Entity("SmartHome.Database.Auth.AuthAccount", b =>
@@ -365,7 +367,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("SmartHome.Database.Auth.Role", b =>
@@ -385,7 +387,7 @@ namespace SmartHome.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("SmartHome.Common.Models.Entities.Device", b =>
@@ -427,7 +429,7 @@ namespace SmartHome.Database.Migrations
                         .IsRequired();
 
                     b.HasOne("SmartHome.Common.Models.Entities.Routine", "Routine")
-                        .WithMany()
+                        .WithMany("DeviceActions")
                         .HasForeignKey("RoutineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -487,6 +489,11 @@ namespace SmartHome.Database.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("SmartHome");
+                });
+
+            modelBuilder.Entity("SmartHome.Common.Models.Entities.Routine", b =>
+                {
+                    b.Navigation("DeviceActions");
                 });
 #pragma warning restore 612, 618
         }
