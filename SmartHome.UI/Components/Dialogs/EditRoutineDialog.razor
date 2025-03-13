@@ -205,6 +205,7 @@
         if (result.EnsureSuccess(snackBar))
         {
             MudDialog.Close();
+            result.Show(snackBar, "Routine is succesfully Updated!", Severity.Success);
         }
         else{
             result.Show(snackBar, result._RequestMessage, Severity.Warning);

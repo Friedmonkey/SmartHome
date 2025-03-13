@@ -55,7 +55,7 @@
         var dialog = await DialogService.ShowAsync<EditRoomDialog>(Title, dialogParameter);
         var result = await dialog.Result;
 
-        if (result.Data != "Close")
+        if (result.Data != "Close" && result.Data != null)
         {
             //Update de roomlist nadat er een room is bewerkt of toegevoegd
             if (IsNewRoom)
