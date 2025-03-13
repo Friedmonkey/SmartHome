@@ -3,7 +3,7 @@
 namespace SmartHome.Common.Api;
 
 public record SmartHomeGuidRequest(Guid Id) : SmartHomeRequest;
-public record GuidRequest(Guid Id) : SmartHomeRequest;
+public record GuidRequest(Guid Id);
 public record GuidResponse(Guid Id) : Response<GuidResponse>;
 
 //Fastendpoints cant handle empty stuff so we put garbage that we dont have to use

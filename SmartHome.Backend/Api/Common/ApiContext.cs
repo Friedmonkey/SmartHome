@@ -70,8 +70,6 @@ public class ApiContext
             Action = Action.Replace("[device_name]", device.Name);
             Action = Action.Replace("[device_room]", device.Room.Name);
 
-            string TypeTest = device.Type.ToString();
-
             switch (device.Type)
             {
                 case DeviceType.Lamp:
