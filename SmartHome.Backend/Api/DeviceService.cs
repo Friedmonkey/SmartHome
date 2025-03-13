@@ -79,6 +79,8 @@ public class DeviceService : IDeviceService
             await _ctx.Device.UpdateDeviceSafe(request.smartHome, device, smartUser);
         }
 
+        await _ctx.CreateLog($"[user] chanched the divces in each room", request, LogType.Action);
+
         return SuccessResponse.Success();
     }
 
@@ -88,6 +90,8 @@ public class DeviceService : IDeviceService
 
         await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser);
 
+        await _ctx.CreateLog($"Device proppertie of {request.device.Name} are chanche by [user]", request, LogType.Action);
+
         return SuccessResponse.Success();
     }
     public async Task<SuccessResponse> DeleteDevice(DeleteDeviceRequest request)
@@ -96,6 +100,9 @@ public class DeviceService : IDeviceService
         await _ctx.Device.EnforceDeviceInSmartHome(request.smartHome, request.DeviceGuid);
 
         await _ctx.DbContext.Devices.Where(d => d.Id == request.DeviceGuid).ExecuteDeleteAsync();
+
+        await _ctx.CreateLog($"Device is deleted by [user]", request, LogType.Action);
+
         return SuccessResponse.Success();
     }
     public async Task<GuidResponse> CreateDevice(DeviceRequest request)
@@ -122,6 +129,8 @@ public class DeviceService : IDeviceService
 
         await _ctx.DbContext.SaveChangesAsync();
 
+        await _ctx.CreateLog($"Device created widht the type {newDevice.Type} named {newDevice.Name} made by [user]", request, LogType.Action);
+
         return new GuidResponse(result.Entity.Id);
     }
 
@@ -133,6 +142,8 @@ public class DeviceService : IDeviceService
         device.JsonObjectConfig = request.ConfigJson;
 
         await _ctx.DbContext.SaveChangesAsync();
+
+        await _ctx.CreateLog($"[device_name] is used by [user]", request, LogType.Action, DeviceId: request.DeviceId);
 
         return SuccessResponse.Success();
     }
