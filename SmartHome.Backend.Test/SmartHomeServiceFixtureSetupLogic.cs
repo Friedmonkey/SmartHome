@@ -11,6 +11,7 @@ using SmartHome.Backend;
 using SmartHome.Backend.Api;
 using SmartHome.Backend.Test.Testing;
 using SmartHome.Common.Api;
+using SmartHome.Common.Models;
 using SmartHome.Common.Models.Configs;
 using SmartHome.Common.Models.Entities;
 using SmartHome.Common.Models.Enums;
@@ -30,7 +31,6 @@ public class SmartHomeServiceCollection : ICollectionFixture<SmartHomeServiceFix
 public class SmartHomeServiceFixtureSetupLogic : IDisposable
 {
     //public DeviceContext TestDeviceContext { get; }
-    //public AuthContext TestAuthContext { get; }
     //public RoomContext TestRoomContext { get; }
     //public RoutineContext TestRoutineContext { get; }
     public ApiContext TestApiContext { get; }
@@ -41,7 +41,7 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
     public IRoutineService TestRoutineService { get; }
     public IDeviceService TestDeviceService { get; }
     public ISmartHomeService TestSmartHomeService { get; }
-    public IAuthContext TestIAuthContext { get; }
+    public IAuthContext TestAuthContext { get; }
     public Guid AccoutId { get; set; }
     public Guid SmartUserId { get; set; } = Guid.NewGuid();
     public Guid SmartHomeId { get; set; } = Guid.NewGuid();
@@ -52,6 +52,7 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
     public Guid RoutineId { get; set; } = Guid.NewGuid();
 
     //public ITestOutputHelper TestConsole { get; }
+    public LoginRequest LoginRequest = new LoginRequest("Admin@gmail.com", "Password1!");
 
     private readonly ServiceProvider _serviceProvider;
     private readonly IServiceScope _rootScope;
@@ -100,8 +101,7 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
 
         // Register services
         services.AddScoped<DeviceContext>();
-        services.AddScoped<AuthContext>();
-        services.AddScoped<IAuthContext, TestAuthContext>();
+        services.AddScoped<IAuthContext, AuthContext>();
         services.AddScoped<RoomContext>();
         services.AddScoped<RoutineContext>();
         services.AddScoped<ApiContext>();
@@ -120,7 +120,7 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
         // Use a proper service scope for initialization
 
         // Resolve services after provider is fully built
-        TestIAuthContext = scopedProvider.GetRequiredService<IAuthContext>();
+        TestAuthContext = scopedProvider.GetRequiredService<IAuthContext>();
         TestApiContext = scopedProvider.GetRequiredService<ApiContext>();
         TestAccountService = scopedProvider.GetRequiredService<IAccountService>();
         TestRoomService = scopedProvider.GetRequiredService<IRoomService>();
@@ -246,7 +246,7 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
                 Id = RoutineId,
                 Name = "admin",
                 RepeatDays = (byte)(RoutineRepeat.Monday | RoutineRepeat.Wednsday),
-                SmartHomeId = RoutineId,
+                SmartHomeId = SmartHomeId,
                 Start = TimeOnly.MinValue
             }
         );
@@ -266,10 +266,17 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
 
     public void ApiLogin(string jwtStr)
     {
-        if (TestIAuthContext is TestAuthContext authCtx)
-        {
-            authCtx.Login(jwtStr);
-        }
+        var jwt = new JwtSecurityToken(jwtStr);
+        var identity = new ClaimsIdentity(jwt.Claims, "jwt");
+        var user = new ClaimsPrincipal(identity);
+
+        TestHttpContextAccessor.HttpContext ??= new DefaultHttpContext();
+        TestHttpContextAccessor.HttpContext.User = user;
+    }
+
+    public bool WasSuccess<T>(Response<T>? response) where T : Response<T>
+    {   //handles null too
+        return response?._RequestSuccess == true;
     }
 
     public void Dispose()

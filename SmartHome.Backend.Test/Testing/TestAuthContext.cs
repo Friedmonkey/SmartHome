@@ -1,4 +1,7 @@
-﻿using SmartHome.Common.Models.Entities;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using SmartHome.Common.Models.Entities;
+using SmartHome.Database;
 using SmartHome.Database.ApiContext;
 using SmartHome.Database.Auth;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,9 +12,13 @@ namespace SmartHome.Backend.Test.Testing;
 public class TestAuthContext : IAuthContext
 {
     private readonly AuthContext host;
-    public TestAuthContext(AuthContext host)
+    private readonly IHttpContextAccessor _contextAccessor;
+    private readonly SmartHomeContext _dbContext;
+    private readonly UserManager<AuthAccount> _userManager;
+    public TestAuthContext(IHttpContextAccessor contextAccessor, SmartHomeContext dbContext,
+    UserManager<AuthAccount> userManager)
     {
-        this.host = host;
+        this.host = new AuthContext(contextAccessor, dbContext, userManager);
     }
 
     public ClaimsPrincipal? JWT => currentLogin;
@@ -23,6 +30,7 @@ public class TestAuthContext : IAuthContext
         var identity = new ClaimsIdentity(jwt.Claims, "jwt");
         var user = new ClaimsPrincipal(identity);
         currentLogin = user;
+        
     }
 
     public Task EnforceIsPartOfSmartHome(Guid smarthomeId) => host.EnforceIsPartOfSmartHome(smarthomeId);
