@@ -17,13 +17,13 @@ public class ApiContext
 
     private readonly SmartHomeContext _dbContext;
 
-    public readonly AuthContext Auth;
+    public readonly IAuthContext Auth;
     public readonly DeviceContext Device;
     public readonly RoomContext Room;
     public readonly RoutineContext Routine;
 
     public ApiContext(
-        AuthContext authCtx,
+        IAuthContext authCtx,
         DeviceContext deviceCtx,
         RoomContext roomCtx,
         RoutineContext routineCtx,
