@@ -1,6 +1,7 @@
 ﻿@inject IDeviceService deviceSerice;
 @inject ISnackbar snackBar;
 @inject MemoryCacheService cacheService;
+@inject ApiService apiService;
 
 @if (Device is not null)
 {
@@ -16,10 +17,10 @@
                     <LampSettings Device="@Device" />
                     break;
                 case DeviceType.Televisie:
-                    <TelevisieSettings Device="@Device" />
+                    <TelevisonSettings Device="@Device" />
                     break;
                 case DeviceType.Wasmachine:
-                    <WasmachineSettings Device="@Device" />
+                    <WashingMachineSettings Device="@Device" />
                     break;
                 case DeviceType.Router:
                     <Wifi_RouterSettings Device="@Device" />
@@ -53,6 +54,8 @@
         Device.SaveDeviceConfig();
         var result = await deviceSerice.UpdateDevice(new(Device));
         if (result.WasSuccessAndShow(snackBar, "Device updated!", Severity.Success))
-            cacheService.RemoveCacheWithPrimary(SharedConfig.Urls.Device.GetAllDevices);
+        { 
+            apiService.RemoveCommonEmptyCache(SharedConfig.Urls.Device.GetAllDevices);
+        }
     }
 }

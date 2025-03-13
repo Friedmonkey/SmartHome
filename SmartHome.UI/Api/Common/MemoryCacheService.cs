@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using SmartHome.UI.Layout;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CacheObject = (System.DateTime cacheTime, System.Type type, object? value);
@@ -18,6 +19,7 @@ public class MemoryCacheService
         innerCache[cacheKey] = (DateTime.UtcNow, typeof(T), value);
         Console.WriteLine(cacheKey + " was added/updated to cache");
     }
+
     public void RemoveCache(string cacheKey)
     {   //specifically remove an single cache entry that must exactly match
         if (innerCache.Remove(cacheKey))

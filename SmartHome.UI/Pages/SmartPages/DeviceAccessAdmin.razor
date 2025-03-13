@@ -4,13 +4,22 @@
 @inject IDeviceService deviceSerivce;
 @inject IRoomService roomService;
 @inject ISnackbar snackBar;
+@inject NavigationManager navManager;
+@inject ApiService apiService;
 
-@* <MudText Typo="Typo.h1">This needs to be implmented</MudText> *@
+@* Dense="true" *@
 <MudTable 
-Items="Devices"
-Dense="true">
+Items="AllDevices"
+FixedHeader="true"
+Breakpoint="Breakpoint.Sm" Height="100%"
+GroupBy="_groupDefinition"
+GroupHeaderStyle="background-color:var(--mud-palette-background-gray)"
+MultiSelection="true"
+SelectedItems="AllowedUserDevices"
+>
     <ColGroup>
-        <col style="width: 60px;" />
+        <col style="width: 60px;" /> @* multiSelect *@
+        <col style="width: 60px;" /> @* group *@
         <col />
         <col />
     </ColGroup>
@@ -19,7 +28,7 @@ Dense="true">
         <MudTh>Type</MudTh>
     </HeaderContent>
     <GroupHeaderTemplate>
-        <MudTh Class="mud-table-cell-custom-group" colspan="5">@($"{context.GroupName}: {GetName(context.Key)}")</MudTh>
+        <MudTh Class="mud-table-cell-custom-group" colspan="2">@($"{context.GroupName}: {GetName(context.Key)}")</MudTh>
     </GroupHeaderTemplate>
     <RowTemplate>
         <MudTd DataLabel="Name">@context.Name</MudTd>
@@ -28,15 +37,25 @@ Dense="true">
     <GroupFooterTemplate>
         <MudTh Class="mud-table-cell-custom-group mud-table-cell-custom-group-footer" colspan="5">Total: @context.Items.Count()</MudTh>
     </GroupFooterTemplate>
+    <FooterContent>
+        <MudButton OnClick="Save" Variant="Variant.Filled" Color="Color.Success">
+            Save
+        </MudButton>
+    </FooterContent>
 </MudTable>
 
 @code {
     [Parameter]
     public string? UserGuidStr { get; set; } = null;
-    public Guid? UserGuid => ParsingExtention.GuidTryParse(UserGuidStr);
 
-    private List<Device> Devices = new();
-    private List<Room> Rooms = new();
+    private Guid UserGuid = Guid.Empty;
+
+    private SmartUserModel CurrentUser = new();
+    private HashSet<Device> CurrentUserDevices = new();
+    private HashSet<Device> AllowedUserDevices = new();
+
+    private List<Device> AllDevices = new();
+    private List<Room> AllRooms = new();
 
     private TableGroupDefinition<Device> _groupDefinition = new()
     {
@@ -46,29 +65,70 @@ Dense="true">
         Selector = (e) => e.RoomId
     };
 
+    protected override async Task OnInitializedAsync()
+    {
+        var guid = ParsingExtention.GuidTryParse(UserGuidStr);
+        if (guid is null)
+        {
+            snackBar.Add("Unable to get user from url!", Severity.Error);
+            navManager.NavigateTo($"/smarthome/{SmartGuid}/admin/users");
+            return;
+        }
+        UserGuid = (Guid)guid!;
+
+        var rooms = await roomService.GetAllRooms(new());
+        if (rooms.EnsureSuccess(snackBar))
+            AllRooms = rooms.Rooms;
+
+        var devices = await deviceSerivce.GetAllDevices(new());
+        if (devices.EnsureSuccess(snackBar))
+            AllDevices = devices.Devices;
+
+        var userDevicesAccess = await deviceSerivce.GetUserDevicesAccessAdmin(new(UserGuid));
+        if (userDevicesAccess.EnsureSuccess(snackBar))
+        {
+            CurrentUser = userDevicesAccess.user;
+            AllowedUserDevices = AllDevices.Where(d => userDevicesAccess.Devices.Any(dv => dv.Id == d.Id)).ToHashSet();
+            CurrentUserDevices = AllowedUserDevices.ToHashSet(); //backup for diff later
+        }
+    }
+
+    private async Task Save()
+    {
+        if (CurrentUserDevices.SetEquals(AllowedUserDevices))
+        {   //no changes made
+            snackBar.Add("Nothing has changed!", Severity.Warning);
+            return;
+        }
+
+        var added = AllowedUserDevices.Except(CurrentUserDevices).Select(a => a.Id).ToList();
+        var removed = CurrentUserDevices.Except(AllowedUserDevices).Select(a => a.Id).ToList();
+
+        var addedResult = await deviceSerivce.GiveDevicesAccessAdmin(new (UserGuid, added));
+        addedResult.Show(snackBar);
+        var removedResult = await deviceSerivce.RevokeDevicesAccessAdmin(new (UserGuid, removed));
+        removedResult.Show(snackBar);
+
+        if (addedResult.WasSuccess() && removedResult.WasSuccess())
+        { 
+            snackBar.Add("Save success!", Severity.Success);
+            object cacheKey = new { smartUserId = UserGuid };
+            apiService.RemoveCommonCache(cacheKey, SharedConfig.Urls.Device.GetUserDevicesAccessAdmin);
+        }
+    }
+
     private string GetName(object? guidObj)
     {
         Guid guid = Guid.Empty;
         if (guidObj is Guid g)
             guid = g;
 
-        var room = Rooms.FirstOrDefault(r => r.Id == guid);
+        var room = AllRooms.FirstOrDefault(r => r.Id == guid);
         if (room is null)
             snackBar.Add($"Room not found for {guidObj}", Severity.Error);
         else
             return room!.Name ?? "Room has no name";
 
         return "Room_not_found";
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var devices = await deviceSerivce.GetAllDevices(new());
-        if (devices.EnsureSuccess(snackBar))
-            Devices = devices.Devices;
-
-        var rooms = await roomService.GetAllRooms(new());
-        if (rooms.EnsureSuccess(snackBar))
-            Rooms = rooms.Rooms;
     }
 }
