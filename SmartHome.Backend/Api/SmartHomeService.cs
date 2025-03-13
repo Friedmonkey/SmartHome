@@ -55,9 +55,8 @@ namespace SmartHome.Backend.Api
                 Role = UserRole.InvitationPending,
             };
 
-            var result = await _ctx.DbContext.SmartUsers.AddAsync(smartUser);
-            if (result is null)
-                return SuccessResponse.Failed("Failed to send invitation");
+            await _ctx.DbContext.SmartUsers.AddAsync(smartUser);
+            await _ctx.DbContext.SaveChangesAsync();
             return SuccessResponse.Success();
         }
         public async Task<SuccessResponse> AcceptSmartHomeInvite(GuidRequest request)
@@ -94,7 +93,22 @@ namespace SmartHome.Backend.Api
                 return SmartHomeResponse.Failed("Smart home not found");
             return new SmartHomeResponse(smartHome);
         }
+        public async Task<UserListResponse> GetAllUsers(EmptySmartHomeRequest request)
+        {
+            await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
 
+            var smartUsers = await _ctx.DbContext.SmartUsers.Where(sm => sm.SmartHomeId == request.smartHome).ToListAsync();
+
+            //somehow couple the account
+            foreach (var user in smartUsers)
+            {
+                user.Account = await _ctx.UserManager.Users.FirstOrDefaultAsync(a => a.Id == user.AccountId);
+                if (user.Account == null)
+                    throw new ApiError("Unable to get Account for user" + user.Id);
+            }
+
+            return new UserListResponse(smartUsers);
+        }
         public async Task<SmartHomeListResponse> GetHomesFromIds(IQueryable<Guid> ids)
         {
             var smartHomes = await _ctx.DbContext.SmartHomes

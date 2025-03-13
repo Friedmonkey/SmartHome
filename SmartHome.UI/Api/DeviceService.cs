@@ -15,7 +15,9 @@ public class DeviceService : IDeviceService
 
     public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
-        return await _api.Get<DeviceListResponse>(SharedConfig.Urls.Device.GetAllDevices, request);
+        object cacheKey = new { };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(5);
+        return await _api.GetWithCache<DeviceListResponse>(cacheKey, SharedConfig.Urls.Device.GetAllDevices, request, cacheTime);
     }
 
     public async Task<SuccessResponse> UpdateDevicesRange(UpdateDevicesRangeRequest request)
@@ -35,15 +37,30 @@ public class DeviceService : IDeviceService
 
     public async Task<GuidResponse> CreateDevice(DeviceRequest request)
     {
-        return await _api.Post<GuidResponse>(SharedConfig.Urls.Device.CreaateDevice, request);
+        return await _api.Post<GuidResponse>(SharedConfig.Urls.Device.CreateDevice, request);
     }
 
-    //public async Task<RoomListResponse> GetAllRooms(EmptySmartHomeRequest request)
-    //{
-    //    return await _api.Get<RoomListResponse>(SharedConfig.Urls.Device.GetAllRooms, request);
-    //}
     public async Task<SuccessResponse> UpdateDeviceConfig(UpdateDeviceConfigRequest request)
     {
         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.UpdateDeviceConfig, request);
+    }
+
+    public async Task<UserDevicesAccessAdminResponse> GetUserDevicesAccessAdmin(SmartHomeGuidRequest request)
+    {
+        object cacheKey = new { smartUserId=request.Id };
+        TimeSpan cacheTime = TimeSpan.FromMinutes(1);
+        return await _api.GetWithCache<UserDevicesAccessAdminResponse>(cacheKey, SharedConfig.Urls.Device.GetUserDevicesAccessAdmin, request, cacheTime);
+    }
+    public async Task<SuccessResponse> GiveDevicesAccessAdmin(DeviceAccessRequest request)
+    {
+        if (request.deviceIds.Count == 0) //there is no point in making this request if we're not going to do anything
+            return SuccessResponse.Success();
+        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Device.GiveDeviceAccessAdmin, request);
+    }
+    public async Task<SuccessResponse> RevokeDevicesAccessAdmin(DeviceAccessRequest request)
+    {
+        if (request.deviceIds.Count == 0) //there is no point in making this request if we're not going to do anything
+            return SuccessResponse.Success();
+        return await _api.Delete<SuccessResponse>(SharedConfig.Urls.Device.RevokeDeviceAccessAdmin, request);
     }
 }

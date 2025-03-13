@@ -1,0 +1,16 @@
+﻿<MudSwitch @bind-Value="@Config.Enabled" Label="@StatusText" Color="Color.Warning" UncheckedColor="Color.Dark" />
+
+@code {
+    [Parameter]
+    public Device Device { get; set; }
+
+    private RouterConfig Config;
+
+    protected override void OnInitialized()
+    {
+        Config = Device.GetConfig<RouterConfig>();
+        base.OnInitialized();
+    }
+
+    private string StatusText => Config.Enabled ? "Ingeschakeld" : "Uitgeschakeld";
+}

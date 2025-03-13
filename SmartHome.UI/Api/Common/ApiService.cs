@@ -7,6 +7,7 @@ using SmartHome.Common.Api;
 using SmartHome.Common.Models;
 using SmartHome.UI.Auth;
 using SmartHome.UI.Layout;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static SmartHome.Common.Api.IAccountService;
 using static SmartHome.Common.Api.ISmartHomeService;
 
@@ -40,7 +41,6 @@ public class ApiService
         if (response.WasSuccess())
         {
             await _jwtStoreService.SetTokens(response.JWT, response.Refresh);
-            //_memoryCacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetByIDUrl);
             _memoryCacheService.FullyClearCache();
             _jwtAuthStateProvider.UpdateAuthState();
         }
@@ -49,9 +49,8 @@ public class ApiService
     public async Task Logout()
     {
         var response = await Delete<SuccessResponse>(SharedConfig.Urls.Account.LogoutUrl);
-        response.Show(_snackbarService, "Logout success!");
+        response.Show(_snackbarService);
         await _jwtStoreService.RemoveTokens();
-        //_memoryCacheService.RemoveCacheWithPrimary(SharedConfig.Urls.SmartHome.GetByIDUrl);
         _memoryCacheService.FullyClearCache();
         _jwtAuthStateProvider.UpdateAuthState();
     }
@@ -67,10 +66,33 @@ public class ApiService
 
         return response;
     }
+    public void RemoveCommonEmptyCache(string url, bool smartHomeSpecific = true)
+    {
+        RemoveCommonCache(new { }, url, smartHomeSpecific);
+    }
+    public void RemoveCommonCache(object cacheKey, string url, bool smartHomeSpecific = true)
+    {
+        object? obj = smartHomeSpecific ? new EmptySmartHomeRequest() : null;
+        RemoveCache(cacheKey, url, obj, authenticated: true);
+    }
+    public void RemoveCache(object cacheKey, string url, object? data = null, bool authenticated = true)
+    {
+        Guid guid = Guid.Empty;
+        if (data is not null)
+            (guid, _) = _selectedSmartHomeService.TryGetCurrentSmartHomeGuid(ref data);
+
+        string key = _memoryCacheService.HashKey(url, new { cacheKey, guid, authenticated });
+        _memoryCacheService.RemoveCache(key);
+    }
     public async ValueTask<T> GetWithCache<T>(object cacheKey, string url, object? data = null, TimeSpan? cacheTime = null, bool authenticated = true) where T : Response<T>
     {
+        //auto get current smart home guid and use it for cache as well
+        Guid guid = Guid.Empty;
+        if (data is not null)
+            (guid, _) = _selectedSmartHomeService.TryGetCurrentSmartHomeGuid(ref data);
+
         TimeSpan expire = cacheTime ?? TimeSpan.FromMinutes(5);
-        string key = _memoryCacheService.HashKey(url, new { cacheKey, authenticated });
+        string key = _memoryCacheService.HashKey(url, new { cacheKey, guid, authenticated });
 
         if (_memoryCacheService.TryGet(key, expire, out T result))
             return result;
@@ -108,25 +130,10 @@ public class ApiService
 
             if (data is not null)
             {
-                if (data is SmartHomeRequest req)
-                {
-                    bool success = true;
-                    Guid? smartHomeGuid = _selectedSmartHomeService.GetCurrentSmartHomeGuid();
-                    if (!success || smartHomeGuid is null)
-                    {
-                        throw new ApiError("Unable to resolve SmartHome Guid from state.\n" +
-                        "If you are making an api request on OnInitializedAsync, make sure to call\n" +
-                        "await base.OnInitializedAsync(); BEFORE you do you api calls!\n" +
-                        "So that SmartHomeGuidPage.razor can resolve the model\n", fatal: true);
-                    }
+                var (guid, req) = _selectedSmartHomeService.TryGetCurrentSmartHomeGuid(ref data);
+                if (req is not null)
+                    data = req with { smartHome = guid };
 
-
-                    if (req.smartHome != Guid.Empty)
-                        _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
-
-                    //update the smartHome guid using record with syntax
-                    data = req with { smartHome = (Guid)smartHomeGuid };
-                }
                 content = GetData(method, data, ref url); //can put data in url for GET requests
             }
 
@@ -155,33 +162,41 @@ public class ApiService
         }
     }
 
-    public void RemoveSmartHomeCache(GuidRequest request)
-    {
-        string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
-            new
-            {
-                cacheKey = new { id = request.Id },
-                authenticated = true
-            }
-        );
-        _memoryCacheService.RemoveCache(cacheKey);
-    }
-    public async Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request)
-    {
-        object cacheKey = new { id = request.Id };
-        TimeSpan cacheTime = TimeSpan.FromMinutes(2);
-        return await GetWithCache<SmartHomeResponse>(cacheKey, SharedConfig.Urls.SmartHome.GetByIDUrl, request, cacheTime);
-    }
+    //private (Guid, SmartHomeRequest?) TryGetCurrentSmartHomeGuid(ref object data)
+    //{
+    //    if (data is SmartHomeRequest req)
+    //    {
+    //        Guid? smartHomeGuid = _selectedSmartHomeService.GetCurrentSmartHomeGuid();
+    //        if (smartHomeGuid is null)
+    //            throw new ApiError("Unable to resolve SmartHome Guid from state.", fatal: true);
+
+    //        if (req.smartHome != Guid.Empty)
+    //            _snackbarService.Add("Overriding SmartHome Guid", Severity.Warning);
+
+    //        //update the smartHome guid using record with syntax
+    //        return ((Guid)smartHomeGuid, req);
+    //    }
+    //    return (Guid.Empty, null);
+    //}
+    //public void RemoveSmartHomeCache(GuidRequest request)
+    //{
+    //    string cacheKey = _memoryCacheService.HashKey(SharedConfig.Urls.SmartHome.GetByIDUrl,
+    //        new
+    //        {
+    //            cacheKey = new { id = request.Id },
+    //            authenticated = true
+    //        }
+    //    );
+    //    _memoryCacheService.RemoveCache(cacheKey);
+    //}
     private JsonContent? GetData(HttpMethod method, object data, ref string url)
     {
-        if (method == HttpMethod.Post)
+        if (method == HttpMethod.Post || method == HttpMethod.Delete)
             return JsonContent.Create(data);
 
         if (method == HttpMethod.Get)
             url = ParseDataAsQuery(url, data);
         else if (method == HttpMethod.Put)
-            url = ParseDataAsQuery(url, data);
-        else if (method == HttpMethod.Delete)
             url = ParseDataAsQuery(url, data);
         else throw new NotSupportedException($"Http method: {method.Method} is not supported!");
 

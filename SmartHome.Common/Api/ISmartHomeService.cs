@@ -19,6 +19,10 @@ public interface ISmartHomeService
     public Task<SmartHomeListResponse> GetSmartHomeInvites(EmptyRequest request);
 
 
+    public record UserListResponse(List<SmartUserModel> users) : Response<UserListResponse>;
+    public Task<UserListResponse> GetAllUsers(EmptySmartHomeRequest request);
+
+
     public record SmartHomeResponse(SmartHomeModel smartHome) : Response<SmartHomeResponse>;
     public Task<SmartHomeResponse> GetSmartHomeById(GuidRequest request);
 }

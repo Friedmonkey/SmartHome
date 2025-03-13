@@ -53,6 +53,7 @@ public class Program
         builder.Services.AddScoped<ApiContext>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IRoomService, RoomService>();
+        builder.Services.AddScoped<ILogService, LogService>();
         builder.Services.AddScoped<IRoutineService, RoutineService>();
         builder.Services.AddScoped<IDeviceService, DeviceService>();
         builder.Services.AddScoped<ISmartHomeService, SmartHomeService>();

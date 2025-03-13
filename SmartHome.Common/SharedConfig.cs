@@ -22,9 +22,14 @@ public class SharedConfig
             public const string UpdateDevicesRange = DeviceBase + "UpdateDevicesRange";
             public const string UpdateDevice = DeviceBase + "UpdateDevice";
             public const string DeleteDevice = DeviceBase + "DeleteDevice";
-            public const string CreaateDevice = DeviceBase + "CreateDevice";
+            public const string CreateDevice = DeviceBase + "CreateDevice";
             public const string GetAllRooms = DeviceBase + "GetAllRooms";
             public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
+
+            public const string GetUserDevicesAccessAdmin = DeviceBase + "GetUserDevicesAccessAdmin";
+            public const string GiveDeviceAccessAdmin = DeviceBase + "GiveDeviceAccessAdmin";
+            public const string RevokeDeviceAccessAdmin = DeviceBase + "RevokeDeviceAccessAdmin";
+
         }
         
         private const string RoutineBase = ApiBase + "Routine/";
@@ -49,6 +54,13 @@ public class SharedConfig
             public const string DeleteRoom2 = RoomBase + "DeleteRoom2";
         }
 
+        private const string LogBase = ApiBase + "log/";
+        public static class Log
+        {
+            public const string GetAllLogs = LogBase + "GetAllLogs";
+            public const string CreateLog = RoomBase + "CreateLog";
+        }
+
         private const string SmartHomeBase = ApiBase + "SmartHome/";
         public static class SmartHome
         {
@@ -58,15 +70,7 @@ public class SharedConfig
             public const string GetJoinedUrl = SmartHomeBase + "getJoined";
             public const string GetInvitesUrl = SmartHomeBase + "getInvited";
             public const string GetByIDUrl = SmartHomeBase + "getByIDUrl";
-        }
-
-        private const string SmartUserBase = ApiBase + "SmartUser/";
-        public static class SmartUser
-        {
-            public const string AddSmartUserUrl = SmartUserBase + "add";
-            public const string UpdateSmartHomeUrl = SmartUserBase + "update";
-            public const string GetSmartUsersOfSmartUserUrl = SmartUserBase + "getsmartuserofaccount";
-            public const string DeleteSmartUserUrl = SmartUserBase + "Delete";
+            public const string GetAllUsers = SmartHomeBase + "getAllUsers";
         }
     }
 }
