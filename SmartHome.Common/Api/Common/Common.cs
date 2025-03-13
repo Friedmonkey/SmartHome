@@ -20,5 +20,5 @@ public record SuccessResponse() : Response<SuccessResponse>
 public abstract record SmartHomeRequest
 {
     //No need to set this property, this property gets auto injected from the ApiService
-    public Guid smartHome { get; init; } = Guid.Empty;
+    public Guid smartHome { get; set; } = Guid.Empty;
 };

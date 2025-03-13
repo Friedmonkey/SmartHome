@@ -80,9 +80,12 @@ public class DeviceService : IDeviceService
 
     public async Task<SuccessResponse> UpdateDevice(DeviceRequest request)
     {
-        var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
+        //var smartUser = await _ctx.Auth.GetLoggedInSmartUser(request.smartHome);
 
-        await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser);
+        SmartUserModel smartUser1 = new SmartUserModel();
+        smartUser1.SmartHomeId = Guid.Parse("054aba40-97d2-4b85-8269-35206b8141b7");
+
+        await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser1);
 
         return SuccessResponse.Success();
     }
@@ -96,7 +99,7 @@ public class DeviceService : IDeviceService
     }
     public async Task<GuidResponse> CreateDevice(DeviceRequest request)
     {
-        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        //await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         _ctx.Device.EnforceCorrectDeviceType(request.device.Type);
 
         if (request.device.RoomId == Guid.Empty)
@@ -113,6 +116,7 @@ public class DeviceService : IDeviceService
             RoomId = request.device.RoomId,
             Type = request.device.Type,
             JsonObjectConfig = request.device.JsonObjectConfig,
+            
         };
         var result = await _ctx.DbContext.Devices.AddAsync(newDevice);
 

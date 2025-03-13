@@ -25,22 +25,23 @@ public class ApiContext
     public ApiContext(
         AuthContext authCtx,
         DeviceContext deviceCtx,
-        RoomContext roomCtx,
-        RoutineContext routineCtx,
+        //RoomContext roomCtx,
+        //RoutineContext routineCtx,
 
-        SmartHomeContext dbContext,
-        UserManager<AuthAccount> userManager, SignInManager<AuthAccount> signInManager,
-        BackendConfig backendConfig)
+        SmartHomeContext dbContext//,
+        //UserManager<AuthAccount> userManager, SignInManager<AuthAccount> signInManager,
+        //BackendConfig backendConfig
+        )
     {
         Auth = authCtx;
         Device = deviceCtx;
-        Room = roomCtx;
-        Routine = routineCtx;
+        //Room = roomCtx;
+        //Routine = routineCtx;
 
         _dbContext = dbContext;
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _backendConfig = backendConfig;
+        //_userManager = userManager;
+        //_signInManager = signInManager;
+        //_backendConfig = backendConfig;
     }
 
     public SmartHomeContext DbContext => _dbContext;

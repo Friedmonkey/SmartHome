@@ -11,14 +11,14 @@ public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCor
     public SmartHomeContext(DbContextOptions<SmartHomeContext> options) : base(options)
     {
     }
-    public DbSet<DeviceAccess> DeviceAccesses { get; set; }
-    public DbSet<DeviceAction> DeviceActions { get; set; }
-    public DbSet<Device> Devices { get; set; }
-    public DbSet<Log> Logs { get; set; }
-    public DbSet<Room> Rooms { get; set; }
-    public DbSet<Routine> Routines { get; set; }
-    public DbSet<SmartHomeModel> SmartHomes { get; set; }
-    public DbSet<SmartUserModel> SmartUsers { get; set; }
+    public virtual DbSet<DeviceAccess> DeviceAccesses { get; set; }
+    public virtual DbSet<DeviceAction> DeviceActions { get; set; }
+    public virtual DbSet<Device> Devices { get; set; }
+    public virtual DbSet<Log> Logs { get; set; }
+    public virtual DbSet<Room> Rooms { get; set; }
+    public virtual DbSet<Routine> Routines { get; set; }
+    public virtual DbSet<SmartHomeModel> SmartHomes { get; set; }
+    public virtual DbSet<SmartUserModel> SmartUsers { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         //auth
