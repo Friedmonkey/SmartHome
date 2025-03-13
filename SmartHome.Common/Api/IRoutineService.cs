@@ -16,6 +16,7 @@ public interface IRoutineService
     public Task<SuccessResponse> UpdateRoutine(RoutineRequest request);
     public Task<SuccessResponse> DeleteRoutine(SmartHomeGuidRequest request);
 
+    public Task<ActionListResponse> GetDeviceActionOfRoutine(SmartHomeGuidRequest request);
     public Task<GuidResponse> CreateDeviceAction(DeviceActionRequest request);
     public Task<SuccessResponse> UpdateDeviceAction(DeviceActionRequest request);
     public Task<SuccessResponse> DeleteDeviceAction(SmartHomeGuidRequest request);

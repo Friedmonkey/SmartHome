@@ -1,0 +1,20 @@
+﻿@switch (Device.Type)
+{
+    case DeviceType.Lamp:
+        <LampSettings Device="@Device" />
+        break;
+    case DeviceType.Televisie:
+        <TelevisonSettings Device="@Device" />
+        break;
+    case DeviceType.Wasmachine:
+        <WashingMachineSettings Device="@Device" />
+        break;
+    case DeviceType.Router:
+        <Wifi_RouterSettings Device="@Device" />
+        break;
+}
+
+@code{
+    [Parameter]
+    public Device Device { get; set; }
+}

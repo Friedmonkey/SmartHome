@@ -198,7 +198,6 @@ public class SmartHomeServiceFixtureSetupLogic : IDisposable
             new DeviceAction()
             {
                 Id = DeviceActionId,
-                Name = "admin",
                 DeviceId = device.Id,
                 RoutineId = RoutineId,
                 JsonObjectConfig = device.JsonObjectConfig,

@@ -11,21 +11,7 @@
             <MudText Style="font-size: 250%" Typo="Typo.h3" Class="Lamp-Name">@Device.Name</MudText>
         </MudPaper>
         <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Elevation="0">
-            @switch (Device.Type)
-            {
-                case DeviceType.Lamp:
-                    <LampSettings Device="@Device" />
-                    break;
-                case DeviceType.Televisie:
-                    <TelevisonSettings Device="@Device" />
-                    break;
-                case DeviceType.Wasmachine:
-                    <WashingMachineSettings Device="@Device" />
-                    break;
-                case DeviceType.Router:
-                    <Wifi_RouterSettings Device="@Device" />
-                    break;
-            }
+           <DeviceConfigRenderer Device="Device"/>
         </MudPaper>
         @if (DeviceSaveable){
             <MudPaper>

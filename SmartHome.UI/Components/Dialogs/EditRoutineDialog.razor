@@ -3,11 +3,12 @@
 @inject IRoutineService routineService;
 @inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
+@inject ApiService apiService;
 
 <MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">CreateRoutine
     <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style=" width: 100%" Elevation="0">
         <MudText Typo="Typo.h4">Routine Name</MudText>
-        <MudTextField @bind-Value="@RoutineName" Label="Name" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField @bind-Value="@Routine.Name" Label="Name" Variant="Variant.Outlined"></MudTextField>
         <MudTimePicker Label="Start Routine (24 hours)" @bind-Time="_time"></MudTimePicker>
         <MudSelect @bind-Value="selectedDay" Label="Selected a day" AnchorOrigin="Origin.TopCenter">
             @foreach (var day in Enum.GetValues<RoutineRepeat>().Where(d => d != RoutineRepeat.None))
@@ -26,7 +27,7 @@
         </MudChipSet>
         @if (!IsNewRoutine)
         {
-            <MudSelect @bind-Value="Device" Label="Select a device" AnchorOrigin="Origin.TopCenter">
+            <MudSelect @bind-Value="Device" ToStringFunc="d => d.Name" Label="Select a device" AnchorOrigin="Origin.TopCenter">
                 @foreach (var device in AllDevices)
                 {
                     <MudSelectItem Value="device">@device.Name</MudSelectItem>
@@ -43,21 +44,7 @@
                                 @device.Name
                                 <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@((e) => RemoveDevice(device))">Delete</MudButton>
                             </div>
-                            @switch (Device.Type)
-                            {
-                                case DeviceType.Lamp:
-                                    <LampSettings Device="@Device" />
-                                    break;
-                                case DeviceType.Televisie:
-                                    <TelevisonSettings Device="@Device" />
-                                    break;
-                                case DeviceType.Wasmachine:
-                                    <WashingMachineSettings Device="@Device" />
-                                    break;
-                                case DeviceType.Router:
-                                    <Wifi_RouterSettings Device="@Device" />
-                                    break;
-                            }
+                            <DeviceConfigRenderer Device="device"></DeviceConfigRenderer>
                         </MudPaper>
                     }
                 </MudPaper>
@@ -80,15 +67,18 @@
 </MudPaper>
 
 @code {
+
+    [Parameter]
+    public Routine? Routine { get; set; }
+
     private RoutineRepeat selectedDays = RoutineRepeat.None;
     private RoutineRepeat selectedDay = RoutineRepeat.None;
-    private TimeSpan? _time;
+    private TimeSpan? _time = new TimeSpan();
     bool IsNewRoutine = false;
-    string RoutineName = "";
-    private Routine _Routine;
+
     private List<Device> AllDevices = [];
     private List<Device> SelectedDevices = [];
-    private Device Device = new Device(){ Name = "Empty"};
+    private Device Device = new Device();
 
     private IEnumerable<RoutineRepeat> SelectedDays => Enum.GetValues<RoutineRepeat>()
         .Where(day => day != RoutineRepeat.None && selectedDays.Has(day));
@@ -96,18 +86,43 @@
 
     protected override async void OnInitialized()
     {
-        var devices = await deviceService.GetAllDevices(new());
+        IsNewRoutine = (Routine is null);
+        if (!IsNewRoutine)
+        {
+            _time = new TimeSpan(Routine!.Start.Ticks);
+            var result = await routineService.GetDeviceActionOfRoutine(new(Routine.Id));
+            if (result.EnsureSuccess(snackBar))
+            {
+                Routine.DeviceActions = result.Actions;
+            }
+        }
+        else
+            Routine = new Routine();
+
+        apiService.RemoveCommonCache(new { lol = "lol" }, SharedConfig.Urls.Device.GetAllDevices);
+        var devices = await deviceService.GetAllDevices(new("lol"));
         if (devices.EnsureSuccess(snackBar))
         {
-            AllDevices = devices.Devices;
+            AllDevices = devices.Devices.ToList();
             AllDevices.LoadMultipleDeviceConfigs();
         }
-        if (_Routine != null && _Routine.DeviceActions != null && _Routine.DeviceActions.Count > 0)
+
+        if (Routine?.DeviceActions != null )
         {
-            foreach (var item in _Routine.DeviceActions)
+            foreach (var deviceAction in Routine.DeviceActions)
             {
-                item.Device!.LoadDeviceConfig();
-                SelectedDevices.Add(item.Device!);
+                deviceAction.Device = AllDevices.FirstOrDefault(d => d.Id == deviceAction.DeviceId);
+                if (deviceAction.Device != null)
+                {
+                    Device Config = new Device()
+                    {
+                        JsonObjectConfig = deviceAction.JsonObjectConfig,
+                        Type = deviceAction.Device.Type,
+                    };
+                    deviceAction.Device!.LoadDeviceConfig();
+                    SelectedDevices.Add(deviceAction.Device!);
+                    AllDevices.Remove(deviceAction.Device!);
+                }
             }
         }
         StateHasChanged();
@@ -125,19 +140,23 @@
 
     private void AddDevice()
     {
-        if (!SelectedDevices.Contains(Device)){
+        if (!SelectedDevices.Contains(Device) && Device.Id != Guid.Empty){
             SelectedDevices.Add(Device);
             AllDevices.Remove(Device);
+            StateHasChanged();
         }
     } 
 
-    private void RemoveDevice(Device toRemove)
+    private async void RemoveDevice(Device toRemove)
     {
-        if (SelectedDevices.Contains(Device))
-        {
+        var deviceAction = Routine.DeviceActions!.FirstOrDefault(Da => Da.DeviceId == toRemove.Id);
+        if (deviceAction is not null){
             SelectedDevices.Remove(toRemove);
             AllDevices.Add(toRemove);
+            await routineService.DeleteDeviceAction(new(deviceAction.Id));
+
         }
+
     }
 
     [CascadingParameter]
@@ -151,18 +170,16 @@
 
     private async Task CreateRoutine()
     {
-        //Als alle waarden zijn ingevuld in de UI
-        _Routine = new Routine();
-        _Routine.Name = RoutineName;
-        _Routine.Start = new TimeOnly(_time.Value.Ticks);
-        _Routine.RepeatDays = (byte)selectedDays;
+        Routine.Start = new TimeOnly(_time.Value.Ticks);
+        Routine.RepeatDays = (byte)selectedDays;
         //Maar een nieuwe Routine aan in de database met de api
-        var result = await routineService.CreateRoutine(new(_Routine));
-        result.Show(snackBar, "Routine is succesfully created!", Severity.Success);
-        if (result.WasSuccess())
+        var result = await routineService.CreateRoutine(new(Routine));
+        if (result.EnsureSuccess(snackBar))
         {
-            MudDialog.Close(DialogResult.Ok(_Routine));
+            result.Show(snackBar, "Routine is succesfully created!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(Routine));
         }
+        StateHasChanged();
     }
 
     private async Task UpdateRoutine()
@@ -172,84 +189,57 @@
         //Als er 1 of meer waarden verandert zijn in de UI
         Routine newRoutine = new Routine()
         {
-            Id = _Routine.Id,
-            Name = _Routine.Name,
-            SmartHomeId = _Routine.SmartHomeId,
-            DeviceActions = _Routine.DeviceActions,
-            RepeatDays = _Routine.RepeatDays,
-            Start = _Routine.Start
+            Id = Routine.Id,
+            Name = Routine.Name,
+            SmartHomeId = Routine.SmartHomeId,
+            DeviceActions = Routine.DeviceActions,
+            RepeatDays = Routine.RepeatDays,
+            Start = Routine.Start
         };
 
-        newRoutine.Name = RoutineName;
         newRoutine.Start = timeOnly;
         newRoutine.RepeatDays = (byte)selectedDays;
-        newRoutine.DeviceActions = await DeviceActions();
+        newRoutine.DeviceActions = await DeviceActions(newRoutine);
 
-        if (Routine.Name == newRoutine.Name && Routine.Start == newRoutine.Start && Routine.RepeatDays == newRoutine.RepeatDays && Routine.DeviceActions == newRoutine.DeviceActions)
+        var result = await routineService.UpdateRoutine(new(newRoutine));
+        if (result.EnsureSuccess(snackBar))
         {
-            new SuccessResponse().Show(snackBar, "There are no changes", Severity.Warning);
+            MudDialog.Close();
         }
         else{
-            //Update Routine naar database met de api
-
-            var result = await routineService.UpdateRoutine(new(newRoutine));
-            if (result.WasSuccess())
-            {
-                result.Show(snackBar, "Routine is succesfully updated!", Severity.Success);
-                MudDialog.Close(DialogResult.Ok(newRoutine));
-            }
-            else{
-                result.Show(snackBar, result._RequestMessage, Severity.Warning);
-            }
+            result.Show(snackBar, result._RequestMessage, Severity.Warning);
         }
+
     }
 
-    private async Task<List<DeviceAction>> DeviceActions()
+    private async Task<List<DeviceAction>> DeviceActions(Routine routine)
     {
         foreach (var device in SelectedDevices)
         {
             device.SaveDeviceConfig();
             DeviceAction ToCreate = new DeviceAction()
-                {
-                    JsonObjectConfig = device.JsonObjectConfig,
-                };
+            {
+                JsonObjectConfig = device.JsonObjectConfig,
+                DeviceId = device.Id,
+                RoutineId = routine.Id
+            };
 
-            if (_Routine.DeviceActions == null){
-                _Routine.DeviceActions = [];
+            if (Routine.DeviceActions == null){
+                Routine.DeviceActions = [];
             }
-            var exist = _Routine.DeviceActions.Where(da => da.DeviceId == device.Id).ToList().Count();
-            if (exist == 0){
-                _Routine.DeviceActions.Add(ToCreate);
+            var exist = Routine.DeviceActions.FirstOrDefault(da => da.DeviceId == device.Id);
+            if (exist == null)
+            {
                 var result = await routineService.CreateDeviceAction(new(ToCreate));
+                if(result.EnsureSuccess(snackBar)){
+                    Routine.DeviceActions.Add(ToCreate);
+                }
+            }
+            else{
+                exist.JsonObjectConfig = ToCreate.JsonObjectConfig;
+                var result = await routineService.UpdateDeviceAction(new(exist));
             }
         }
-        return _Routine.DeviceActions != null ? _Routine.DeviceActions : [];
-    }
-
-    [Parameter]
-    public Routine Routine
-    {
-        set
-        {
-            //Kijk of de meegegeven Routine geen waarde heeft
-            if (value is not null)
-            {
-                _Routine = value;
-                _Routine.DeviceActions = value.DeviceActions;
-                RoutineName = value.Name;
-                _time = new TimeSpan(value.Start.Ticks);
-                selectedDays = (RoutineRepeat)value.RepeatDays;
-                
-            }
-            else
-            {
-                IsNewRoutine = true;
-            }
-        }
-
-        get
-        {
-            return _Routine;
-        }
+        return Routine.DeviceActions != null ? Routine.DeviceActions : [];
     }
 }

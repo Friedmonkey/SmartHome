@@ -2,7 +2,7 @@
 @inherits SmartHomeGuidPage
 
 @inject IRoutineService routineService;
-@inject IDialogService DialogService;
+@inject IDialogService dialogService;
 @inject ISnackbar snackBar;
 
 <MudDataGrid Items="@routineList" Filterable="false" SortMode="@SortMode.None" Groupable="false">
@@ -34,38 +34,32 @@
         if (result.EnsureSuccess(snackBar))
             routineList = result.Routines;
     }
-    private async void GoToRoutineActions(Routine _routineToEditOrCreate)
-    { 
-    }
+
     private async void OpenroutineEditDialog(Routine _routineToEditOrCreate)
     {
-        bool IsNewroutine = true;
+        string title = "Update routine";
+        bool IsNewroutine = (_routineToEditOrCreate is null);
 
-        //zet de routine en type aanpassing van de routine in variable en refresh html om routine edit menu zichtbaar te maken
-        var dialogParameter = new DialogParameters<EditRoutineDialog>();
-        dialogParameter.Add(p => p.Routine, _routineToEditOrCreate);
-        //dialogParameter.Add(p => p.smartHomeId, _SmartHomeId);
-
-        string Title = "New routine";
-        if (_routineToEditOrCreate is not null)
+        if (IsNewroutine)
         {
-            Title = "Edit routine";
-            IsNewroutine = false;
+            title = "Create routine";
+            _routineToEditOrCreate = new Routine();
         }
 
-        //Open de dialog popup voor het invoeren van routine gegevens
-        var dialog = await DialogService.ShowAsync<EditRoutineDialog>(Title, dialogParameter);
+        var parameters = new DialogParameters();
+        parameters.Add("Routine", _routineToEditOrCreate);
+
+        DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true, BackdropClick = false };
+        var dialog = await dialogService.ShowAsync<EditRoutineDialog>(title, parameters, closeOnEscapeKey);
         var result = await dialog.Result;
 
         if (result.Data != "Close" && result.Data != null)
         {
             //Update de routinelist nadat er een routine is bewerkt of toegevoegd
-            if (!IsNewroutine)
+            if (IsNewroutine)
             {
-                routineList.RemoveAll(d => d.Id == (result.Data as Routine).Id);
+                routineList.Add(result.Data as Routine);    
             }
-            routineList.Add(result.Data as Routine);
-            StateHasChanged();
         }
     }
 

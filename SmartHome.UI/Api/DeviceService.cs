@@ -15,7 +15,7 @@ public class DeviceService : IDeviceService
 
     public async Task<DeviceListResponse> GetAllDevices(EmptySmartHomeRequest request)
     {
-        object cacheKey = new { };
+        object cacheKey = new { lol=request.nothing};
         TimeSpan cacheTime = TimeSpan.FromMinutes(5);
         return await _api.GetWithCache<DeviceListResponse>(cacheKey, SharedConfig.Urls.Device.GetAllDevices, request, cacheTime);
     }

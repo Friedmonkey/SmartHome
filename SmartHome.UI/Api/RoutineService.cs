@@ -32,9 +32,13 @@ public class RoutineService : IRoutineService
     {
          return await _api.Get<RoutineListResponse>(SharedConfig.Urls.Routine.GetAllRoutines, request);
     }
+    public async Task<ActionListResponse> GetDeviceActionOfRoutine(SmartHomeGuidRequest request)
+    {
+        return await _api.Get<ActionListResponse>(SharedConfig.Urls.Routine.GetDeviceActionRoutine, request);
+    }
     public async Task<SuccessResponse> UpdateDeviceAction(DeviceActionRequest request)
     {
-         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.DeleteDeviceAction, request);
+         return await _api.Post<SuccessResponse>(SharedConfig.Urls.Routine.UpdateDeviceAction, request);
     }
     public async Task<SuccessResponse> UpdateRoutine(RoutineRequest request)
     {
