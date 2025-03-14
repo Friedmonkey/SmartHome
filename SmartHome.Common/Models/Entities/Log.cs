@@ -8,7 +8,7 @@ public class Log : Entity
     public LogType? Type { get; set; }
 
     [Required]
-    [Column(TypeName = "longtext")]
+    [Column(TypeName = "varchar(500)")]
     public string? Action { get; set; }
 
     [Required]

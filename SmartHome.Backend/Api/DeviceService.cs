@@ -90,7 +90,7 @@ public class DeviceService : IDeviceService
 
         await _ctx.Device.UpdateDeviceSafe(request.smartHome, request.device, smartUser);
 
-        await _ctx.CreateLog($"Device proppertie of {request.device.Name} are chanche by [user]", request, LogType.Action);
+        await _ctx.CreateLog($"Device propperties {request.device.JsonObjectConfig} of {request.device.Name} are chanche by [user]", request, LogType.Action);
 
         return SuccessResponse.Success();
     }
