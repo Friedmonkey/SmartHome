@@ -26,7 +26,7 @@ public class RoutineServiceTest
     [Theory]
     [InlineData("Name",(byte)(RoutineRepeat.Monday | RoutineRepeat.Saturday), true)]
     [InlineData("Name 1",(byte)(RoutineRepeat.Monday | RoutineRepeat.Saturday), true)]
-    public async Task CreateRoutine(string name, byte repeatDays, bool expected)
+    public async Task CreateRoutineTest(string name, byte repeatDays, bool expected)
     {
         var resultLogin = await _accountService.Login(_fixture.LoginRequest);
         if (_fixture.WasSuccess(resultLogin))
@@ -41,8 +41,9 @@ public class RoutineServiceTest
             Start = TimeOnly.MinValue,
             SmartHomeId = _fixture.SmartHomeId,
         };
-        
-        var result = await _routineService.CreateRoutine(new(tmp));
+        var request = new RoutineRequest(tmp);
+        var req = request with { smartHome = _fixture.SmartHomeId };
+        var result = await _routineService.CreateRoutine(req);
         if (result.Id == Guid.Empty)
         {
             TestConsole.WriteLine(result._RequestMessage);
