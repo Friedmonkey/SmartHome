@@ -97,31 +97,29 @@ namespace SmartHome_Testing
 
         }
 
-        //<h3 class="mud-typography mud-typography-h3 Lamp-Name" style="font-size: 250%">Lamp15</h3>
-
-        //public static int Data { get; set; }
-
-        //[Theory]
-        //[InlineData(1)]
-        //public void Counter(int Value1)
-        //{
-        //    //Haal de geladen home component op uit blazor
-        //    var remderComponent = RenderComponent<Counter>();
-
-        //    remderComponent.SetParametersAndRender(param => param.Add<int>(p => p.currentCount, 5));
-
-        //    int ExpectedValue = 5;
-
-        //    //Test de blazor component
-        //    remderComponent
-        //        .Find("p")
-        //        .MarkupMatches($"<p role=\"status\">Current count: {ExpectedValue}</p>");
-
-        //}
-
         IDeviceService deviceServiceFunctions;
         Mock<SmartHomeContext> mockDbContext = new Mock<SmartHomeContext>();
 
+        public ApiContext GetDbContext()
+        {
+            string connectionString = @"server = localhost; database = SmartHome; uid = root";
+            var obj = new DbContextOptionsBuilder<SmartHomeContext>().UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)).Options;
+
+            SmartHomeContext smartHomeContext = new SmartHomeContext(obj);
+
+            DeviceContext deviceContext1 = new DeviceContext(smartHomeContext);
+            RoomContext roomContext1 = new RoomContext(smartHomeContext);
+
+            //AuthContext
+            IHttpContextAccessor httpContextAccessor = null;
+            UserManager<AuthAccount> userManager = null;
+            AuthContext authContext1 = new AuthContext(httpContextAccessor, smartHomeContext, userManager);
+            //
+            ApiContext apiContext = new ApiContext(authContext1, deviceContext1, roomContext1, smartHomeContext);
+
+            return apiContext;
+
+        }
 
 
         [Fact]
@@ -140,7 +138,6 @@ namespace SmartHome_Testing
             deviceList.Add(TestDevice1);
             var deviceData = deviceList.AsQueryable();
 
-            //var deviceContext = new Mock<SmartHomeContext>();
             var mockSet = new Mock<DbSet<Device>>();
 
             mockSet.Setup(x => x.AddAsync(It.IsAny<Device>(), It.IsAny<CancellationToken>()))
@@ -149,27 +146,7 @@ namespace SmartHome_Testing
             mockDbContext.Setup(x => x.Set<Device>()).Returns(mockSet.Object);
             mockDbContext.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(() => Task.FromResult(1));
             var authContext = new Mock<AuthContext>();
-
-            string connectionString = @"server = localhost; database = SmartHome; uid = root";
-            var obj = new DbContextOptionsBuilder<SmartHomeContext>().UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)).Options;
-
-           
-
-
-            SmartHomeContext smartHomeContext = new SmartHomeContext(obj);
-
-            DeviceContext deviceContext1 = new DeviceContext(smartHomeContext);
-
-            //AuthContext
-            IHttpContextAccessor httpContextAccessor = null;
-            UserManager<AuthAccount> userManager = null;
-            AuthContext authContext1 = new AuthContext(httpContextAccessor, smartHomeContext, userManager);
-
-
-            //
-            ApiContext apiContext = new ApiContext(authContext1, deviceContext1, smartHomeContext);
-
-            var Service = new SmartHome.Backend.Api.DeviceService(apiContext);
+            var Service = new SmartHome.Backend.Api.DeviceService(GetDbContext());
 
             DeviceRequest request = new DeviceRequest(TestDevice1);
             request.smartHome = Guid.Parse("054aba40-97d2-4b85-8269-35206b8141b7");
@@ -177,27 +154,63 @@ namespace SmartHome_Testing
         }
 
         [Fact]
-        public async Task TestApiGetDevices()
+        public async Task TestApiDelete()
         {
-           // Device TestDevice1 = new Device
-           // {
-           //     Id = Guid.Parse("a4aefbef-0d8d-4f84-b5d2-e9a05eac103a"),
-           //     Name = "Lamp 1",
-           //     Type = DeviceType.Lamp,
-           //     RoomId = Guid.Parse("66133695-9398-4e09-b782-7c9702d44206"),
-           //     JsonObjectConfig = JsonConvert.SerializeObject(new LampConfig() { Brightness = 100, Color = "#ffffff", Enabled = false })
-           // };
-           // SmartHomeContext dbContext = new SmartHomeContext(new DbContextOptions<SmartHomeContext>());
-           //// ApiContext apiContext = new ApiContext(dbContext);
+            Device TestDevice1 = new Device
+            {
+                Id = Guid.Parse("a4aefbef-0d8d-4f84-b5d2-e9a05eac103a"),
+                Name = "Lamp 1",
+                Type = DeviceType.Lamp,
+                RoomId = Guid.Parse("08dd5264-bf3e-4884-821c-e41670578c32"),
+                JsonObjectConfig = JsonConvert.SerializeObject(new LampConfig() { Brightness = 100, Color = "#ffffff", Enabled = false })
+            };
 
-           // deviceServiceFunctions = new SmartHome.Backend.Api.DeviceService(apiContext);
+            List<Device> deviceList = new List<Device>();
+            deviceList.Add(TestDevice1);
+            var deviceData = deviceList.AsQueryable();
 
-            
+            var mockSet = new Mock<DbSet<Device>>();
 
-           // DeviceRequest deviceRequest = new DeviceRequest(TestDevice1);
-           // deviceRequest.smartHome = Guid.Parse("054aba40-97d2-4b85-8269-35206b8141b7");
+            mockSet.Setup(x => x.AddAsync(It.IsAny<Device>(), It.IsAny<CancellationToken>()))
+                .Callback((Device model, CancellationToken token) => { })
+                .Returns((Device model, CancellationToken token) => ValueTask.FromResult((EntityEntry<Device>)null));
+            mockDbContext.Setup(x => x.Set<Device>()).Returns(mockSet.Object);
+            mockDbContext.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(() => Task.FromResult(1));
+            var authContext = new Mock<AuthContext>();
+            var Service = new SmartHome.Backend.Api.DeviceService(GetDbContext());
 
-           // var response = await deviceServiceFunctions.UpdateDevice(deviceRequest);
+            //Delete device guid
+            DeleteDeviceRequest request = new DeleteDeviceRequest(Guid.Parse("08dd5263-f10d-46d6-830a-28ef72ad54c7"));
+            var result = await Service.DeleteDevice(request);
+        }
+
+        [Fact]
+        public async Task TestApiCreateRoom()
+        {
+            Room TestRoom1 = new Room
+            {
+                Id = Guid.Parse("9cd030d7-347e-4673-8a78-e180e22162c9"),
+                Name = "Woonkamer1"
+            };
+
+            List<Room> roomList = new List<Room>();
+            roomList.Add(TestRoom1);
+            var roomData = roomList.AsQueryable();
+
+            var mockSet = new Mock<DbSet<Room>>();
+
+            mockSet.Setup(x => x.AddAsync(It.IsAny<Room>(), It.IsAny<CancellationToken>()))
+                .Callback((Room model, CancellationToken token) => { })
+                .Returns((Room model, CancellationToken token) => ValueTask.FromResult((EntityEntry<Room>)null));
+            mockDbContext.Setup(x => x.Set<Room>()).Returns(mockSet.Object);
+            mockDbContext.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(() => Task.FromResult(1));
+            var authContext = new Mock<AuthContext>();
+            var Service = new SmartHome.Backend.Api.RoomService(GetDbContext());
+
+            //Delete device guid
+            RoomRequest request = new RoomRequest(TestRoom1);
+            request.smartHome = Guid.Parse("054aba40-97d2-4b85-8269-35206b8141b7");
+            var result = await Service.CreateRoom(request);
         }
     }
 }

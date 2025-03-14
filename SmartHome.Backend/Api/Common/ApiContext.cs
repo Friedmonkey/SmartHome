@@ -25,7 +25,7 @@ public class ApiContext
     public ApiContext(
         AuthContext authCtx,
         DeviceContext deviceCtx,
-        //RoomContext roomCtx,
+        RoomContext roomCtx,
         //RoutineContext routineCtx,
 
         SmartHomeContext dbContext//,
@@ -35,7 +35,7 @@ public class ApiContext
     {
         Auth = authCtx;
         Device = deviceCtx;
-        //Room = roomCtx;
+        Room = roomCtx;
         //Routine = routineCtx;
 
         _dbContext = dbContext;

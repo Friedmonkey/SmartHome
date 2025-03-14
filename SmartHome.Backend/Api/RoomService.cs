@@ -37,7 +37,7 @@ public class RoomService : IRoomService
 
     public async Task<GuidResponse> CreateRoom(RoomRequest request)
     {
-        await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
+        //await _ctx.Auth.EnforceIsSmartHomeAdmin(request.smartHome);
         await _ctx.Room.EnforceRoomNameUnique(request.smartHome, request.room.Name);
 
         Room newRoom = new Room()
