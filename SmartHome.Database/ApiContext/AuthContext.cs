@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace SmartHome.Database.ApiContext;
 
-public class AuthContext
+public class AuthContext : IAuthContext
 {
     private readonly IHttpContextAccessor _contextAccessor;
     private readonly SmartHomeContext _dbContext;

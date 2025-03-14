@@ -29,29 +29,16 @@ public class RoutineContext
             throw new ApiError("The device action does not exist within the given routine!");
     }
 
-    public async Task EnforceRoutineNameUnique(Guid smartHomeId, string? routineName)
+    public async Task EnforceRoutineNameUnique(Guid smartHomeId, Guid? routineId, string? routineName)
     {
         if (string.IsNullOrEmpty(routineName))
             throw new ApiError("Routine name cannot be empty!");
 
         bool alreadyExists = await _dbContext.Routines
-            .Where(r => r.SmartHomeId == smartHomeId)
+            .Where(r => r.SmartHomeId == smartHomeId && r.Id != routineId)
             .AnyAsync(d => d.Name == routineName);
 
         if (alreadyExists)
             throw new ApiError("There is already a routine with the same name!!");
-    }
-
-    public async Task EnforceDeviceActionNameUnique(Guid routineId, string? DeviceActionName)
-    {
-        if (string.IsNullOrEmpty(DeviceActionName))
-            throw new ApiError("Device action name cannot be empty!");
-
-        bool alreadyExists = await _dbContext.DeviceActions
-            .Where(r => r.RoutineId == routineId)
-            .AnyAsync(d => d.Name == DeviceActionName);
-
-        if (alreadyExists)
-            throw new ApiError("There is already a device action with the same name!!");
     }
 }

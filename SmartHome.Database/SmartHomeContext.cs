@@ -81,11 +81,12 @@ public class SmartHomeContext : Microsoft.AspNetCore.Identity.EntityFrameworkCor
            .WithMany()
            .HasForeignKey(l => l.DeviceId)
            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<DeviceAction>()
-           .HasOne(d => d.Routine)
-           .WithMany()
-           .HasForeignKey(l => l.RoutineId)
-           .OnDelete(DeleteBehavior.Cascade);
+            .HasOne(da => da.Routine)
+            .WithMany(r => r.DeviceActions)
+            .HasForeignKey(da => da.RoutineId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 public class YourDbContextFactiory : IDesignTimeDbContextFactory<SmartHomeContext>

@@ -36,6 +36,7 @@ public class SharedConfig
         public static class Routine
         {
             public const string GetAllRoutines =  RoutineBase + "GetRoutinesOfSmartHomeWithAccess";
+            public const string GetDeviceActionRoutine =  RoutineBase + "GetDeviceActionRoutine";
             public const string UpdateRoutine = RoutineBase + "UpdateRoutine";
             public const string DeleteRoutine = RoutineBase + "DeleteRoutine";
             public const string CreateRoutine = RoutineBase + "CreateRoutine";

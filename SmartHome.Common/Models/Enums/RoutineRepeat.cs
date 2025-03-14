@@ -14,7 +14,7 @@ public enum RoutineRepeat : byte
     Sunday = 0b0000_0001,
 }
 
-static class ConfigHelper
+public static class ConfigHelper
 {
     public static RoutineRepeat Add(this RoutineRepeat value, RoutineRepeat flag) => value | flag;
     public static RoutineRepeat Remove(this RoutineRepeat value, RoutineRepeat flag) => value & ~flag;
