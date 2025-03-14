@@ -5,10 +5,6 @@ namespace SmartHome.Common.Models.Entities;
 public class DeviceAction : Entity
 {
     [Required]
-    [Column(TypeName = "varchar(20)")]
-    public string Name { get; set; }
-
-    [Required]
     [Column(TypeName = "longtext")]
     public string JsonObjectConfig { get; set; }
 

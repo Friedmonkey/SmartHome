@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartHome.Database;
 
@@ -11,9 +12,11 @@ using SmartHome.Database;
 namespace SmartHome.Database.Migrations
 {
     [DbContext(typeof(SmartHomeContext))]
-    partial class SmartHomeContextModelSnapshot : ModelSnapshot
+    [Migration("20250306151824_update-deviceaction-removed-name")]
+    partial class updatedeviceactionremovedname
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,11 +184,16 @@ namespace SmartHome.Database.Migrations
                     b.Property<Guid>("RoutineId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("RoutineId1")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceId");
 
                     b.HasIndex("RoutineId");
+
+                    b.HasIndex("RoutineId1");
 
                     b.ToTable("DeviceActions");
                 });
@@ -198,7 +206,7 @@ namespace SmartHome.Database.Migrations
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<DateTime>("CreateOn")
                         .HasColumnType("datetime(6)");
@@ -425,10 +433,14 @@ namespace SmartHome.Database.Migrations
                         .IsRequired();
 
                     b.HasOne("SmartHome.Common.Models.Entities.Routine", "Routine")
-                        .WithMany("DeviceActions")
+                        .WithMany()
                         .HasForeignKey("RoutineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("SmartHome.Common.Models.Entities.Routine", null)
+                        .WithMany("DeviceActions")
+                        .HasForeignKey("RoutineId1");
 
                     b.Navigation("Device");
 

@@ -158,7 +158,7 @@ public class ApiService
                 return Response<T>.Failed("BACKEND not enabled");
             }
 #endif
-            throw new ApiError("Unexpected Api error: " + ex.Message, fatal: true);
+            throw new ApiError($"Unexpected {method.Method} Api error on {url}: {ex.Message}", fatal: true);
         }
     }
 

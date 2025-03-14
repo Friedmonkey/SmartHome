@@ -1,32 +1,163 @@
-﻿@inject IRoutineService routineService;
+﻿@using SmartHome.Common.Models.Enums;
+@using SmartHome.UI.Components.Devices;
+@inject IRoutineService routineService;
+@inject IDeviceService deviceService;
 @inject ISnackbar snackBar;
+@inject ApiService apiService;
 
 <MudPaper Class="d-flex flex-column d-inline-flex flex-grow-1 justify-center my-4 pa-4" Style="width: 100%;" Elevation="0">CreateRoutine
-    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style="min-width: 370px; width: 45%" Elevation="0">
+    <MudPaper Class="d-flex flex-column flex-grow-0 gap-0 mb-4" Style=" width: 100%" Elevation="0">
         <MudText Typo="Typo.h4">Routine Name</MudText>
-        <MudTextField @bind-Value="@RoutineName" Label="Name" Variant="Variant.Outlined"></MudTextField>
-        @* <MudTextField @bind-Value="@RoutineDate" Label="Start Date" Variant="Variant.Outlined"></MudTextField> *@
+        <MudTextField @bind-Value="@Routine.Name" Label="Name" Variant="Variant.Outlined"></MudTextField>
+        <MudTimePicker Label="Start Routine (24 hours)" @bind-Time="_time"></MudTimePicker>
+        <MudSelect @bind-Value="selectedDay" Label="Selected a day" AnchorOrigin="Origin.TopCenter">
+            @foreach (var day in Enum.GetValues<RoutineRepeat>().Where(d => d != RoutineRepeat.None))
+            {
+                <MudSelectItem Value="day">@day</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudButton OnClick="AddDay" Variant="Variant.Filled" Color="Color.Primary">Add</MudButton>
+
+        <MudChipSet T="RoutineRepeat">
+            @foreach (var day in SelectedDays)
+            {
+                <MudChip T="RoutineRepeat" Color="Color.Primary" OnClose="@(() => RemoveDay(day))">@day</MudChip>
+            }
+        </MudChipSet>
+        @if (!IsNewRoutine)
+        {
+            <MudSelect @bind-Value="Device" ToStringFunc="d => d.Name" Label="Select a device" AnchorOrigin="Origin.TopCenter">
+                @foreach (var device in AllDevices)
+                {
+                    <MudSelectItem Value="device">@device.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton OnClick="AddDevice" Variant="Variant.Filled" Color="Color.Primary">Add</MudButton>
+
+            <MudPaper Class="d-flex d-inline-flex flex-grow-1 justify-center mb-4" Style="width: 100%; background-color: transparent;" Elevation="0">
+                <MudPaper class="d-flex flex-wrap align-center gap-12 justify-space-between Apparaat-Container" Style="width: 100%; background-color: transparent;" Elevation="0">
+                    @foreach (var device in SelectedDevices)
+                    {
+                        <MudPaper Class="d-flex flex-column align-center flex-grow-1 gap-1" Elevation="0">
+                            <div>
+                                @device.Name
+                                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="@((e) => RemoveDevice(device))">Delete</MudButton>
+                            </div>
+                            <DeviceConfigRenderer Device="device"></DeviceConfigRenderer>
+                        </MudPaper>
+                    }
+                </MudPaper>
+            </MudPaper>
+        }
     </MudPaper>
-    
+
     <MudPaper class="d-flex flex-row gap-1 justify-space-between mt-2" Style="width: 100%;" Elevation="0">
         <MudButton @onclick="CloseMenu" Class="my-1" Variant="Variant.Filled" Color="MudBlazor.Color.Secondary" StartIcon="@Icons.Material.Filled.Close">Close</MudButton>
         <MudSpacer />
         @if (IsNewRoutine)
         {
-            <MudButton @onclick="CreateRoutine" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Device</MudButton>
+            <MudButton @onclick="CreateRoutine" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save New Routine</MudButton>
         }
         else
         {
-            <MudButton @onclick="UpdateRoutine" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Device</MudButton>
+            <MudButton @onclick="UpdateRoutine" Class="my-1" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save Edit Routine</MudButton>
         }
     </MudPaper>
 </MudPaper>
 
 @code {
+
+    [Parameter]
+    public Routine? Routine { get; set; }
+
+    private RoutineRepeat selectedDays = RoutineRepeat.None;
+    private RoutineRepeat selectedDay = RoutineRepeat.None;
+    private TimeSpan? _time = new TimeSpan();
     bool IsNewRoutine = false;
-    string RoutineName = "";
-    TimeOnly RoutineDate;
-    private Routine _Routine;
+
+    private List<Device> AllDevices = [];
+    private List<Device> SelectedDevices = [];
+    private Device Device = new Device();
+
+    private IEnumerable<RoutineRepeat> SelectedDays => Enum.GetValues<RoutineRepeat>()
+        .Where(day => day != RoutineRepeat.None && selectedDays.Has(day));
+
+
+    protected override async void OnInitialized()
+    {
+        IsNewRoutine = (Routine is null);
+        if (!IsNewRoutine)
+        {
+            _time = new TimeSpan(Routine!.Start.Ticks);
+            var result = await routineService.GetDeviceActionOfRoutine(new(Routine.Id));
+            if (result.EnsureSuccess(snackBar))
+            {
+                Routine.DeviceActions = result.Actions;
+            }
+        }
+        else
+            Routine = new Routine();
+
+        apiService.RemoveCommonCache(new { lol = "lol" }, SharedConfig.Urls.Device.GetAllDevices);
+        var devices = await deviceService.GetAllDevices(new("lol"));
+        if (devices.EnsureSuccess(snackBar))
+        {
+            AllDevices = devices.Devices.ToList();
+            AllDevices.LoadMultipleDeviceConfigs();
+        }
+
+        if (Routine?.DeviceActions != null )
+        {
+            foreach (var deviceAction in Routine.DeviceActions)
+            {
+                deviceAction.Device = AllDevices.FirstOrDefault(d => d.Id == deviceAction.DeviceId);
+                if (deviceAction.Device != null)
+                {
+                    Device Config = new Device()
+                    {
+                        JsonObjectConfig = deviceAction.JsonObjectConfig,
+                        Type = deviceAction.Device.Type,
+                    };
+                    deviceAction.Device!.LoadDeviceConfig();
+                    SelectedDevices.Add(deviceAction.Device!);
+                    AllDevices.Remove(deviceAction.Device!);
+                }
+            }
+        }
+        StateHasChanged();
+        base.OnInitialized();
+    }
+    private void AddDay()
+    {
+        selectedDays = selectedDays.Add(selectedDay);
+    }
+
+    private void RemoveDay(RoutineRepeat day)
+    {
+        selectedDays = selectedDays.Remove(day);
+    }
+
+    private void AddDevice()
+    {
+        if (!SelectedDevices.Contains(Device) && Device.Id != Guid.Empty){
+            SelectedDevices.Add(Device);
+            AllDevices.Remove(Device);
+            StateHasChanged();
+        }
+    } 
+
+    private async void RemoveDevice(Device toRemove)
+    {
+        var deviceAction = Routine.DeviceActions!.FirstOrDefault(Da => Da.DeviceId == toRemove.Id);
+        if (deviceAction is not null){
+            SelectedDevices.Remove(toRemove);
+            AllDevices.Add(toRemove);
+            await routineService.DeleteDeviceAction(new(deviceAction.Id));
+
+        }
+
+    }
 
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
@@ -39,81 +170,77 @@
 
     private async Task CreateRoutine()
     {
-        if (RoutineName == string.Empty)
-        {
-            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
-            return;
-        }
-
-        //Als alle waarden zijn ingevuld in de UI
-        Routine newRoutine = new Routine();
-        newRoutine.Name = RoutineName;
-        newRoutine.Start = RoutineDate;
-        //newRoutine.SmartHomeId = _smartHomeId;
-
+        Routine.Start = new TimeOnly(_time.Value.Ticks);
+        Routine.RepeatDays = (byte)selectedDays;
         //Maar een nieuwe Routine aan in de database met de api
-        var result = await routineService.CreateRoutine(new(newRoutine));
-        result.Show(snackBar, "Routine is succesfully created!", Severity.Success);
-        if (result.WasSuccess())
+        var result = await routineService.CreateRoutine(new(Routine));
+        if (result.EnsureSuccess(snackBar))
         {
-            MudDialog.Close(DialogResult.Ok(newRoutine));
+            result.Show(snackBar, "Routine is succesfully created!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(Routine));
         }
+        StateHasChanged();
     }
-
 
     private async Task UpdateRoutine()
     {
-        if (RoutineName == _Routine.Name)
-        {
-            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
-            return;
-        }
-        if (RoutineName == string.Empty)
-        {
-            snackBar.Add("Not all values has a value. Chanche all the values!", Severity.Warning);
-            return;
-        }
-        if (RoutineDate == _Routine.Start)
-        {
-            snackBar.Add("No values has chanched. Edit a field to make Chanches!", Severity.Warning);
-            return;
-        }
+        TimeOnly timeOnly = new TimeOnly(_time.Value.Ticks);
 
         //Als er 1 of meer waarden verandert zijn in de UI
-        Routine newRoutine = _Routine;
-        newRoutine.Name = RoutineName;
-        newRoutine.Start = RoutineDate;
-
-        //Update Routine naar database met de api
-        var result = await routineService.UpdateRoutine(new(newRoutine));
-        result.Show(snackBar, "Routine is succesfully updated!", Severity.Success);
-
-        if (result.WasSuccess())
+        Routine newRoutine = new Routine()
         {
-            MudDialog.Close(DialogResult.Ok(newRoutine));
+            Id = Routine.Id,
+            Name = Routine.Name,
+            SmartHomeId = Routine.SmartHomeId,
+            DeviceActions = Routine.DeviceActions,
+            RepeatDays = Routine.RepeatDays,
+            Start = Routine.Start
+        };
+
+        newRoutine.Start = timeOnly;
+        newRoutine.RepeatDays = (byte)selectedDays;
+        newRoutine.DeviceActions = await DeviceActions(newRoutine);
+
+        var result = await routineService.UpdateRoutine(new(newRoutine));
+        if (result.EnsureSuccess(snackBar))
+        {
+            MudDialog.Close();
+            result.Show(snackBar, "Routine is succesfully Updated!", Severity.Success);
         }
+        else{
+            result.Show(snackBar, result._RequestMessage, Severity.Warning);
+        }
+
     }
 
-    [Parameter]
-    public Routine Routine
+    private async Task<List<DeviceAction>> DeviceActions(Routine routine)
     {
-        set
+        foreach (var device in SelectedDevices)
         {
-            //Kijk of de meegegeven Routine geen waarde heeft
-            if (value is not null)
+            device.SaveDeviceConfig();
+            DeviceAction ToCreate = new DeviceAction()
             {
-                _Routine = value;
-                RoutineName = value.Name;
-            }
-            else
-            {
-                IsNewRoutine = true;
-            }
-        }
+                JsonObjectConfig = device.JsonObjectConfig,
+                DeviceId = device.Id,
+                RoutineId = routine.Id
+            };
 
-        get
-        {
-            return _Routine;
+            if (Routine.DeviceActions == null){
+                Routine.DeviceActions = [];
+            }
+            var exist = Routine.DeviceActions.FirstOrDefault(da => da.DeviceId == device.Id);
+            if (exist == null)
+            {
+                var result = await routineService.CreateDeviceAction(new(ToCreate));
+                if(result.EnsureSuccess(snackBar)){
+                    Routine.DeviceActions.Add(ToCreate);
+                }
+            }
+            else{
+                exist.JsonObjectConfig = ToCreate.JsonObjectConfig;
+                var result = await routineService.UpdateDeviceAction(new(exist));
+            }
         }
+        return Routine.DeviceActions != null ? Routine.DeviceActions : [];
     }
 }

@@ -47,7 +47,7 @@ public class Program
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         builder.Services.AddScoped<DeviceContext>();
-        builder.Services.AddScoped<AuthContext>();
+        builder.Services.AddScoped<IAuthContext, AuthContext>();
         builder.Services.AddScoped<RoomContext>();
         builder.Services.AddScoped<RoutineContext>();
         builder.Services.AddScoped<ApiContext>();
