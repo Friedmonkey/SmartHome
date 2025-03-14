@@ -13,9 +13,13 @@ public class LogService : ILogService
         _ctx = context;
     }
 
-    public Task<SuccessResponse> CreateLog(ILogService.CreateLogRequest request)
+    public async Task<SuccessResponse> CreateLog(LogRequest request)
     {
-        throw new NotImplementedException();
+        var result = await _ctx.DbContext.Logs.AddAsync(request.Log);
+
+        await _ctx.DbContext.SaveChangesAsync();
+
+        return SuccessResponse.Success();
     }
 
     public async Task<LogListResponse> GetAllLogs(EmptySmartHomeRequest request)

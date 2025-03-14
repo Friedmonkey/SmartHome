@@ -12,9 +12,9 @@ public class LogService : ILogService
         this._api = api;
     }
 
-    public Task<SuccessResponse> CreateLog(ILogService.CreateLogRequest request)
+    public async Task<SuccessResponse> CreateLog(LogRequest request)
     {
-        throw new NotImplementedException();
+        return await _api.Post<SuccessResponse>(SharedConfig.Urls.Log.CreateLog, request);
     }
 
     public async Task<LogListResponse> GetAllLogs(EmptySmartHomeRequest request)

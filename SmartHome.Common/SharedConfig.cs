@@ -27,6 +27,9 @@ public class SharedConfig
             public const string UpdateDeviceConfig = DeviceBase + "UpdateDeviceConfig";
 
             public const string GetUserDevicesAccessAdmin = DeviceBase + "GetUserDevicesAccessAdmin";
+            public const string GiveDeviceAccessAdmin = DeviceBase + "GiveDeviceAccessAdmin";
+            public const string RevokeDeviceAccessAdmin = DeviceBase + "RevokeDeviceAccessAdmin";
+
         }
         
         private const string RoutineBase = ApiBase + "Routine/";
@@ -68,15 +71,6 @@ public class SharedConfig
             public const string GetInvitesUrl = SmartHomeBase + "getInvited";
             public const string GetByIDUrl = SmartHomeBase + "getByIDUrl";
             public const string GetAllUsers = SmartHomeBase + "getAllUsers";
-        }
-
-        private const string SmartUserBase = ApiBase + "SmartUser/";
-        public static class SmartUser
-        {
-            public const string AddSmartUserUrl = SmartUserBase + "add";
-            public const string UpdateSmartHomeUrl = SmartUserBase + "update";
-            public const string GetSmartUsersOfSmartUserUrl = SmartUserBase + "getsmartuserofaccount";
-            public const string DeleteSmartUserUrl = SmartUserBase + "Delete";
         }
     }
 }
