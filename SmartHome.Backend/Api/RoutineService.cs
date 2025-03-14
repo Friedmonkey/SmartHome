@@ -36,7 +36,7 @@ public class RoutineService : IRoutineService
         var result = await _ctx.DbContext.Routines.AddAsync(routine);
         await _ctx.DbContext.SaveChangesAsync();
 
-        await _ctx.CreateLog($"[user] created a new routing with name {request.routine.Name}", request, LogType.Action);
+        await _ctx.CreateLog($"[user] created a new routine with name {request.routine.Name}", request, LogType.Action);
 
         return new GuidResponse(result.Entity.Id);
     }
@@ -65,7 +65,7 @@ public class RoutineService : IRoutineService
 
         await _ctx.DbContext.SaveChangesAsync();
 
-        await _ctx.CreateLog($"[user] updated stuff in {request.routine.Name}", request, LogType.Action);
+        await _ctx.CreateLog($"[user] updated routine {request.routine.Name}", request, LogType.Action);
 
         return SuccessResponse.Success();
     }
@@ -114,7 +114,7 @@ public class RoutineService : IRoutineService
         var result = await _ctx.DbContext.DeviceActions.AddAsync(deviceAction);
         await _ctx.DbContext.SaveChangesAsync();
 
-        await _ctx.CreateLog($"[user] added new action {request.action.Name} to [routine_name]", request, LogType.Action, RoutineId: request.action.RoutineId);
+        await _ctx.CreateLog($"[user] added new action {request.action} to [routine_name]", request, LogType.Action, RoutineId: request.action.RoutineId);
 
         return new GuidResponse(result.Entity.Id);
     }
@@ -135,7 +135,7 @@ public class RoutineService : IRoutineService
         _ctx.DbContext.DeviceActions.Update(deviceAction);
         await _ctx.DbContext.SaveChangesAsync();
 
-        await _ctx.CreateLog($"[user] updated routine with name [routine_name] to {request.action.Name}", request, LogType.Action, RoutineId: request.action.RoutineId);
+        await _ctx.CreateLog($"[user] updated routine with name [routine_name] to {request.action}", request, LogType.Action, RoutineId: request.action.RoutineId);
 
         return SuccessResponse.Success();
     }
