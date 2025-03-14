@@ -50,4 +50,32 @@ public class RoutineServiceTest
         }
         Assert.Equal(expected, result.Id != Guid.Empty);
     }
+    [Theory]
+    [InlineData("Name 1234", (byte)(RoutineRepeat.Monday | RoutineRepeat.Saturday), true)]
+    [InlineData("Name 654", (byte)(RoutineRepeat.Monday | RoutineRepeat.Saturday), true)]
+    public async Task UpdateRoutineTest(string name, byte repeatDays, bool expected)
+    {
+        var resultLogin = await _accountService.Login(_fixture.LoginRequest);
+        if (_fixture.WasSuccess(resultLogin))
+            _fixture.ApiLogin(resultLogin.JWT);
+        else
+            TestConsole.WriteLine(resultLogin._RequestMessage);
+
+        var tmp = new Routine()
+        {
+            Id = _fixture.RoutineId,
+            Name = name,
+            RepeatDays = repeatDays,
+            Start = TimeOnly.MinValue,
+            SmartHomeId = _fixture.SmartHomeId,
+        };
+        var request = new RoutineRequest(tmp);
+        var req = request with { smartHome = _fixture.SmartHomeId };
+        var result = await _routineService.UpdateRoutine(req);
+        if (_fixture.WasSuccess(result))
+        {
+            TestConsole.WriteLine(result._RequestMessage);
+        }
+        Assert.Equal(expected, _fixture.WasSuccess(result));
+    }
 }
