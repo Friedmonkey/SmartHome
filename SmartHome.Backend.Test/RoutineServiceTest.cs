@@ -26,7 +26,7 @@ public class RoutineServiceTest
     [Theory]
     [InlineData("Name",(byte)(RoutineRepeat.Monday | RoutineRepeat.Saturday), true)]
     [InlineData("Name 1",(byte)(RoutineRepeat.Monday | RoutineRepeat.Saturday), true)]
-    public async Task CreateRoutine(string name, byte repeatDays, bool expected)
+    public async Task CreateRoutineTest(string name, byte repeatDays, bool expected)
     {
         var resultLogin = await _accountService.Login(_fixture.LoginRequest);
         if (_fixture.WasSuccess(resultLogin))
