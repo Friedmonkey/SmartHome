@@ -2,16 +2,16 @@
 
 public class BackendConfig
 {
-    private ConfigurationManager _configurationManager;
+    private IConfiguration _configuration;
 
-    public BackendConfig(ConfigurationManager _configurationManager)
+    public BackendConfig(IConfiguration _configurationManager)
     {
-        this._configurationManager = _configurationManager;
+        this._configuration = _configurationManager;
     }
 
     public string GetOption(string name, string? overrideKey = null)
     {
-        return _configurationManager[overrideKey ?? name] ?? throw new NullReferenceException(name);
+        return _configuration[overrideKey ?? name] ?? throw new NullReferenceException(name);
     }
 
     public string Domain => GetOption("Domain");
