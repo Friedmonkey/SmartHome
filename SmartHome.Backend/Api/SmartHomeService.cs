@@ -70,7 +70,7 @@ namespace SmartHome.Backend.Api
 
             await _ctx.DbContext.SaveChangesAsync();
 
-            await _ctx.CreateLog($"{smartUserInvite.Account.UserName} joned the smarthome", new SmartHomeGuidRequest(request.Id), LogType.Action);
+            //await _ctx.CreateLog($"{smartUserInvite.Account.UserName} joned the smarthome", new SmartHomeGuidRequest(request.Id), LogType.Action);
 
             return SuccessResponse.Success();
         }

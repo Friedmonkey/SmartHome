@@ -101,7 +101,7 @@ public class ApiContext
         {
             var result = await _dbContext.Routines.Where(r => r.Id == RoomId).ToListAsync();
             routine = result.FirstOrDefault();
-            Action = Action.Replace("[routine_name]", routine.Name);
+            //Action = Action.Replace("[routine_name]", routine.Name);
         }
 
         //Haal de smartuser uit de database en verander de {user} parameter naar de user naam

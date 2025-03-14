@@ -8,7 +8,7 @@
     _LogList = logList;
 }
 
-<MudPaper Class="rounded-lg " Style="background-color: slategray; width: 100%; height: calc(100vh - var(--mud-appbar-height) - 45px);">
+<MudPaper Class="rounded-lg pa-1 " Elevation="3" Style="width: 100%; height: calc(100vh - var(--mud-appbar-height) - 45px);">
     @foreach (Log log in _LogList)
     {
         string TextColor = Colors.Shades.Black;
